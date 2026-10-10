@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Polymarket Physics",
-  description: "Five-minute Bitcoin predictions with simulated prices and free gold coins.",
+  description: "Predict fluid flow, falling balls, ring escapes, and mathematical simulations. Trade with free gold and explore science competitions.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

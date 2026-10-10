@@ -25,7 +25,7 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     );
     assert.equal(await page.locator(".market-card").count(), 12);
     await page.locator("#load-more").click();
-    assert.equal(await page.locator(".market-card").count(), 21);
+    assert.equal(await page.locator(".market-card").count(), 22);
     await page.locator('#subject-nav [data-subject="maths"]').click();
     assert.equal(
       await page.locator("#markets-heading").textContent(),
@@ -39,10 +39,10 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
       "PASS Maths & Statistics includes playable Bitcoin; all science subjects filter",
     );
     await page.locator('#subject-nav [data-subject=""]').click();
-    await page.locator("#home-search").fill("galton");
+    await page.locator("#home-search").fill("convection");
     assert.equal(await page.locator(".market-card").count(), 1);
     await page
-      .locator('.market-card [data-preview="galton"]')
+      .locator('.market-card [data-preview="convection"]')
       .first()
       .click();
     assert.match(
@@ -56,7 +56,7 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     await page.locator("#home-search").fill("");
     await page.locator("#watchlist-filter").click();
     assert.equal(await page.locator(".market-card").count(), 1);
-    assert.equal(await page.locator('[data-market="galton"]').count(), 1);
+    assert.equal(await page.locator('[data-market="convection"]').count(), 1);
     await page.locator("#watchlist-filter").click();
     await page.locator("#next-feature").click();
     assert.match(

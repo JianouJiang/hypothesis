@@ -874,3 +874,33 @@ h1 {
     font-size: 9px;
   }
 }
+
+/* Dust photography controls */
+.wind-tunnel {
+  background: #05090d;
+  border-color: #27353b;
+  box-shadow: 0 10px 35px #06131e0b;
+}
+.tunnel-top,
+.tunnel-bottom {
+  color: #80989f;
+}
+.experiment-caption {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.experiment-caption > span {
+  flex: 1;
+}
+.experiment-caption button[aria-pressed="true"] {
+  color: #426f7d;
+}
+.nav-new {
+  font-size: 8px;
+  font-weight: 700;
+  background: #edf0fc;
+  color: #787dbb;
+  border-radius: 3px;
+  padding: 3px 4px;
+  margin-left: 5px;
+}

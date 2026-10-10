@@ -1,6 +1,7 @@
 "use strict";
 // This module stays on the server. It never sends the private CFD replay bank.
 const { Market } = require("./market");
+const { CollisionMarket } = require("./collision-market");
 const round = (n) => Math.round(n * 1e8) / 1e8;
 
 class AeroMarket extends Market {
@@ -153,7 +154,11 @@ class AeroMarket extends Market {
 
 class Exchange {
   constructor(options = {}) {
-    this.clock = options.now || Date.now;
+    this.nowSource = options.now || Date.now;
+    this.requestTime = this.nowSource();
+    // Every contract in one operation observes the same instant, including at
+    // a Galton round boundary while a cold Worker initializes the physics.
+    this.clock = () => this.requestTime;
     const saved = options.state;
     this.state =
       saved?.version === 2
@@ -166,6 +171,7 @@ class Exchange {
     this.markets = {};
     const shared = {
       ...options,
+      now: this.clock,
       accounts: this.state.accounts,
       trackProfile: false,
     };
@@ -174,6 +180,25 @@ class Exchange {
       state: this.state.markets.bitcoin,
     });
     this.state.markets.bitcoin = this.markets.bitcoin.state;
+    this.state.experimentSeed ||=
+      options.seed || Math.floor(Math.random() * 2147483647);
+    for (const key of [
+      ...Array.from({ length: 7 }, (_, i) => `galton-${i + 1}`),
+      "escape",
+    ]) {
+      const kind = key === "escape" ? "escape" : "galton";
+      this.markets[key] = new CollisionMarket({
+        ...shared,
+        marketId: key,
+        state: this.state.markets[key],
+        simulation: {
+          kind,
+          seed: this.state.experimentSeed,
+          slot: kind === "galton" ? Number(key.split("-")[1]) - 1 : null,
+        },
+      });
+      this.state.markets[key] = this.markets[key].state;
+    }
     if (options.flowData) {
       const datasetKey =
         options.flowData.metadata.fingerprint || options.flowData.metadata.id;
@@ -201,6 +226,7 @@ class Exchange {
     return this.state.accounts;
   }
   select(id = "bitcoin") {
+    if (id === "galton") id = "galton-4";
     if (!this.markets[id])
       throw new Error(
         id === "aerofoil"
@@ -214,7 +240,8 @@ class Exchange {
     return this.state.accounts[id];
   }
   advance() {
-    for (const m of Object.values(this.markets)) m.advance();
+    this.requestTime = this.nowSource();
+    for (const m of Object.values(this.markets)) m.advance(this.requestTime);
   }
   place(id, input, marketId = "bitcoin") {
     this.advance();
@@ -227,6 +254,11 @@ class Exchange {
   updateProfile(id, input) {
     this.markets.bitcoin.updateProfile(id, input);
   }
+  updateCompetition(id, input) {
+    if (typeof input.interested !== "boolean")
+      throw new Error("Choose whether to save your interest.");
+    this.state.accounts[id].competitionInterest = input.interested;
+  }
   reset(id) {
     this.advance();
     for (const m of Object.values(this.markets)) m.reset(id);
@@ -234,6 +266,7 @@ class Exchange {
     this.state.accounts[id].balance = 1000;
   }
   snapshot(id, marketId = "bitcoin") {
+    if (marketId === "galton") marketId = "galton-4";
     this.advance();
     const snapshots = Object.fromEntries(
       Object.entries(this.markets).map(([key, m]) => [key, m.snapshot(id)]),
@@ -289,6 +322,7 @@ class Exchange {
         );
     }
     p.equityHistory = account.equityHistory;
+    p.competitionInterest = account.competitionInterest === true;
     s.markets = Object.fromEntries(
       Object.entries(snapshots).map(([key, m]) => [
         key,
@@ -300,10 +334,37 @@ class Exchange {
             start: m.round.start,
             end: m.round.end,
             volume: m.round.volume,
+            closed: m.round.closed === true,
+            nextAt: m.round.nextAt || null,
           },
         },
       ]),
     );
+    const outcomes = Array.from({ length: 7 }, (_, i) => {
+      const key = `galton-${i + 1}`,
+        m = snapshots[key];
+      return {
+        id: key,
+        slot: i + 1,
+        label: `Slot ${i + 1}`,
+        probability: m.probability,
+        quotes: m.quotes,
+        positions: m.player.positions,
+        roundId: m.round.id,
+      };
+    });
+    s.markets.galton = {
+      ...s.markets["galton-4"],
+      round: {
+        ...s.markets["galton-4"].round,
+        volume: outcomes.reduce(
+          (sum, o) => sum + snapshots[o.id].round.volume,
+          0,
+        ),
+      },
+      outcomes,
+    };
+    if (marketId.startsWith("galton-")) s.outcomes = outcomes;
     return s;
   }
 }

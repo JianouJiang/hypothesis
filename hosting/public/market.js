@@ -29,6 +29,7 @@
       this.marketId = options.marketId || "bitcoin";
       this.accounts = options.accounts;
       this.flowData = options.flowData;
+      this.simulation = options.simulation;
       this.trackProfile = options.trackProfile !== false;
       this.liquidity = options.liquidity !== false;
       this.botsEnabled = options.bots !== false && this.liquidity;
@@ -542,7 +543,7 @@
         marketId: this.marketId,
         id: r.id,
         start: r.start,
-        end: r.end,
+        end: r.settlementAt || r.end,
         opening: r.opening,
         close,
         outcome,
@@ -569,7 +570,7 @@
             shares: player.positions[outcome].shares,
             total: round(payout),
             profit: round(payout - cost),
-            time: r.end,
+            time: r.settlementAt || r.end,
           });
         }
         player.positions = { up: emptyPosition(), down: emptyPosition() };

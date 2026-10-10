@@ -5,17 +5,40 @@
   const icon = (name) =>
     `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   const marketTitle = (id) =>
-    id === "aerofoil"
-      ? "Dust above or below · ~2 min"
-      : "Bitcoin Up or Down · 5 min";
+    id?.startsWith("galton-")
+      ? `Galton board · Slot ${id.split("-")[1]}`
+      : id === "escape"
+        ? "Ring escape · 60 second challenge"
+        : id === "aerofoil"
+          ? "Dust above or below · ~2 min"
+          : "Bitcoin Up or Down · 5 min";
   const marketWords = (id) =>
-    id === "aerofoil"
-      ? "Aerofoil NACA dust fluid dynamics Above Below 2 min"
-      : "Bitcoin BTC Maths Statistics Up Down 5 min";
+    `${marketTitle(id)} ${id?.startsWith("galton-") || id === "escape" ? "Solid Mechanics Yes No" : id === "aerofoil" ? "Fluid Dynamics Above Below" : "Maths Statistics Up Down"}`;
   const outcome = (side, id) =>
-    id === "aerofoil" ? (side === "up" ? "Above" : "Below") : cap(side);
-  const marketLink = (id) =>
-    `${id === "aerofoil" ? "aerofoil" : "bitcoin"}.html`;
+    side === "void"
+      ? "Void"
+      : id?.startsWith("galton-") || id === "escape"
+        ? side === "up"
+          ? "Yes"
+          : "No"
+        : id === "aerofoil"
+          ? side === "up"
+            ? "Above"
+            : "Below"
+          : cap(side);
+  const marketLink = (id, side) => {
+    const name = id?.startsWith("galton-")
+      ? "galton"
+      : id === "escape"
+        ? "escape"
+        : id === "aerofoil"
+          ? "aerofoil"
+          : "bitcoin";
+    const q = new URLSearchParams();
+    if (name === "galton") q.set("slot", id.split("-")[1]);
+    if (side) q.set("side", side);
+    return `${name}.html${q.size ? "?" + q : ""}`;
+  };
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const signed = (n) =>
     `${n > 0 ? "+" : n < 0 ? "−" : ""}${money(Math.abs(n))}`;
@@ -168,7 +191,7 @@
     $("chart-end-label").textContent = "Now";
   }
   function marketCell(side, label, subtitle, marketId) {
-    return `<div class="profile-market-cell"><span class="mini-bitcoin">${marketId === "aerofoil" ? "∿" : "₿"}</span><div><a href="${marketLink(marketId)}?side=${side || "up"}">${marketTitle(marketId)}</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
+    return `<div class="profile-market-cell"><span class="mini-bitcoin">${marketId === "aerofoil" ? "∿" : marketId?.startsWith("galton-") ? "⠿" : marketId === "escape" ? "◌" : "₿"}</span><div><a href="${marketLink(marketId, side || "up")}">${marketTitle(marketId)}</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
   }
   function empty(title, detail, action = true) {
     return `<div class="profile-empty"><div class="empty-profile-icon">${icon(tab === "activity" ? "clock" : "chart")}</div><h2>${safe(title)}</h2><p>${safe(detail)}</p>${action ? `<a href="index.html?status=live">Explore live markets ${icon("arrow")}</a>` : ""}</div>`;
@@ -208,7 +231,7 @@
           .slice(0, activityLimit)
           .map(
             (a) =>
-              `<tr><td>${marketCell(a.side, `${a.type === "settlement" ? "Settled" : a.type === "buy" ? "Bought" : "Sold"} ${outcome(a.side, a.marketId)}`, `${money(a.shares)} shares`, a.marketId)}</td><td class="price-column">${a.type === "settlement" ? "1 gold" : cents(a.price)}</td><td class="price-column">${money(a.shares)}</td><td><span class="position-value-main ${a.type !== "buy" ? "positive" : ""}">${a.type === "buy" ? "−" : "+"}${money(a.total)} G</span><span class="position-date">${date(a.time)} · ${time(a.time)}</span></td><td><span class="position-date">${time(a.time)}</span></td></tr>`,
+              `<tr><td>${marketCell(a.side, `${a.type === "refund" ? "Refunded" : a.type === "settlement" ? "Settled" : a.type === "buy" ? "Bought" : "Sold"} ${outcome(a.side, a.marketId)}`, `${money(a.shares)} shares`, a.marketId)}</td><td class="price-column">${a.type === "refund" ? "Cost basis" : a.type === "settlement" ? "1 gold" : cents(a.price)}</td><td class="price-column">${money(a.shares)}</td><td><span class="position-value-main ${a.type !== "buy" ? "positive" : ""}">${a.type === "buy" ? "−" : "+"}${money(a.total)} G</span><span class="position-date">${date(a.time)} · ${time(a.time)}</span></td><td><span class="position-date">${time(a.time)}</span></td></tr>`,
           )
           .join("")}</tbody></table>`;
         $("profile-load-more").hidden = items.length <= activityLimit;
@@ -246,14 +269,14 @@
           .map((pos) => {
             const value = pos.shares * pos.mark,
               profit = value - pos.cost;
-            return `<tr><td>${marketCell(pos.side, `${outcome(pos.side, pos.marketId)} ${cents(pos.cost / pos.shares)}`, `${money(pos.shares)} shares`, pos.marketId)}</td><td class="price-column">${cents(pos.cost / pos.shares)}</td><td class="price-column">${cents(pos.mark)}</td><td><span class="position-value-main">${money(value)} G</span><span class="position-profit ${cls(profit)}">${signed(profit)} (${money(pos.cost ? (profit / pos.cost) * 100 : 0)}%)</span></td><td><a class="profile-trade-link" href="${marketLink(pos.marketId)}?side=${pos.side}" aria-label="Trade your ${pos.side} position">Trade ↗</a></td></tr>`;
+            return `<tr><td>${marketCell(pos.side, `${outcome(pos.side, pos.marketId)} ${cents(pos.cost / pos.shares)}`, `${money(pos.shares)} shares`, pos.marketId)}</td><td class="price-column">${cents(pos.cost / pos.shares)}</td><td class="price-column">${cents(pos.mark)}</td><td><span class="position-value-main">${money(value)} G</span><span class="position-profit ${cls(profit)}">${signed(profit)} (${money(pos.cost ? (profit / pos.cost) * 100 : 0)}%)</span></td><td><a class="profile-trade-link" href="${marketLink(pos.marketId, pos.side)}" aria-label="Trade your ${pos.side} position">Trade ↗</a></td></tr>`;
           })
           .join("")}</tbody></table>`;
       const orders = (p.allOrders || p.orders).filter((o) =>
         queryMatches(`${marketWords(o.marketId)} ${o.side} ${o.action}`),
       );
       if (orders.length)
-        html += `<div class="profile-orders"><h3>Open orders <span>(${orders.length})</span></h3>${orders.map((o) => `<div class="profile-order-row"><span>${cap(o.action)} ${outcome(o.side, o.marketId)} · ${money(o.remaining)} shares at ${cents(o.price)}</span><a href="${marketLink(o.marketId)}?side=${o.side}">Manage order ↗</a></div>`).join("")}</div>`;
+        html += `<div class="profile-orders"><h3>Open orders <span>(${orders.length})</span></h3>${orders.map((o) => `<div class="profile-order-row"><span>${cap(o.action)} ${outcome(o.side, o.marketId)} · ${money(o.remaining)} shares at ${cents(o.price)}</span><a href="${marketLink(o.marketId, o.side)}">Manage order ↗</a></div>`).join("")}</div>`;
     } else {
       let items = p.history.map((h) => ({
         marketId: h.marketId,

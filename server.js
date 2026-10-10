@@ -28,7 +28,15 @@ function createApp(options = {}) {
     "/bitcoin.html": ["bitcoin.html", "text/html"],
     "/aerofoil.html": ["aerofoil.html", "text/html"],
     "/aerofoil.js": ["aerofoil.js", "text/javascript"],
+    "/flow-renderer.js": ["flow-renderer.js", "text/javascript"],
     "/aerofoil.css": ["aerofoil.css", "text/css"],
+    "/galton.html": ["galton.html", "text/html"],
+    "/escape.html": ["escape.html", "text/html"],
+    "/collision.js": ["collision.js", "text/javascript"],
+    "/collision.css": ["collision.css", "text/css"],
+    "/competitions.html": ["competitions.html", "text/html"],
+    "/competitions.js": ["competitions.js", "text/javascript"],
+    "/competitions.css": ["competitions.css", "text/css"],
     "/profile.html": ["profile.html", "text/html"],
     "/home.css": ["home.css", "text/css"],
     "/home.js": ["home.js", "text/javascript"],
@@ -49,6 +57,8 @@ function createApp(options = {}) {
     "parameters.json",
     "provenance.json",
     "README.txt",
+    "galton.json",
+    "escape.json",
   ])
     assets[`/geometry/${file}`] = [
       `geometry/${file}`,
@@ -157,6 +167,11 @@ function createApp(options = {}) {
           else if (url.pathname === "/api/reset") market.reset(id);
           else if (url.pathname === "/api/profile")
             market.updateProfile(id, input);
+          else if (
+            url.pathname === "/api/competition" &&
+            market instanceof Exchange
+          )
+            market.updateCompetition(id, input);
           else return json(404, { error: "Not found." });
           save();
           json(200, { result, snapshot: market.snapshot(id, marketId) });

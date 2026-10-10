@@ -98,9 +98,9 @@
         .forEach((el) => (el.innerHTML = avatar(data.player.avatar)));
     }
     async local(path, body) {
-      if (this.marketId === "aerofoil") {
+      if (this.marketId !== "bitcoin") {
         this.onStatus(
-          "OpenFOAM data requires a connection. Reconnect to play.",
+          "This experiment requires a live connection. Reconnect to play.",
         );
         return;
       }
@@ -165,7 +165,7 @@
           if (!location.hostname.endsWith(".github.io")) {
             this.mode = "server";
             this.onStatus("Connection lost · Trying to reconnect…");
-          } else this.mode = this.marketId === "aerofoil" ? "server" : "local";
+          } else this.mode = this.marketId !== "bitcoin" ? "server" : "local";
         }
       } else this.mode = "local";
       if (this.mode === "local") {

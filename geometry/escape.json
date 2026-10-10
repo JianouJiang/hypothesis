@@ -1,0 +1,29 @@
+{
+  "engine": "Planck.js 1.5.0 / Box2D",
+  "units": "metres, seconds",
+  "gravity": 0.5,
+  "radii": [
+    1.65,
+    2.75,
+    3.85
+  ],
+  "gap": 1.05,
+  "angularSpeeds": [
+    0.23,
+    -0.16,
+    0.11
+  ],
+  "ballRadius": 0.12,
+  "restitution": 1,
+  "friction": 0,
+  "initialSpeed": 2.2,
+  "preludeMs": 60000,
+  "durationMs": 120000,
+  "deadlineSeconds": 60,
+  "timestepSeconds": 0.008333333333333333,
+  "continuousCollisionDetection": true,
+  "segmentsPerRing": 84,
+  "settlement": "Yes when the entire ball clears outer radius plus 0.04 m detection tolerance at or before 60 physical seconds; No otherwise.",
+  "motorDrivenRings": true,
+  "audio": "Each measured collision impulse creates a tuned note; surface, impulse strength and horizontal position set pitch, loudness and pan."
+}

@@ -90,15 +90,34 @@
       topic: "Galton board",
       art: "galton",
       featured: true,
-      duration: "30 sec",
+      live: true,
+      isNew: true,
+      duration: "~2 min",
       description:
-        "A ball meets a field of pegs. Predict its final bin before the first bounce.",
-      rule: "The planned market settles on the group of bins containing the ball once it comes to rest. Bin boundaries and the release position will be visible before the round.",
-      choices: [
-        { label: "Left bins", chance: 24 },
-        { label: "Center bins", chance: 52 },
-        { label: "Right bins", chance: 24 },
-      ],
+        "One ball, seven slots. Watch real rigid-body collisions and trade Yes or No on each landing slot.",
+      rule: "The landing slot resolves Yes; every other slot resolves No. Winning shares pay 1 gold. Rounds last 1–5 minutes.",
+      choices: [1, 2, 3, 4, 5, 6, 7].map((slot, i) => ({
+        label: `Slot ${slot}`,
+        slot,
+        chance: [3, 10, 22, 30, 22, 10, 3][i],
+      })),
+    },
+    {
+      id: "escape",
+      title: "Will the ball escape in 60 seconds?",
+      short: "Ring escape",
+      subject: "solid",
+      topic: "Collisions",
+      art: "escape",
+      featured: true,
+      live: true,
+      isNew: true,
+      duration: "1–2 min",
+      chance: 50,
+      description:
+        "Three rotating rings. A luminous ball. Real collisions make the music. Predict an escape before time runs out.",
+      rule: "After a one-minute prediction window, the ball has 60 seconds to clear all three rings. Yes pays on escape, No on timeout.",
+      outcomes: ["Escapes in time", "Stays inside"],
     },
     {
       id: "convection",
@@ -124,7 +143,7 @@
       topic: "Chaos",
       art: "magnets",
       featured: true,
-      duration: "60 sec",
+      duration: "1–2 min",
       description:
         "Three magnets. One pendulum. A tiny change in its starting point can lead to a very different ending.",
       rule: "The planned market resolves to the magnet nearest the pendulum bob after it comes to rest. The magnets, initial position, and release conditions will be visible.",
@@ -142,7 +161,7 @@
       topic: "Vortices",
       art: "vortex",
       chance: 54,
-      duration: "45 sec",
+      duration: "1–2 min",
       description:
         "Watch an incoming flow meet a cylinder and predict where the first detached vortex forms.",
       rule: "The planned Yes outcome is a first detected vortex above the cylinder centerline. The detection rule and flow parameters will be defined before launch.",
@@ -156,7 +175,7 @@
       art: "pendulum",
       chance: 43,
       isNew: true,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "Two linked pendulums turn a simple release into a difficult forecast. Will the lower arm complete a rotation?",
       rule: "The planned Yes outcome requires the lower arm to complete a full rotation during the observation window. Release angles will be visible before trading.",
@@ -181,7 +200,7 @@
       subject: "optics",
       topic: "Light",
       art: "prism",
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "Send a pulse of light through a dispersive prism and predict the first color to arrive at the detector.",
       rule: "The planned market records the first detected wavelength band. Material and path-length assumptions will be specified before the game launches.",
@@ -199,7 +218,7 @@
       topic: "Magnetism",
       art: "charge",
       chance: 64,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "Electric and magnetic fields bend a particle's path. Predict whether it will land inside the target.",
       rule: "The planned Yes outcome occurs when the particle intersects the target region. Field strengths, charge, and launch velocity will be shown for each round.",
@@ -225,7 +244,7 @@
       topic: "Elasticity",
       art: "beam",
       chance: 68,
-      duration: "60 sec",
+      duration: "1–2 min",
       description:
         "A flexible beam carries a changing load. Predict whether its tip passes the marked deflection threshold.",
       rule: "The planned market measures the largest tip displacement during the round against the displayed threshold. Material and loading parameters will be announced.",
@@ -239,7 +258,7 @@
       art: "quantum",
       chance: 28,
       isNew: true,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "A wave packet approaches a barrier. Predict the measured side after the interaction.",
       rule: "The planned market resolves from a sampled position measurement after the wave packet interacts with the barrier. The state and sampling rule will be published before play.",
@@ -252,7 +271,7 @@
       topic: "Heat transfer",
       art: "piston",
       chance: 59,
-      duration: "60 sec",
+      duration: "1–2 min",
       description:
         "Heat a chamber of gas and predict how far its piston will move.",
       rule: "The planned Yes outcome requires the piston to cross the marked position before the deadline. Gas, mass, and temperature conditions will be visible.",
@@ -265,7 +284,7 @@
       topic: "Light",
       art: "waves",
       chance: 52,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "Two sources create a pattern of peaks and cancellations. Predict the intensity at a chosen detector.",
       rule: "The planned Yes outcome means detector intensity exceeds a stated threshold. Source geometry, phase, and the threshold will be visible before the round.",
@@ -278,7 +297,7 @@
       topic: "Particles",
       art: "diffusion",
       chance: 49,
-      duration: "60 sec",
+      duration: "1–2 min",
       description:
         "Particles wander through a box. Will the final count favor the left half?",
       rule: "The planned market counts particle centers on each side at the deadline. Initial positions, boundaries, and tie handling will be announced before launch.",
@@ -291,7 +310,7 @@
       topic: "Probability",
       art: "walk",
       chance: 32,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "A sequence of random steps draws a path. Predict whether it revisits its starting point.",
       rule: "The planned Yes outcome is at least one return after the first step within a fixed number of steps. The lattice and step distribution will be specified.",
@@ -304,7 +323,7 @@
       topic: "Magnetism",
       art: "induction",
       chance: 76,
-      duration: "45 sec",
+      duration: "1–2 min",
       description:
         "A magnet passes through a coil. Predict whether the measured current changes sign in the observation window.",
       rule: "The planned market detects a sign change beyond a stated tolerance. Magnet motion, coil geometry, and measurement timing will be provided.",
@@ -317,7 +336,7 @@
       topic: "Collisions",
       art: "collision",
       chance: 45,
-      duration: "30 sec",
+      duration: "1–2 min",
       description:
         "Two balls collide. Predict the direction of the red ball after impact.",
       rule: "The planned Yes outcome is positive horizontal velocity for the red ball after the collision. Masses, velocities, and restitution will be displayed.",
@@ -330,7 +349,7 @@
       topic: "Probability",
       art: "monte",
       chance: 53,
-      duration: "60 sec",
+      duration: "1–2 min",
       description:
         "Random points fill a square. Predict which side of 3.14 the final Monte Carlo estimate will land on.",
       rule: "The planned market compares the final estimate to 3.14 after a fixed sample count. The estimator, count, and tie handling will be visible.",
@@ -619,6 +638,13 @@
               : "#91bfbe",
         );
       }
+    } else if (kind === "escape") {
+      bg = "#141824";
+      for (let i = 0; i < 3; i++)
+        content += `<circle cx="220" cy="140" r="${48 + i * 35}" fill="none" stroke="${["#90d4c4", "#bdabe7", "#e9c49b"][i]}" stroke-width="2.5" stroke-dasharray="${(48 + i * 35) * 5.25} ${(48 + i * 35) * 1.05}" transform="rotate(${i * 115 + 25} 220 140)"/>`;
+      content +=
+        path("M190 115Q238 100 253 151T212 202", "#ad9dd7", 1.5) +
+        circle(212, 202, 6, "#eee4ff");
     } else if (kind === "bitcoin") {
       bg = "#f7931a";
       content += `<text x="220" y="198" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-weight="bold" font-size="180">₿</text>`;

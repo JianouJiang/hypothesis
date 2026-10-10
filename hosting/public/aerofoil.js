@@ -281,139 +281,13 @@
     }
   };
 
-  // Instantaneous streamlines from observed CFD; only the gold tracer settles.
-  const canvas = $("flow-canvas"),
-    ctx = canvas.getContext("2d"),
-    background = document.createElement("canvas"),
-    bg = background.getContext("2d");
-  let width = 800,
-    height = 400;
-  const xy = (p) => [
-    26 + ((p[0] + 3) / 9) * (width - 66),
-    height / 2 - (p[1] / 3) * (height - 95),
-  ];
-  function velocity(x, y) {
-    const f = snapshot.flow,
-      g = f.grid,
-      a = ((x - g.xmin) / (g.xmax - g.xmin)) * (g.nx - 1),
-      b = ((y - g.ymin) / (g.ymax - g.ymin)) * (g.ny - 1);
-    if (a < 0 || b < 0 || a >= g.nx - 1 || b >= g.ny - 1) return null;
-    const i = Math.floor(a),
-      j = Math.floor(b),
-      u = a - i,
-      v = b - j,
-      w = [(1 - u) * (1 - v), u * (1 - v), (1 - u) * v, u * v],
-      ids = [
-        j * g.nx + i,
-        j * g.nx + i + 1,
-        (j + 1) * g.nx + i,
-        (j + 1) * g.nx + i + 1,
-      ],
-      out = [0, 0];
-    for (let k = 0; k < 4; k++)
-      for (let c = 0; c < 2; c++)
-        out[c] += (f.field[ids[k] * 2 + c] * w[k]) / g.scale;
-    return out;
-  }
+  const canvas = $("flow-canvas");
+  const renderer = new FlowRenderer(canvas);
   function drawField() {
-    bg.clearRect(0, 0, width, height);
-    bg.fillStyle = "#0c1828";
-    bg.fillRect(0, 0, width, height);
-    const glow = bg.createRadialGradient(
-      width * 0.49,
-      height * 0.46,
-      5,
-      width * 0.49,
-      height * 0.46,
-      width * 0.6,
-    );
-    glow.addColorStop(0, "#122840");
-    glow.addColorStop(1, "#0c1828");
-    bg.fillStyle = glow;
-    bg.fillRect(0, 0, width, height);
-    bg.strokeStyle = "#273d542f";
-    bg.lineWidth = 0.6;
-    for (let x = -3; x <= 6; x++) {
-      const p = xy([x, 0]);
-      bg.beginPath();
-      bg.moveTo(p[0], 40);
-      bg.lineTo(p[0], height - 40);
-      bg.stroke();
-    }
-    for (let y = -1.5; y <= 1.5; y += 0.5) {
-      const p = xy([0, y]);
-      bg.beginPath();
-      bg.moveTo(26, p[1]);
-      bg.lineTo(width - 40, p[1]);
-      bg.stroke();
-    }
-    if (!snapshot) return;
-    if (streamlines)
-      for (let row = 0; row < 21; row++)
-        for (let col = 0; col < 8; col++) {
-          let x = -2.96 + col * 1.13,
-            y = -1.34 + row * 0.134,
-            speed = 1;
-          bg.beginPath();
-          bg.moveTo(...xy([x, y]));
-          for (let i = 0; i < 28; i++) {
-            const v = velocity(x, y);
-            if (!v) break;
-            speed = Math.hypot(...v);
-            if (speed < 0.025) break;
-            const dt = 0.029 / Math.max(speed, 0.1);
-            x += v[0] * dt;
-            y += v[1] * dt;
-            bg.lineTo(...xy([x, y]));
-          }
-          bg.strokeStyle = `rgba(${speed < 0.75 ? "98,174,182" : "82,139,185"},${speed < 0.75 ? 0.52 : 0.32})`;
-          bg.lineWidth = 0.75;
-          bg.stroke();
-        }
-    if (params?.geometry) {
-      bg.beginPath();
-      params.geometry.forEach((p, i) =>
-        i ? bg.lineTo(...xy(p)) : bg.moveTo(...xy(p)),
-      );
-      bg.closePath();
-      const metal = bg.createLinearGradient(0, height * 0.41, 0, height * 0.59);
-      metal.addColorStop(0, "#d9e4ee");
-      metal.addColorStop(0.5, "#9daec2");
-      metal.addColorStop(1, "#526b88");
-      bg.fillStyle = metal;
-      bg.fill();
-      bg.strokeStyle = "#cadbec";
-      bg.lineWidth = 0.7;
-      bg.stroke();
-      bg.fillStyle = "#7892ae";
-      bg.font = "9px system-ui";
-      bg.textAlign = "center";
-      bg.fillText("NACA 0012", ...xy([0.25, -0.65]));
-    }
-    const outlet = xy([6, 0])[0];
-    bg.strokeStyle = "#6c8da759";
-    bg.beginPath();
-    bg.moveTo(outlet, 44);
-    bg.lineTo(outlet, height - 44);
-    bg.stroke();
-    bg.fillStyle = "#7188a1";
-    bg.font = "8px system-ui";
-    bg.textAlign = "left";
-    bg.fillText("INLET", 26, height - 45);
-    bg.textAlign = "right";
-    bg.fillText("OUTLET", outlet, height - 45);
+    renderer.update(snapshot, params);
   }
   function resize() {
-    const box = canvas.getBoundingClientRect(),
-      dpr = Math.min(2, devicePixelRatio || 1);
-    width = box.width;
-    height = box.height;
-    for (const c of [canvas, background]) {
-      c.width = Math.round(width * dpr);
-      c.height = Math.round(height * dpr);
-      c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    drawField();
+    renderer.resize();
   }
   function drawHeight() {
     const svg = $("height-chart");
@@ -440,74 +314,22 @@
     );
   }
   function animate(now) {
-    ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(background, 0, 0, width, height);
-    if (snapshot) {
-      const target = xy([6, snapshot.round.opening]);
-      ctx.setLineDash([4, 5]);
-      ctx.lineWidth = 0.8;
-      ctx.strokeStyle = "#acbfd28f";
-      ctx.beginPath();
-      ctx.moveTo(...xy([-3, snapshot.round.opening]));
-      ctx.lineTo(...target);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = "#c5d2e0";
-      ctx.beginPath();
-      ctx.arc(...target, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.font = "8px system-ui";
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#7fcbb4";
-      ctx.fillText("ABOVE", target[0] - 7, Math.max(56, target[1] - 12));
-      ctx.fillStyle = "#d68d99";
-      ctx.fillText(
-        "BELOW",
-        target[0] - 7,
-        Math.min(height - 55, target[1] + 18),
-      );
-      ctx.beginPath();
-      snapshot.flow.points.forEach((p, i) =>
-        i ? ctx.lineTo(...xy(p)) : ctx.moveTo(...xy(p)),
-      );
-      ctx.strokeStyle = "#eac582a0";
-      ctx.lineWidth = 1.3;
-      ctx.stroke();
-      const next = snapshot.flow.particle,
-        t = Math.min(1, (now - particleReceived) / 950);
-      shownParticle = next.map(
-        (v, i) => (previousParticle?.[i] ?? v) * (1 - t) + v * t,
-      );
-      const p = xy(shownParticle);
-      ctx.strokeStyle = "#edc17480";
-      ctx.lineWidth = 0.65;
-      ctx.beginPath();
-      ctx.moveTo(26, p[1]);
-      ctx.lineTo(width - 40, p[1]);
-      ctx.stroke();
-      ctx.shadowColor = "#ffdc99";
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = "#ffdd9a";
-      ctx.beginPath();
-      ctx.arc(...p, 3.7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.beginPath();
-      ctx.arc(...p, 8, 0, Math.PI * 2);
-      ctx.strokeStyle = "#d7b67555";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+    renderer.render(now);
     requestAnimationFrame(animate);
   }
   $("toggle-streamlines").onclick = () => {
-    streamlines = !streamlines;
-    $("toggle-streamlines").setAttribute("aria-pressed", streamlines);
+    renderer.dust = !renderer.dust;
+    $("toggle-streamlines").setAttribute("aria-pressed", renderer.dust);
     $("toggle-streamlines").textContent =
-      `Streamlines ${streamlines ? "on" : "off"}`;
-    drawField();
+      `Tracer dust ${renderer.dust ? "on" : "off"}`;
   };
-  new ResizeObserver(resize).observe(canvas);
+  $("toggle-exposure").onclick = () => {
+    renderer.exposure = !renderer.exposure;
+    $("toggle-exposure").setAttribute("aria-pressed", renderer.exposure);
+    $("toggle-exposure").textContent = renderer.exposure
+      ? "Long exposure"
+      : "Short exposure";
+  };
   fetch("geometry/parameters.json")
     .then((r) => r.json())
     .then((data) => {

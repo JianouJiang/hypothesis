@@ -134,7 +134,9 @@ async function handle(request: Request) {
     return json(404, { error: "Not found." });
   if (
     request.method === "POST" &&
-    !["order", "cancel", "reset", "profile"].includes(route || "")
+    !["order", "cancel", "reset", "profile", "competition"].includes(
+      route || "",
+    )
   )
     return json(404, { error: "Not found." });
   if (!env.DB)
@@ -210,6 +212,7 @@ async function handle(request: Request) {
         if (route === "cancel") market.cancel(token, input.orderId, marketId);
         if (route === "reset") market.reset(token);
         if (route === "profile") market.updateProfile(token, input);
+        if (route === "competition") market.updateCompetition(token, input);
       }
       const snapshot = market.snapshot(token, marketId);
       const changed =

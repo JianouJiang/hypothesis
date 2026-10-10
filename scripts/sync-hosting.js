@@ -12,6 +12,14 @@ for (const name of [
   "aerofoil.html",
   "aerofoil.css",
   "aerofoil.js",
+  "flow-renderer.js",
+  "galton.html",
+  "escape.html",
+  "collision.js",
+  "collision.css",
+  "competitions.html",
+  "competitions.css",
+  "competitions.js",
   "profile.html",
   "home.css",
   "home.js",
@@ -39,10 +47,38 @@ const exchange = fs
     'import { Market } from "./engine.js";',
   )
   .replace(
+    'const { CollisionMarket } = require("./collision-market");',
+    'import { CollisionMarket } from "./collision-market.js";',
+  )
+  .replace(
     "module.exports = { Exchange, AeroMarket };",
     "export { Exchange, AeroMarket };",
   );
 fs.writeFileSync(path.join(hosting, "lib", "exchange.js"), exchange);
+for (const name of ["physics.js", "collision-market.js"]) {
+  let source = fs.readFileSync(path.join(root, name), "utf8");
+  source = source
+    .replace(
+      /const pl = require\("\.\/vendor\/planck.cjs"\);/,
+      'import pl from "./vendor/planck.cjs";',
+    )
+    .replace(
+      /const \{ Market \} = require\("\.\/market"\);/,
+      'import { Market } from "./engine.js";',
+    )
+    .replace(
+      /const (\{[^;]+\}) = require\("\.\/physics"\);/,
+      'import $1 from "./physics.js";',
+    )
+    .replace(/module\.exports\s*=\s*(\{[^;]+\});/, "export $1;");
+  fs.writeFileSync(path.join(hosting, "lib", name), source);
+}
+fs.mkdirSync(path.join(hosting, "lib", "vendor"), { recursive: true });
+for (const file of ["planck.cjs", "PLANCK-LICENSE.txt"])
+  fs.copyFileSync(
+    path.join(root, "vendor", file),
+    path.join(hosting, "lib", "vendor", file),
+  );
 fs.copyFileSync(
   path.join(root, "index.html"),
   path.join(hosting, "lib", "home.html"),

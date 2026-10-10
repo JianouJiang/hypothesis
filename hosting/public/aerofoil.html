@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="home.css" />
     <link rel="stylesheet" href="aerofoil.css" />
     <script src="guest.js" defer></script>
+    <script src="flow-renderer.js" defer></script>
     <script src="aerofoil.js" defer></script>
   </head>
   <body class="home-page aero-page">
@@ -52,7 +53,10 @@
           ><a href="index.html?subject=thermo">Thermodynamics</a
           ><a href="index.html?subject=electro">Electromagnetism</a
           ><a href="index.html?subject=optics">Optics</a
-          ><a href="index.html?subject=maths">Maths &amp; Statistics</a>
+          ><a href="index.html?subject=maths">Maths &amp; Statistics</a
+          ><a href="competitions.html"
+            >Competitions <span class="nav-new">NEW</span></a
+          >
         </nav>
       </div>
     </header>
@@ -89,7 +93,7 @@
           </div>
           <div class="wind-tunnel">
             <div class="tunnel-top">
-              <span><i class="live-dot"></i> OPENFOAM REPLAY</span
+              <span><i class="live-dot"></i> SEEDED WIND TUNNEL</span
               ><span>NACA 0012 <b>α 20°</b></span>
             </div>
             <canvas
@@ -110,7 +114,9 @@
           <div class="experiment-caption">
             <span id="flow-time">Genuine CFD fields · Passive tracer</span
             ><button id="toggle-streamlines" aria-pressed="true">
-              Streamlines on
+              Tracer dust on</button
+            ><button id="toggle-exposure" aria-pressed="true">
+              Long exposure
             </button>
           </div>
           <div class="height-chart-wrap">
@@ -232,7 +238,10 @@
                 These are precomputed OpenFOAM velocity fields and particle
                 trajectories, not a random animation. The hosted service keeps
                 the replay library private and sends only observed motion and
-                the current flow field. The finite library repeats; this is an
+                the current flow field. Small background dust tracers are
+                advected through that observed field; their fading trails mimic
+                a long-exposure wind-tunnel photograph. Only the gold particle
+                determines the result. The finite library repeats; this is an
                 educational prototype.
               </p>
               <p>

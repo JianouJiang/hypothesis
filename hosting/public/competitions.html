@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="A proposed seasonal in-person science prediction competition. New geometries, shared conditions, and models that generalize."
+    />
+    <title>Seasonal competitions · Polymarket Physics</title>
+    <link rel="icon" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="aerofoil.css" />
+    <link rel="stylesheet" href="competitions.css" />
+    <script src="market.js" defer></script>
+    <script src="guest.js" defer></script>
+    <script src="catalog.js" defer></script>
+    <script src="competitions.js" defer></script>
+  </head>
+  <body class="home-page aero-page">
+    <a class="skip-link" href="#experiment">Skip to experiment</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
+          ><svg viewBox="0 0 38 38" aria-hidden="true">
+            <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
+          ><span>Polymarket</span><span class="physics-tag">physics</span></a
+        >
+        <a class="aero-search" href="index.html"
+          >⌕ <span>Explore science markets</span></a
+        >
+        <div class="header-actions">
+          <a class="portfolio-link" href="profile.html">Portfolio</a
+          ><a class="wallet-button" href="profile.html"
+            ><span class="coin">G</span><span id="aero-balance">—</span
+            ><span class="wallet-word">Gold</span></a
+          ><a
+            class="guest-avatar header-profile"
+            href="profile.html"
+            data-guest-avatar
+            aria-label="Your profile"
+          ></a>
+        </div>
+      </div>
+      <div class="subject-nav-wrap">
+        <nav class="subject-nav" aria-label="Science subjects">
+          <a href="index.html">↗ Trending</a
+          ><a class="subject-tab" href="index.html?subject=fluid"
+            >Fluid Dynamics</a
+          ><a href="index.html?subject=solid">Solid Mechanics</a
+          ><a href="index.html?subject=thermo">Thermodynamics</a
+          ><a href="index.html?subject=electro">Electromagnetism</a
+          ><a href="index.html?subject=optics">Optics</a
+          ><a href="index.html?subject=maths">Maths &amp; Statistics</a
+          ><a href="competitions.html" aria-current="page"
+            >Competitions <span class="nav-new">NEW</span></a
+          >
+        </nav>
+      </div>
+    </header>
+    <main class="competition-main">
+      <div class="competition-hero">
+        <div>
+          <div class="season-eyebrow">
+            <i></i> SEASON 01 · IN-PERSON CHALLENGE SERIES
+          </div>
+          <h1>Build for<br />the <em>unknown.</em></h1>
+          <p class="season-intro">
+            A new geometry. A room full of curious minds. Bring your simulator,
+            trade your predictions, and find out which models travel beyond the
+            training case.
+          </p>
+          <div class="season-tags">
+            <span>In person</span><span>1–5 minute rounds</span
+            ><span>Equal starting gold</span>
+          </div>
+          <button
+            class="interest-button"
+            id="interest-button"
+            aria-pressed="false"
+            disabled
+          >
+            Connecting…
+          </button>
+          <p class="interest-note">
+            Save interest with your guest profile. This is not an event booking;
+            dates, venue, and final rules are to be announced.
+          </p>
+          <p id="interest-status" class="interest-note" role="status"></p>
+        </div>
+        <div class="season-art">
+          <span class="season-art-label">GENERALIZE BEYOND THE FAMILIAR</span
+          ><svg
+            viewBox="0 0 400 240"
+            role="img"
+            aria-label="Three different aerofoil shapes illustrate the unseen geometry challenge"
+          >
+            <defs>
+              <linearGradient id="foil-metal" x1="0" y1="0" x2="1" y2="1">
+                <stop stop-color="#fefeff" />
+                <stop offset=".45" stop-color="#abb3ca" />
+                <stop offset="1" stop-color="#6f7c98" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M38 79C74 36 205 87 344 125C195 105 70 115 38 79Z"
+              fill="url(#foil-metal)"
+              stroke="#8e9db3"
+            />
+            <path
+              d="M42 122C99 59 233 160 347 165C211 180 78 168 42 122Z"
+              fill="#edeaf740"
+              stroke="#a39bbc"
+              stroke-dasharray="4 5"
+            />
+            <path
+              d="M49 177C89 151 219 166 345 206C202 207 91 206 49 177Z"
+              fill="#edeaf740"
+              stroke="#bdafc9"
+              stroke-dasharray="4 5"
+            />
+            <path d="M23 25H365M23 221H365" stroke="#d9d8e5" />
+            <text
+              x="28"
+              y="17"
+              fill="#9e97ad"
+              font-size="8"
+              font-family="system-ui"
+            >
+              TRAIN ON WHAT YOU KNOW
+            </text>
+            <text
+              x="28"
+              y="237"
+              fill="#9e97ad"
+              font-size="8"
+              font-family="system-ui"
+            >
+              TEST ON WHAT YOU HAVEN’T SEEN
+            </text>
+          </svg>
+          <div class="season-art-footer">
+            <span>TRAINING<br /><strong>Public experiments</strong></span
+            ><span>COMPETITION<br /><strong>Unseen settings</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="season-facts">
+        <div><span>FIRST SEASON</span><strong>Planning stage</strong></div>
+        <div><span>DATE &amp; VENUE</span><strong>To be announced</strong></div>
+        <div>
+          <span>FORMAT</span><strong>Bring a laptop &amp; a model</strong>
+        </div>
+        <div>
+          <span>ENTRY &amp; PRIZES</span><strong>To be announced</strong>
+        </div>
+      </div>
+      <section class="season-section">
+        <h2>A better test than memorizing a trajectory.</h2>
+        <p class="section-intro">
+          The public games are a practice ground. The seasonal challenge changes
+          the geometry and conditions, so success depends on how well your model
+          generalizes. This is the proposed format; final rules will be
+          published before registration opens.
+        </p>
+        <div class="format-grid">
+          <article class="format-step">
+            <span>01 / PREPARE</span>
+            <h3>Build at home.</h3>
+            <p>
+              Use the downloadable geometry and parameters to build your own
+              model. Choose your solver, approximations, and uncertainty
+              estimates.
+            </p>
+          </article>
+          <article class="format-step">
+            <span>02 / REVEAL</span>
+            <h3>Meet the new setting.</h3>
+            <p>
+              Everyone receives the new geometry and boundary conditions at the
+              same time. A calibration session lets teams check their setup.
+            </p>
+          </article>
+          <article class="format-step">
+            <span>03 / COMPETE</span>
+            <h3>Predict, then trade.</h3>
+            <p>
+              Freeze your model before the scored trials. Forecast on unseen
+              cases and trade during 1–5 minute rounds, with equal gold and
+              compute budgets.
+            </p>
+          </article>
+          <article class="format-step">
+            <span>04 / COMPARE</span>
+            <h3>Measure robustness.</h3>
+            <p>
+              Score across several unseen settings. Compare forecasting accuracy
+              and trading results, then discuss where the models succeeded or
+              failed.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section class="season-section">
+        <h2>Familiar physics. Unfamiliar conditions.</h2>
+        <p class="section-intro">
+          Proposed challenge families. Competition geometries and exact settings
+          stay unreleased until the event.
+        </p>
+        <div class="challenge-grid">
+          <article class="challenge-card">
+            <div class="challenge-art" id="aerofoil-challenge-art"></div>
+            <div class="challenge-copy">
+              <span>FLUID DYNAMICS</span>
+              <h3>Beyond NACA 0012</h3>
+              <p>
+                A different aerofoil, angle of attack, and inlet conditions.
+                Does your wake model still predict the exit?
+              </p>
+              <a href="aerofoil.html">Practice the current flow ↗</a>
+            </div>
+          </article>
+          <article class="challenge-card">
+            <div class="challenge-art" id="galton-challenge-art"></div>
+            <div class="challenge-copy">
+              <span>SOLID MECHANICS</span>
+              <h3>A different path down</h3>
+              <p>
+                Changed peg spacing, release conditions, or restitution.
+                Forecast a full distribution over the slots.
+              </p>
+              <a href="galton.html">Practice the Galton board ↗</a>
+            </div>
+          </article>
+          <article class="challenge-card">
+            <div class="challenge-art" id="escape-challenge-art"></div>
+            <div class="challenge-copy">
+              <span>CHAOTIC COLLISIONS</span>
+              <h3>New ways out</h3>
+              <p>
+                Unseen ring speeds and gap widths. Predict escape under
+                conditions you haven’t tuned for.
+              </p>
+              <a href="escape.html">Practice ring escape ↗</a>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section class="season-section">
+        <h2>Good predictions. Good decisions.</h2>
+        <p class="section-intro">
+          Two proposed leaderboards keep scientific accuracy visible alongside
+          trading performance.
+        </p>
+        <div class="score-panel">
+          <div>
+            <h3>Forecasting leaderboard</h3>
+            <p>
+              Submit probabilities before the observation window. Use a proper
+              probability score, such as the Brier score, averaged over held-out
+              settings. Report uncertainty and performance by case family.
+            </p>
+          </div>
+          <div>
+            <h3>Trading leaderboard</h3>
+            <p>
+              Start each event with equal gold. Rank final settled balances
+              across the same rounds and publish trades with timestamps.
+              Competition balances are separate from everyday practice wallets.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="season-section competition-faq">
+        <h2>Before you pack your laptop.</h2>
+        <details>
+          <summary>What does “offline competition” mean?</summary>
+          <p>
+            An in-person event, with a shared local market running at the venue.
+            Participants bring their own models and trade on the same
+            experiments. Internet and compute rules will be announced before
+            registration.
+          </p>
+        </details>
+        <details>
+          <summary>Will we receive the new geometry in advance?</summary>
+          <p>
+            The practice geometry is public now. The scored challenge uses new
+            geometries and settings released to all teams at the event.
+            Calibration and model-freeze rules will be published in advance; no
+            per-case manual tuning during the held-out trials.
+          </p>
+        </details>
+        <details>
+          <summary>Can I enter without a large CFD workstation?</summary>
+          <p>
+            The proposed format supports reduced-order models and other
+            efficient approaches, alongside full simulations. Equal compute
+            limits and preparation windows will be specified before registration
+            opens.
+          </p>
+        </details>
+        <details>
+          <summary>Is this real-money trading?</summary>
+          <p>
+            No. Predictions use virtual gold. The event’s entry arrangements and
+            any prizes have not been announced.
+          </p>
+        </details>
+      </section>
+      <footer class="competition-foot">
+        <span id="competition-status">Connecting to your guest profile…</span
+        ><a href="index.html">Explore science markets ↗</a>
+      </footer>
+    </main>
+  </body>
+</html>

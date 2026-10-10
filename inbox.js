@@ -7,6 +7,11 @@
     aerofoil: "Aerofoil flow",
     galton: "Galton board",
     escape: "Ball escape",
+    ...Object.fromEntries(
+      Object.entries(window.HypothesisExperiments?.definitions || {}).map(
+        ([id, d]) => [id, d.short],
+      ),
+    ),
   };
   let key = "",
     base = "",

@@ -2,6 +2,9 @@
 // This module stays on the server. It never sends the private CFD replay bank.
 import { Market } from "./engine.js";
 import { CollisionMarket } from "./collision-market.js";
+import { LabMarket } from "./lab-market.js";
+import { randomBytes } from "node:crypto";
+import Labs from "./experiments.js";
 const round = (n) => Math.round(n * 1e8) / 1e8;
 
 class AeroMarket extends Market {
@@ -220,6 +223,17 @@ class Exchange {
         "CFD replay data is temporarily unavailable. Your wallet and positions are preserved.",
       );
     }
+    this.state.labSecret ||= randomBytes(32).toString("hex");
+    for (const key of Labs.contractIds) {
+      const { game, index } = Labs.parse(key);
+      this.markets[key] = new LabMarket({
+        ...shared,
+        marketId: key,
+        state: this.state.markets[key],
+        simulation: { kind: game, index, secret: this.state.labSecret },
+      });
+      this.state.markets[key] = this.markets[key].state;
+    }
     for (const id of Object.keys(this.state.accounts)) this.addPlayer(id);
   }
   get players() {
@@ -227,6 +241,7 @@ class Exchange {
   }
   select(id = "bitcoin") {
     if (id === "galton") id = "galton-4";
+    if (Labs.definitions[id]?.outcomes.length > 2) id += ":0";
     if (!this.markets[id])
       throw new Error(
         id === "aerofoil"
@@ -267,6 +282,7 @@ class Exchange {
   }
   snapshot(id, marketId = "bitcoin") {
     if (marketId === "galton") marketId = "galton-4";
+    if (Labs.definitions[marketId]?.outcomes.length > 2) marketId += ":0";
     this.advance();
     const snapshots = Object.fromEntries(
       Object.entries(this.markets).map(([key, m]) => [key, m.snapshot(id)]),
@@ -365,6 +381,24 @@ class Exchange {
       outcomes,
     };
     if (marketId.startsWith("galton-")) s.outcomes = outcomes;
+    for (const game of Labs.ids) {
+      const def = Labs.definitions[game];
+      if (def.outcomes.length <= 2) continue;
+      const choices = def.outcomes.map((label, i) => {
+        const id = `${game}:${i}`,
+          m = snapshots[id];
+        return {
+          id,
+          label,
+          probability: m.probability,
+          quotes: m.quotes,
+          positions: m.player.positions,
+          roundId: m.round.id,
+        };
+      });
+      s.markets[game] = { ...s.markets[`${game}:0`], outcomes: choices };
+      if (marketId.startsWith(game + ":")) s.outcomes = choices;
+    }
     return s;
   }
 }

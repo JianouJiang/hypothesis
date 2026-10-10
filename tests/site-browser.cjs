@@ -41,17 +41,14 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     await page.locator('#subject-nav [data-subject=""]').click();
     await page.locator("#home-search").fill("convection");
     assert.equal(await page.locator(".market-card").count(), 1);
-    await page
-      .locator('.market-card [data-preview="convection"]')
-      .first()
-      .click();
-    assert.match(
-      await page.locator("#home-dialog-content").textContent(),
-      /still being built/,
+    assert.equal(
+      await page
+        .locator('[data-market="convection"] .card-title-link')
+        .getAttribute("href"),
+      "experiment.html?game=convection",
     );
     assert.equal(await page.locator("#home-balance").textContent(), "1,000.00");
-    await page.locator("[data-modal-bookmark]").click();
-    await page.keyboard.press("Escape");
+    await page.locator('[data-market="convection"] [data-bookmark]').click();
     await page.reload();
     await page.locator("#home-search").fill("");
     await page.locator("#watchlist-filter").click();
@@ -64,7 +61,7 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
       /Galton/,
     );
     console.log(
-      "PASS search, preview dialog, persistent watchlist, and featured carousel",
+      "PASS search, playable experiment links, persistent watchlist, and featured carousel",
     );
     await page.goto(base + "/profile.html");
     await page.locator("#edit-profile:not([disabled])").waitFor();

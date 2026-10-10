@@ -1,6 +1,7 @@
 "use strict";
 // Server-only community data. Never serialize this state into a market snapshot.
-const GAMES = ["bitcoin", "aerofoil", "galton", "escape"];
+import Labs from "./experiments.js";
+const GAMES = ["bitcoin", "aerofoil", "galton", "escape", ...Labs.ids];
 const MAX_BYTES = 1500000;
 const requireValue = (ok, message) => {
   if (!ok) throw new Error(message);
@@ -75,7 +76,9 @@ class Community {
     return Object.entries(
       this.market.markets || { bitcoin: this.market },
     ).filter(([key]) =>
-      game === "galton" ? /^galton-[1-7]$/.test(key) : key === game,
+      game === "galton"
+        ? /^galton-[1-7]$/.test(key)
+        : key === game || Labs.parse(key)?.game === game,
     );
   }
   positions(token, game) {
@@ -85,7 +88,8 @@ class Community {
       return ["up", "down"].flatMap((side) => {
         const shares = market.players?.[token]?.positions?.[side]?.shares || 0;
         const label =
-          game === "galton"
+          Labs.label(key, side) ||
+          (game === "galton"
             ? `Slot ${key.split("-")[1]} ${side === "up" ? "Yes" : "No"}`
             : game === "bitcoin"
               ? side === "up"
@@ -97,7 +101,7 @@ class Community {
                   : "Below"
                 : side === "up"
                   ? "Yes"
-                  : "No";
+                  : "No");
         return shares > 0.000001
           ? [{ label, side, shares: Math.round(shares * 100) / 100 }]
           : [];
@@ -172,7 +176,8 @@ class Community {
           quantity: t.quantity,
           price: t.price,
           label:
-            game === "galton"
+            Labs.label(key, t.side) ||
+            (game === "galton"
               ? `Slot ${key.split("-")[1]} ${t.side === "up" ? "Yes" : "No"}`
               : game === "bitcoin"
                 ? t.side === "up"
@@ -184,7 +189,7 @@ class Community {
                     : "Below"
                   : t.side === "up"
                     ? "Yes"
-                    : "No",
+                    : "No"),
         })),
       )
       .sort((a, b) => b.time - a.time)

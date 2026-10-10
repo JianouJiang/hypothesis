@@ -1,13 +1,13 @@
 # Hypothesis
 
-**Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Predict aerofoil dust, Galton-board landings, ring escapes, and mathematical simulations. Explore more science experiments and seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
+**Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Trade 21 live experiments covering fluids, mechanics, heat, light, fields, quantum physics, gravity, and probability. Explore seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
 
 **Play:** [GitHub Pages](https://jianoujiang.github.io/hypothesis/) · [Shared live market](https://hypothesis.jianou-works.chatgpt.site)
 
 ## What works
 
 - A science market home page with featured experiments, subject navigation, search, topic/status filters, and a saved watchlist.
-- Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. **Aerofoil dust** is live in Fluid Dynamics; **Bitcoin Up or Down** remains live in Maths & Statistics. **Galton board** and **ring escape** are live in Solid Mechanics. The other 17 experiments are coming-soon previews.
+- Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. All **21 catalogue experiments are playable**, including the original aerofoil, Bitcoin, Galton board and ring escape, plus 17 numerical experiments listed below.
 - An aerofoil game with rounds around two minutes using genuine, precomputed OpenFOAM velocity fields and passive-tracer trajectories. Thousands of advected dust tracers and adjustable photographic trails reveal the flow. A dashed horizontal line marks the previous exit; a solid gold line and height chart show the current particle. Download the NACA 0012 geometry and public physical parameters.
 - A personal profile with an editable username, bio, and avatar; live positions, closed positions, activity, and a gold-denominated profit/loss chart.
 - An animated BTC/USD chart, opening price to beat, and five-minute countdown.
@@ -15,10 +15,10 @@
 - A review window before every market or limit order. Nothing is spent until **Confirm**; canceling or dismissing leaves the wallet unchanged. Confirmations expire when their round ends. Market execution uses prices available when confirmed.
 - Market orders, resting limit orders, partial fills, cancellation, and price improvement.
 - A live order book with real guest-to-guest matching and labeled bot traders.
-- Automatic settlement: the final simulated price at or above the opening price pays Up; otherwise Down. Winning shares pay **1 gold each**; losing shares pay zero. Unfilled orders expire and release reserved funds/shares.
+- Automatic settlement follows each game’s published rule. Winning shares pay **1 gold each**; losing shares pay zero. Unfilled orders expire and release reserved funds/shares.
 - Guest wallets, open positions, transaction activity, settled results, and a practice-wallet reset.
 - Responsive desktop/mobile layout, keyboard support, chart hover, and search.
-- Public discussions on all four live games: guest avatars, current-position badges, threaded replies, likes, Newest/Most liked sorting, a Holders filter, comment links, reports, and deletion of your own posts. Comments stay with the game across rounds; holdings reflect the current round.
+- Public discussions on all 21 live games: guest avatars, current-position badges, threaded replies, likes, Newest/Most liked sorting, a Holders filter, comment links, reports, and deletion of your own posts. Comments stay with the game across rounds; holdings reflect the current round.
 - Private feedback with optional reply email and a separate, unchecked email-updates opt-in; contact **jianou.works@gmail.com** from every page.
 - Aggregate game-link clicks and visits, with a browser opt-out and Do Not Track support. A protected owner inbox shows feedback, update requests, engagement totals, and reported comments.
 
@@ -45,7 +45,7 @@ npm start
 
 Open **http://127.0.0.1:3000**. Different browser profiles receive separate guest wallets and trade in the same market. Tabs in the same profile share a wallet. The server saves progress to `data/market.json`, which is excluded from Git. Keep this directory to retain wallets after a restart.
 
-The public repository includes the games, matching engine, geometry, and physical conditions. The private CFD replay library is intentionally excluded. The owner's local server reads `../polymarket_physics_private/flow-bank.json`, or a file selected with `PHYSICS_CFD_DATA=/absolute/path/flow-bank.json`. Without it, Bitcoin, Galton board, ring escape, and browsing still work; aerofoil trading reports unavailable rather than inventing flow. Existing aerofoil positions require their original dataset to resume safely. Use the hosted game to play without running CFD yourself.
+The public repository includes the games, matching engine, geometry, and physical conditions. The private CFD replay library is intentionally excluded. The owner's local server reads `../polymarket_physics_private/flow-bank.json`, or a file selected with `PHYSICS_CFD_DATA=/absolute/path/flow-bank.json`. Without it, all 20 other games and browsing still work; aerofoil trading reports unavailable rather than inventing flow. Existing aerofoil positions require their original dataset to resume safely. Use the hosted game to play without running CFD yourself.
 
 To play across your local network:
 
@@ -81,6 +81,38 @@ Bitcoin, CFD and Galton rounds last **1–5 minutes**. Escape attempts run for u
 
 Both games compute authoritative trajectories on the server and send only elapsed positions and impacts. A short rendering buffer smooths the 1-second network updates. Guests share the same ball, clock, book, and wallet. Their trades do not alter physics. The Galton probability vector is normalized from visible ball position; escape quotes use current radius and remaining time. These are liquidity heuristics, not calibrated scientific forecasts. Seeds and unobserved outcomes stay on the server. Contracts in one request share a clock sample so all seven slots cross a round boundary together.
 
+## Numerical experiment catalogue
+
+All 17 former previews are playable at `experiment.html?game=<id>`. Each uses **120 seconds of trading, then a 3-second result display**. The physical/simulation clock is separate; its units are visible on the stage. A round generates fresh published initial conditions. The browser draws only elapsed server observations, with a live measurement history and dashed threshold where appropriate. **Round data** downloads full-precision parameters, initial-state variable labels, equations, assumptions, timestamps and settlement rules.
+
+| Game ID             | Model                                                          | Settlement                                                                                 |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `convection`        | Lorenz-63 three-mode convection, RK4                           | Sign of circulation X at dimensionless t = 30; X ≥ 0 is Clockwise                          |
+| `magnetic-pendulum` | Damped planar point-attractor model, RK4                       | Nearest of three magnets at t = 60 s; three independent Yes/No markets                     |
+| `vortex`            | Original D2Q9 BGK lattice Boltzmann cylinder wake              | Mean vertical bounce-back force over the final 15 lattice steps is positive                |
+| `double-pendulum`   | Exact nonlinear two-link equations, RK4                        | Net unwrapped lower-arm rotation from release is at least one turn at t = 12 s             |
+| `heat`              | 2D Dirichlet heat equation, separated Fourier solution         | Centre temperature ≥ 50°C at t = 180 s                                                     |
+| `prism`             | N-BK7 Sellmeier dispersion, Snell refraction and group delay   | First pulse to its detector, including published launch delays; three Yes/No markets       |
+| `charge`            | Exact solution of uniform-field Lorentz motion                 | Centre within the 1.4 m target at t = 6 s                                                  |
+| `orbit`             | Softened three-body gravity, velocity Verlet at 0.00025        | No body satisfies the published finite-time escape criterion at t = 12                     |
+| `beam`              | First-mode cantilever response                                 | Tip deflection ≥ 10 mm at t = 8 s                                                          |
+| `tunneling`         | 1D time-dependent Schrödinger equation, complex Crank–Nicolson | One Born-rule position-region measurement beyond the barrier at t = 16                     |
+| `piston`            | Ideal gas, piston mechanics and first-law heat balance         | Position ≥ 0.12 m at t = 10 s                                                              |
+| `interference`      | Two coherent sources with time-varying phase                   | Normalized detector intensity ≥ 0.6 at t = 6 s                                             |
+| `diffusion`         | 120 reflecting Brownian tracers                                | More than 60 centres in the left half at t = 20 s; a tie is No                             |
+| `random-walk`       | Independent cardinal steps on a 2D square lattice              | Within 10 lattice units of the origin after exactly 120 steps; earlier visits do not count |
+| `induction`         | Axial dipole flux and an RL coil                               | Current > +0.005 A at t = 6 s                                                              |
+| `collision`         | Analytic momentum and restitution solution                     | Red-ball velocity strictly positive after impact                                           |
+| `monte-carlo`       | 1,600 private uniform samples of the square                    | Final estimate of π strictly above 3.14                                                    |
+
+**Model scope matters.** Convection is a reduced Lorenz model, the magnetic pendulum uses softened point attractors, and the beam is a single-mode approximation. The cylinder uses a coarse 96×48 grid with an eight-cell diameter, periodic transverse boundaries, and a published symmetry-breaking perturbation. Its visual shows interpolated calculated vorticity; it is not a mesh-converged engineering CFD prediction. The independent aerofoil game continues to use the private OpenFOAM bank. Quantum evolution uses 1,024 interior grid points, cell-averaged barrier potential, dimensionless ħ = m = 1, and a maximum time step of 0.01. Its curve is a probability density; the final measurement is stochastic, not a pre-existing classical trajectory.
+
+The equations and primary references are linked from each game. Useful references include [UCAR Lorenz-63](https://docs.dart.ucar.edu/en/v11.7.1/guide/lorenz-63-model.html), [Berkeley double-pendulum mechanics](https://rotations.berkeley.edu/the-double-pendulum/), [OpenLB cylinder demonstrations](https://www.openlb.net/cylinder/), [SCHOTT N-BK7 coefficients](https://media.schott.com/api/public/content/41e799d0bf874807a0bb8e702fbb75b5?v=54856406), and [Bielefeld quantum propagation notes](https://roesner.pages.ub.uni-bielefeld.de/lectures/computational-physics/semester/sose2026/lecture/08_pde/04_operator_splitting.html). These references support the model choices; they do not independently validate this implementation.
+
+Deterministic experiments can be predicted from their published initial conditions, subject to numerical and chaotic sensitivity. Stochastic games require probability forecasts. Independent SHA-256 counter streams isolate public initial conditions from future noise and quantum measurements. The persisted private `labSecret` preserves rounds over server restarts and is never serialized into public snapshots. In-process caches retain generated trajectories; no new external service or paid dependency is needed. Bot prices use observed state and are liquidity heuristics, not exact probabilities. The three-outcome markets share one trajectory, one settlement instant, and the same guest wallet.
+
+`experiments.js` contains the public specifications; `lab-physics.js`, `wave-physics.js` and `wake-physics.js` run on the server, and `lab-market.js` handles settlement. `experiment.js` and `lab-renderer.js` provide the common trade interface and distinct canvas scenes. The new games participate in the home page, subject filters, watchlists, profile, discussions, feedback and private aggregate engagement dashboard. None of these changes resets existing wallets or the original games.
+
 ## Seasonal in-person competitions
 
 The **[competition page](https://hypothesis.jianou-works.chatgpt.site/competitions.html)** is linked from the main navigation, discovery page, and ball games. It proposes public practice, simultaneous release of new geometry/conditions at the venue, calibration, a model freeze, and scored held-out trials. Separate forecasting and trading leaderboards would expose model robustness across unseen cases rather than performance on a memorized trajectory.
@@ -89,7 +121,7 @@ Dates, venue, entry arrangements, prizes, final scoring and compute budgets are 
 
 ## Guest profiles
 
-The profile uses the same guest account as the home page and all four live experiments. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
+The profile uses the same guest account as the home page and all 21 live experiments. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
 
 Positions Value marks held shares at the current sell quotes. Total PnL is cash plus reserved gold plus marked positions, minus the initial 1,000 gold. The chart shows recorded portfolio observations and the current value, with time filters; it never invents historical results. Biggest Win is the largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct market rounds with fills. Volume counts the guest's actual fills, including fills of their resting orders.
 
@@ -101,7 +133,7 @@ Guest access is remembered in this browser. Clearing browser storage, changing b
 
 GitHub Pages serves the plain HTML, CSS, and JavaScript. `deployment.json` points the Pages app at the shared public server. The hosted app in `hosting/` runs the same market engine on a Cloudflare Worker with D1 wallet storage and a private R2 CFD replay library through Sites. Both URLs connect to the same market.
 
-The online server creates anonymous guest sessions and stores profiles, balances, orders, and settlement centrally. The live games poll once per second; discovery and profiles poll every three seconds. A revision check commits the full market update atomically; a conflicting update is re-read and validated before committing, preventing concurrent trades from double-spending the same gold. Future price points and guest secrets are never returned to browsers.
+The online server creates anonymous guest sessions and stores profiles, balances, orders, and settlement centrally. The numerical experiments poll every 750 ms and the original live games once per second; discovery and profiles poll every three seconds. A revision check commits the full market update atomically; a conflicting update is re-read and validated before committing, preventing concurrent trades from double-spending the same gold. Future price points and guest secrets are never returned to browsers.
 
 Local Node hosting provides server-sent events for Bitcoin and polling for the other pages. When GitHub Pages cannot reach the shared server at startup, Bitcoin and profile pages clearly switch to an independent browser practice market. Aerofoil trading requires a live connection and never falls back to synthetic CFD. It never merges practice gold into the shared market.
 
@@ -109,12 +141,12 @@ Local Node hosting provides server-sent events for Bitcoin and polling for the o
 
 An empty book is no fun, so the market starts with four behaviors:
 
-| Bot | Behavior |
-| --- | --- |
+| Bot                    | Behavior                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Atlas** market maker | Quotes both outcomes in each market at six price levels. Prices follow estimated outcome probability, with a spread and an inventory adjustment. Sizes vary each second. Consumed depth is tracked and replenished on the next tick. |
-| **Momentum** | Favors the direction of the last 12 seconds of visible price movement. |
-| **Contrarian** | Prefers the other side of the recent movement. |
-| **Noise** | Places small randomized orders to keep activity varied. |
+| **Momentum**           | Favors the direction of the last 12 seconds of visible price movement.                                                                                                                                                               |
+| **Contrarian**         | Prefers the other side of the recent movement.                                                                                                                                                                                       |
+| **Noise**              | Places small randomized orders to keep activity varied.                                                                                                                                                                              |
 
 The three trading bots submit market and limit orders through the **same matching engine as people**, roughly every three seconds. A guest order offering a better price is eligible for a bot fill. Orders use price/time priority, avoid self-trades, and reserve cash or shares when resting. All bot activity is labeled in the feed. Market-maker quotes are simulated liquidity, backed by virtual capital, rather than genuine external traders.
 
@@ -139,7 +171,7 @@ The hosted build uses the supplied Sites/Vinext starter and its lockfile. Hostin
 
 The GitHub Actions workflow tests the engine and uploads **only the public web assets** to Pages. It does not publish wallets, server data, or hosting configuration.
 
-`node tests/community-browser.cjs` covers all four comment sections, two-browser replies/likes, filters, reports and moderation, email privacy and erasure, owner exports, opt-out/Do Not Track, mobile layouts, and Hypothesis branding. These tests run against an isolated local server and never submit data to the live site or send email.
+`node tests/community-browser.cjs` covers the original four comment sections, two-browser replies/likes, filters, reports and moderation, email privacy and erasure, owner exports, opt-out/Do Not Track, mobile layouts, and Hypothesis branding. These tests run against an isolated local server and never submit data to the live site or send email.
 
 ## Rendering and inspiration
 
@@ -152,3 +184,5 @@ Planck’s [body/continuous collision documentation](https://piqnt.com/planck.js
 ## Credits
 
 Hypothesis is an independent science playground with original identity, scientific illustrations, and avatar artwork. Each experiment publishes its own physical conditions and settlement rules.
+
+`tests/lab.test.js` checks all new models, conservation and symmetry properties, heat bounds, Brownian reflection, Lorentz motion, restitution, Faraday flux, wave normalization/free propagation/grid refinement, SCHOTT indices/Snell refraction, cylinder density and mirror symmetry, private future state, shared-wallet settlement, restart persistence and the exact three-second rollover. `NODE_PATH=/path/to/playwright/node_modules node tests/labs-browser.cjs` runs each of the 17 games through a real browser and local HTTP server: visual rendering, parameter downloads, review/cancel/confirm, positions, comments, mobile overflow, catalogue/profile links and expired confirmations. Browser tests use isolated wallets and never submit comments or feedback to production.

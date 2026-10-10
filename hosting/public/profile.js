@@ -5,28 +5,32 @@
   const icon = (name) =>
     `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   const marketTitle = (id) =>
-    id?.startsWith("galton-")
+    HypothesisExperiments.parse(id)?.definition.short ||
+    (id?.startsWith("galton-")
       ? `Galton board · Slot ${id.split("-")[1]}`
       : id === "escape"
         ? "Ring escape · 60 second challenge"
         : id === "aerofoil"
           ? "Dust above or below · ~2 min"
-          : "Bitcoin Up or Down · 5 min";
+          : "Bitcoin Up or Down · 5 min");
   const marketWords = (id) =>
     `${marketTitle(id)} ${id?.startsWith("galton-") || id === "escape" ? "Solid Mechanics Yes No" : id === "aerofoil" ? "Fluid Dynamics Above Below" : "Maths Statistics Up Down"}`;
   const outcome = (side, id) =>
     side === "void"
       ? "Void"
-      : id?.startsWith("galton-") || id === "escape"
-        ? side === "up"
-          ? "Yes"
-          : "No"
-        : id === "aerofoil"
+      : HypothesisExperiments.label(id, side) ||
+        (id?.startsWith("galton-") || id === "escape"
           ? side === "up"
-            ? "Above"
-            : "Below"
-          : cap(side);
+            ? "Yes"
+            : "No"
+          : id === "aerofoil"
+            ? side === "up"
+              ? "Above"
+              : "Below"
+            : cap(side));
   const marketLink = (id, side) => {
+    if (HypothesisExperiments.parse(id))
+      return HypothesisExperiments.link(id, side);
     const name = id?.startsWith("galton-")
       ? "galton"
       : id === "escape"
@@ -191,7 +195,7 @@
     $("chart-end-label").textContent = "Now";
   }
   function marketCell(side, label, subtitle, marketId) {
-    return `<div class="profile-market-cell"><span class="mini-bitcoin">${marketId === "aerofoil" ? "∿" : marketId?.startsWith("galton-") ? "⠿" : marketId === "escape" ? "◌" : "₿"}</span><div><a href="${marketLink(marketId, side || "up")}">${marketTitle(marketId)}</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
+    return `<div class="profile-market-cell"><span class="mini-bitcoin">${HypothesisExperiments.parse(marketId) ? "∿" : marketId === "aerofoil" ? "∿" : marketId?.startsWith("galton-") ? "⠿" : marketId === "escape" ? "◌" : "₿"}</span><div><a href="${marketLink(marketId, side || "up")}">${marketTitle(marketId)}</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
   }
   function empty(title, detail, action = true) {
     return `<div class="profile-empty"><div class="empty-profile-icon">${icon(tab === "activity" ? "clock" : "chart")}</div><h2>${safe(title)}</h2><p>${safe(detail)}</p>${action ? `<a href="index.html?status=live">Explore live markets ${icon("arrow")}</a>` : ""}</div>`;
@@ -261,7 +265,7 @@
               ? "No active positions"
               : "Make your first prediction",
           query
-            ? "Try searching for Aerofoil, Bitcoin, or an outcome."
+            ? "Try searching for an experiment or an outcome."
             : `You have ${money(p.balance)} gold available. Choose a live science market and follow your positions here.`,
         );
       else
@@ -403,7 +407,7 @@
     $("home-dialog-content").innerHTML =
       type === "wallet" && p
         ? `<div class="wallet-total"><span class="coin">G</span>${money(p.balance)}</div><p>Available gold · ${safe(p.name)}</p><div class="wallet-details"><div><span>Reserved in orders</span><strong>${money(p.reserved)} G</strong></div><div><span>Total portfolio value</span><strong>${money(p.equity)} G</strong></div></div><div class="dialog-note">Gold has no cash value. This browser remembers your guest account. Different browsers get separate accounts.</div><a class="dialog-button" href="bitcoin.html">Explore the live market</a>`
-        : '<p>Explore upcoming science experiments and trade the live Bitcoin simulation with free gold. Bitcoin lives under Maths &amp; Statistics.</p><p>Every new guest starts with 1,000 gold. Each trade asks for confirmation, and each winning share pays 1 gold. Your profile tracks real guest trades and saved portfolio observations.</p><p>Positions Value uses current sell quotes. Total PnL includes available gold, reserved gold, and marked positions, less your starting 1,000 gold. Biggest Win is your largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct five-minute rounds with fills. Statistics reset when you reset your practice wallet.</p><div class="dialog-note">A playground for scientific predictions. Trade live aerofoil, Galton, escape, and Bitcoin experiments. Gold has no cash value.</div><a class="dialog-button" href="index.html">Explore science markets</a>';
+        : '<p>Explore live science experiments and trade their outcomes with free gold. Each game publishes its model and settlement rule.</p><p>Every new guest starts with 1,000 gold. Each trade asks for confirmation, and each winning share pays 1 gold. Your profile tracks real guest trades and saved portfolio observations.</p><p>Positions Value uses current sell quotes. Total PnL includes available gold, reserved gold, and marked positions, less your starting 1,000 gold. Biggest Win is your largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct market rounds with fills. Statistics reset when you reset your practice wallet.</p><div class="dialog-note">A playground for scientific predictions. Build a model and trade the live experiments. Gold has no cash value.</div><a class="dialog-button" href="index.html">Explore science markets</a>';
     $("home-dialog").showModal();
   }
   $("profile-subject-nav").innerHTML =

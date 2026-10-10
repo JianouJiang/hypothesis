@@ -356,6 +356,28 @@
     },
   ];
 
+  for (const m of markets) {
+    const def = window.HypothesisExperiments?.definitions[m.id];
+    if (!def) continue;
+    Object.assign(m, {
+      title: def.title,
+      short: def.short,
+      subject: def.subject,
+      rule: def.rule,
+      outcomes: def.outcomes,
+      live: true,
+      isNew: true,
+      duration: "2 min",
+      description: def.model + ". " + def.assumptions,
+    });
+    if (def.outcomes.length > 2)
+      m.choices = def.outcomes.map((label, i) => ({
+        label,
+        chance: Math.round(100 / def.outcomes.length),
+        index: i,
+      }));
+    else delete m.choices;
+  }
   let artCounter = 0;
   const svg = (kind, large = false) => {
     const id = `science-art-${++artCounter}`;

@@ -8,6 +8,11 @@
     aerofoil: "Aerofoil flow",
     galton: "Galton board",
     escape: "Ball escape",
+    ...Object.fromEntries(
+      Object.entries(window.HypothesisExperiments?.definitions || {}).map(
+        ([id, d]) => [id, d.short],
+      ),
+    ),
   };
   const uid = () =>
     crypto.randomUUID
@@ -542,10 +547,12 @@
       const a = event.target.closest("a[href]");
       if (!a) return;
       const url = new URL(a.href, location.href);
-      const target = url.pathname
-        .split("/")
-        .pop()
-        .replace(/\.html$/, "");
+      const target =
+        url.searchParams.get("game") ||
+        url.pathname
+          .split("/")
+          .pop()
+          .replace(/\.html$/, "");
       if (url.origin === location.origin && titles[target])
         track("click", target);
     },

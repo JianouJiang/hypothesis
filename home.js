@@ -37,7 +37,34 @@
       { label: m.outcomes?.[1] || "No", chance: 100 - m.chance },
     ];
   const thumb = (m) => `<span class="science-thumbnail">${svg(m.art)}</span>`;
-  const link = (m) => (m.live ? `${m.id}.html` : `?market=${m.id}`);
+  const link = (m) =>
+    m.live
+      ? HypothesisExperiments.link(m.id) || `${m.id}.html`
+      : `?market=${m.id}`;
+  const tradeLink = (m, side, index) =>
+    HypothesisExperiments.definitions[m.id]
+      ? HypothesisExperiments.link(
+          index === undefined ? m.id : `${m.id}:${index}`,
+          side,
+        )
+      : `${link(m)}?${m.id === "galton" ? "slot=" + index + "&" : ""}side=${side}`;
+  const sideLabel = (m, side) =>
+    m.id === "convection"
+      ? side === "up"
+        ? "CW"
+        : "CCW"
+      : HypothesisExperiments.label(m.id, side) ||
+        (m.id === "bitcoin"
+          ? side === "up"
+            ? "Up"
+            : "Down"
+          : m.id === "aerofoil"
+            ? side === "up"
+              ? "Above"
+              : "Below"
+            : side === "up"
+              ? "Yes"
+              : "No");
   const preview = (m) => (m.live ? "" : `data-preview="${m.id}"`);
   function bookmark(m, className = "card-bookmark") {
     return `<button class="${className}" data-bookmark="${m.id}" aria-label="${watchlist.has(m.id) ? "Remove from" : "Add to"} watchlist: ${safe(m.short)}" aria-pressed="${watchlist.has(m.id)}">${icon("bookmark")}</button>`;
@@ -99,7 +126,7 @@
         )
         .join(
           "",
-        )}<p class="feature-odds-caption">${m.live ? (m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Hypothesis</span></div>`;
+        )}<p class="feature-odds-caption">${m.live ? (HypothesisExperiments.definitions[m.id] ? "Live science · Two-minute rounds" : m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (HypothesisExperiments.definitions[m.id] ? "LIVE NUMERICAL EXPERIMENT" : m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Hypothesis</span></div>`;
     $("carousel-dots").innerHTML = featured
       .map(
         (m, i) =>
@@ -119,7 +146,7 @@
             0.5) * 100,
         )
       : m.chance;
-    return `<article class="market-card ${m.live ? "live-card" : "preview-card"}${m.choices ? " multi-card" : ""}" data-market="${m.id}"><div class="market-card-top"><a class="card-title-link" href="${link(m)}" ${preview(m)}>${thumb(m)}<div><h2>${safe(m.title)}</h2>${m.choices ? `<span class="topic-mini-label">${m.choices.length} possible outcomes</span>` : ""}</div></a>${m.choices ? "" : `<div class="${m.live ? "chance-gauge" : "card-chance"}" style="--chance:${chance}"><strong ${m.live ? `id="${m.id}-chance"` : ""}>${chance}%</strong><small>${m.live ? (m.id === "bitcoin" ? "chance Up" : m.id === "aerofoil" ? "chance Above" : "chance Yes") : "preview"}</small></div>`}</div>${m.live ? `<div class="live-card-subtitle">${icon("clock")}${m.duration} · <span id="${m.id}-countdown">Connecting to live round</span></div>` : ""}${m.choices ? `<div class="market-card-choices">${(m.id === "galton" ? m.choices.slice(2, 5) : m.choices).map((c, i) => `<div class="card-choice"><i class="outcome-dot" style="background:${c.color || ["#98abc7", "#ccb78d", "#a3bcb0"][i]}"></i><a class="choice-name" href="${link(m)}" ${preview(m)}>${safe(c.label)}</a><strong ${m.id === "galton" ? `data-slot-chance="${c.slot}"` : ""}>${c.chance}%</strong><span class="choice-actions"><a href="${link(m)}${m.id === "galton" ? `?slot=${c.slot}&side=up` : ""}" ${preview(m)} aria-label="${m.live ? "Trade" : "Preview"} ${safe(c.label)} Yes">Yes</a><a href="${link(m)}${m.id === "galton" ? `?slot=${c.slot}&side=down` : ""}" ${preview(m)} aria-label="${m.live ? "Trade" : "Preview"} ${safe(c.label)} No">No</a></span></div>`).join("")}</div>` : `<div class="card-outcomes">${m.live ? `<a href="${link(m)}?side=up" id="${m.id}-up">${m.id === "bitcoin" ? "Up" : m.id === "aerofoil" ? "Above" : "Yes"} ↗</a><a href="${link(m)}?side=down" id="${m.id}-down">${m.id === "bitcoin" ? "Down" : m.id === "aerofoil" ? "Below" : "No"} ↘</a>` : `<a href="${link(m)}" ${preview(m)}>Yes ↗</a><a href="${link(m)}" ${preview(m)}>No ↘</a>`}</div>`}<div class="market-card-footer">${m.live ? `<span class="live-label"><i></i>Live</span><span class="card-volume" id="${m.id}-volume"></span>` : '<span class="preview-tag">Coming soon</span>'}<span>·</span><span class="card-subject">${safe(subject(m.subject).name)}</span>${bookmark(m)}</div></article>`;
+    return `<article class="market-card ${m.live ? "live-card" : "preview-card"}${m.choices ? " multi-card" : ""}" data-market="${m.id}"><div class="market-card-top"><a class="card-title-link" href="${link(m)}" ${preview(m)}>${thumb(m)}<div><h2>${safe(m.title)}</h2>${m.choices ? `<span class="topic-mini-label">${m.choices.length} possible outcomes</span>` : ""}</div></a>${m.choices ? "" : `<div class="${m.live ? "chance-gauge" : "card-chance"}" style="--chance:${chance}"><strong ${m.live ? `id="${m.id}-chance"` : ""}>${chance}%</strong><small>${m.live ? `chance ${sideLabel(m, "up")}` : "preview"}</small></div>`}</div>${m.live ? `<div class="live-card-subtitle">${icon("clock")}${m.duration} · <span id="${m.id}-countdown">Connecting to live round</span></div>` : ""}${m.choices ? `<div class="market-card-choices">${(m.id === "galton" ? m.choices.slice(2, 5) : m.choices).map((c, i) => `<div class="card-choice"><i class="outcome-dot" style="background:${c.color || ["#98abc7", "#ccb78d", "#a3bcb0"][i]}"></i><a class="choice-name" href="${link(m)}" ${preview(m)}>${safe(c.label)}</a><strong ${m.id === "galton" ? `data-slot-chance="${c.slot}"` : `data-choice-game="${m.id}" data-choice-index="${i}"`}>${c.chance}%</strong><span class="choice-actions"><a href="${tradeLink(m, "up", m.id === "galton" ? c.slot : i)}" ${preview(m)} aria-label="${m.live ? "Trade" : "Preview"} ${safe(c.label)} Yes">Yes</a><a href="${tradeLink(m, "down", m.id === "galton" ? c.slot : i)}" ${preview(m)} aria-label="${m.live ? "Trade" : "Preview"} ${safe(c.label)} No">No</a></span></div>`).join("")}</div>` : `<div class="card-outcomes">${m.live ? `<a href="${tradeLink(m, "up")}" id="${m.id}-up">${sideLabel(m, "up")} ↗</a><a href="${tradeLink(m, "down")}" id="${m.id}-down">${sideLabel(m, "down")} ↘</a>` : `<a href="${link(m)}" ${preview(m)}>Yes ↗</a><a href="${link(m)}" ${preview(m)}>No ↘</a>`}</div>`}<div class="market-card-footer">${m.live ? `<span class="live-label"><i></i>Live</span><span class="card-volume" id="${m.id}-volume"></span>` : '<span class="preview-tag">Coming soon</span>'}<span>·</span><span class="card-subject">${safe(subject(m.subject).name)}</span>${bookmark(m)}</div></article>`;
   }
   function render() {
     $("subject-nav").innerHTML =
@@ -188,7 +215,7 @@
   }
   function updateLive() {
     if (!snapshot) return;
-    for (const id of ["bitcoin", "aerofoil", "escape", "galton"]) {
+    for (const id of markets.filter((m) => m.live).map((m) => m.id)) {
       const live =
         snapshot.markets?.[id] || (id === "bitcoin" ? snapshot : null);
       if (!live) continue;
@@ -204,14 +231,25 @@
             );
         continue;
       }
+      for (const el of document.querySelectorAll(
+        `[data-choice-game="${id}"]`,
+      )) {
+        const outcome = live.outcomes?.[Number(el.dataset.choiceIndex)];
+        if (outcome)
+          el.textContent = `${Math.round(outcome.probability * 100)}%`;
+      }
       if (!$(id + "-chance")) continue;
       const chance = Math.round(live.probability * 100);
       $(id + "-chance").textContent = `${chance}%`;
       $(id + "-chance").parentNode.style.setProperty("--chance", chance);
-      $(id + "-up").textContent =
-        `${id === "bitcoin" ? "Up" : id === "aerofoil" ? "Above" : "Yes"} ${Math.round(live.quotes.up.ask * 100)}¢ ↗`;
-      $(id + "-down").textContent =
-        `${id === "bitcoin" ? "Down" : id === "aerofoil" ? "Below" : "No"} ${Math.round(live.quotes.down.ask * 100)}¢ ↘`;
+      $(id + "-up").textContent = `${sideLabel(
+        markets.find((m) => m.id === id),
+        "up",
+      )} ${Math.round(live.quotes.up.ask * 100)}¢ ↗`;
+      $(id + "-down").textContent = `${sideLabel(
+        markets.find((m) => m.id === id),
+        "down",
+      )} ${Math.round(live.quotes.down.ask * 100)}¢ ↘`;
       $(id + "-volume").textContent = `· ${money(live.round.volume, 0)} G vol.`;
     }
     document.querySelectorAll("[data-featurechance]").forEach((el) => {
@@ -221,13 +259,13 @@
         return;
       }
       if (live)
-        el.textContent = `${Math.round((el.dataset.featurechance === "0" ? live.probability : 1 - live.probability) * 100)}%`;
+        el.textContent = `${Math.round((live.outcomes?.[Number(el.dataset.featurechance)]?.probability ?? (el.dataset.featurechance === "0" ? live.probability : 1 - live.probability)) * 100)}%`;
     });
     countdown();
   }
   function countdown() {
     if (!snapshot) return;
-    for (const id of ["bitcoin", "aerofoil", "escape", "galton"]) {
+    for (const id of markets.filter((m) => m.live).map((m) => m.id)) {
       const live =
         snapshot.markets?.[id] || (id === "bitcoin" ? snapshot : null);
       if (!live || !$(id + "-countdown")) continue;
@@ -238,7 +276,7 @@
             (live.round.nextAt - Date.now() - (client.offset || 0)) / 1000,
           ),
         );
-        $(id + "-countdown").textContent = `Next ball in ${left}s`;
+        $(id + "-countdown").textContent = `Next round in ${left}s`;
         continue;
       }
       if (id === "aerofoil" || id === "galton") {
@@ -279,7 +317,11 @@
   function showDialog(type, id) {
     let title, content;
     if (type === "preview") {
-      const m = markets.find((m) => m.id === id && !m.live);
+      const m = markets.find((m) => m.id === id);
+      if (m?.live) {
+        location.href = link(m);
+        return;
+      }
       if (!m) return;
       title = m.title;
       content = `<div class="preview-modal-art">${svg(m.art, true)}</div><div class="preview-modal-meta">${safe(subject(m.subject).name)}<i></i>Planned ${m.duration} rounds<span class="preview-tag">Coming soon</span></div><p>${safe(m.description)}</p><div class="preview-modal-choices">${choices(
@@ -298,11 +340,11 @@
     } else if (type === "about") {
       title = "A prediction playground for curious minds";
       content =
-        '<p>Hypothesis is a playground for scientific predictions. Explore science experiments, form a prediction, and see what happens.</p><p>Bitcoin, the OpenFOAM aerofoil experiment, the seven-slot Galton board, and ring escape are playable now. Other science markets are concept previews while their games are in development. All trades use free gold with no cash value.</p><a class="dialog-button secondary" href="https://github.com/JianouJiang/hypothesis" target="_blank" rel="noopener">Explore the project on GitHub ↗</a>';
+        '<p>Hypothesis is a playground for scientific predictions. Explore science experiments, form a prediction, and see what happens.</p><p>Explore live experiments across mechanics, thermodynamics, fields, light, fluids, and probability. Each live market publishes its model, starting conditions, and settlement rule. All trades use free gold with no cash value.</p><a class="dialog-button secondary" href="https://github.com/JianouJiang/hypothesis" target="_blank" rel="noopener">Explore the project on GitHub ↗</a>';
     } else {
       title = "A little curiosity goes a long way.";
       content =
-        '<ol class="home-steps"><li><strong>Make yourself at home.</strong>Your guest account starts with 1,000 gold. Visit your profile to choose a username.</li><li><strong>Find your next prediction.</strong>Browse the science subjects, explore upcoming experiments, and save your favorites.</li><li><strong>Play a live experiment.</strong>Predict a dust particle’s exit height, trade a Galton landing slot, watch a ring-escape challenge, or play Bitcoin in Maths &amp; Statistics. Review and confirm each trade before spending gold.</li><li><strong>See how your ideas stack up.</strong>Follow your positions, activity, and profit/loss in your profile. Each winning share pays 1 gold.</li></ol><div class="dialog-note">The aerofoil experiment replays real OpenFOAM data. Other science previews have illustrative odds. Bitcoin prices and trading bots are simulated; gold has no cash value.</div><a class="dialog-button" href="galton.html">Make your first prediction</a>';
+        '<ol class="home-steps"><li><strong>Make yourself at home.</strong>Your guest account starts with 1,000 gold. Visit your profile to choose a username.</li><li><strong>Find your next prediction.</strong>Browse live experiments by science subject and save your favorites.</li><li><strong>Play a live experiment.</strong>Predict a dust particle’s exit height, trade a Galton landing slot, watch a ring-escape challenge, or play Bitcoin in Maths &amp; Statistics. Review and confirm each trade before spending gold.</li><li><strong>See how your ideas stack up.</strong>Follow your positions, activity, and profit/loss in your profile. Each winning share pays 1 gold.</li></ol><div class="dialog-note">The aerofoil experiment uses real OpenFOAM data. Other live experiments use the numerical model shown on their game page. Bitcoin prices and trading bots are simulated; gold has no cash value.</div><a class="dialog-button" href="galton.html">Make your first prediction</a>';
     }
     $("home-dialog-title").textContent = title;
     $("home-dialog-content").innerHTML = content;

@@ -15,6 +15,11 @@ for (const name of [
   "flow-renderer.js",
   "galton.html",
   "escape.html",
+  "experiment.html",
+  "experiment.js",
+  "experiments.js",
+  "experiment.css",
+  "lab-renderer.js",
   "collision.js",
   "collision.css",
   "competitions.html",
@@ -55,13 +60,57 @@ const exchange = fs
     'import { CollisionMarket } from "./collision-market.js";',
   )
   .replace(
+    'const { LabMarket } = require("./lab-market");',
+    'import { LabMarket } from "./lab-market.js";',
+  )
+  .replace(
+    'const { randomBytes } = require("node:crypto");',
+    'import { randomBytes } from "node:crypto";',
+  )
+  .replace(
+    'const Labs = require("./experiments");',
+    'import Labs from "./experiments.js";',
+  )
+  .replace(
     "module.exports = { Exchange, AeroMarket };",
     "export { Exchange, AeroMarket };",
   );
 fs.writeFileSync(path.join(hosting, "lib", "exchange.js"), exchange);
-for (const name of ["physics.js", "collision-market.js", "community.js"]) {
+for (const name of [
+  "physics.js",
+  "collision-market.js",
+  "community.js",
+  "lab-market.js",
+  "lab-physics.js",
+  "wave-physics.js",
+  "wake-physics.js",
+]) {
   let source = fs.readFileSync(path.join(root, name), "utf8");
   source = source
+    .replace(
+      /const (\{[^;]+\}) = require\("\.\/wave-physics"\);/,
+      'import $1 from "./wave-physics.js";',
+    )
+    .replace(
+      /const (\{[^;]+\}) = require\("\.\/wake-physics"\);/,
+      'import $1 from "./wake-physics.js";',
+    )
+    .replace(
+      /const (\{[^;]+\}) = require\("node:crypto"\);/,
+      'import $1 from "node:crypto";',
+    )
+    .replace(
+      /const (\{[^;]+\}) = require\("\.\/lab-physics"\);/,
+      'import $1 from "./lab-physics.js";',
+    )
+    .replace(
+      /const (\{[^;]+\}) = require\("\.\/experiments"\);/,
+      'import $1 from "./experiments.js";',
+    )
+    .replace(
+      'const Labs = require("./experiments");',
+      'import Labs from "./experiments.js";',
+    )
     .replace(
       /const pl = require\("\.\/vendor\/planck.cjs"\);/,
       'import pl from "./vendor/planck.cjs";',
@@ -107,3 +156,15 @@ fs.writeFileSync(
     "\n})();\n",
 );
 console.log("Hosted HTML, assets, and trading engine synchronized.");
+
+// Convert the public UMD definitions to a single ESM instance for Worker imports.
+const labSource = fs.readFileSync(path.join(root, "experiments.js"), "utf8");
+const labStart = labSource.indexOf("const definitions"),
+  labEnd = labSource.lastIndexOf("return {");
+if (labStart < 0 || labEnd < labStart)
+  throw new Error("Cannot locate experiment definitions factory.");
+fs.writeFileSync(
+  path.join(hosting, "lib", "experiments.js"),
+  labSource.slice(labStart, labEnd).trimEnd() +
+    "\nconst Labs={definitions,ids,parse,contractIds,label,link};\nexport {definitions,ids,parse,contractIds,label,link};\nexport default Labs;\n",
+);

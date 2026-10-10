@@ -29,7 +29,7 @@ jobs:
       - name: Prepare public files
         run: |
           mkdir -p _site
-          cp index.html bitcoin.html aerofoil.html galton.html escape.html competitions.html profile.html styles.css home.css aerofoil.css collision.css competitions.css profile.css app.js home.js aerofoil.js flow-renderer.js collision.js competitions.js profile.js guest.js catalog.js market.js favicon.svg deployment.json community-ui.js community.css inbox.html inbox.js _site/
+          cp experiment.html experiment.js experiments.js experiment.css lab-renderer.js index.html bitcoin.html aerofoil.html galton.html escape.html competitions.html profile.html styles.css home.css aerofoil.css collision.css competitions.css profile.css app.js home.js aerofoil.js flow-renderer.js collision.js competitions.js profile.js guest.js catalog.js market.js favicon.svg deployment.json community-ui.js community.css inbox.html inbox.js _site/
           cp -r geometry _site/geometry
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5

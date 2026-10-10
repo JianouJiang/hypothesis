@@ -1,0 +1,179 @@
+.lab-title-art {
+  background: linear-gradient(140deg, #bddbd5, #3a827c);
+  color: white;
+}
+.lab-page .aero-title h1 {
+  font-size: clamp(23px, 3vw, 30px);
+}
+.lab-page .aero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 10px;
+}
+.lab-stage {
+  margin-top: 24px;
+  background: #0e1926;
+}
+.lab-stage #physics-canvas {
+  height: 420px;
+  width: 100%;
+  display: block;
+}
+.lab-stage .stage-hud,
+.lab-stage .stage-foot {
+  pointer-events: none;
+}
+.lab-stage .stage-foot {
+  gap: 16px;
+  font-size: 10px;
+}
+.lab-readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 4px 14px;
+}
+.lab-readout > div > span {
+  display: block;
+  font-size: 10px;
+  color: #6d7e92;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+.lab-readout strong {
+  font-size: 23px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #244b52;
+}
+.lab-readout strong small {
+  font-size: 10px;
+  color: #7b8797;
+  font-weight: 400;
+}
+.lab-readout .geometry-download {
+  font-size: 12px;
+  padding: 10px 13px;
+  margin: 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lab-chart {
+  background: #f9fbfc;
+  border: 1px solid #e8eef1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 4px 0 20px;
+}
+#lab-chart {
+  height: 112px;
+  width: 100%;
+  display: block;
+}
+#lab-chart-caption {
+  color: #7b8999;
+  font-size: 10px;
+  margin: 6px 0 1px;
+}
+.lab-equations {
+  font-family: ui-monospace, monospace;
+  color: #365c66;
+  background: #f1f7f7;
+  border-radius: 6px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+#lab-parameters {
+  font-size: 12px;
+  max-height: 320px;
+  overflow: auto;
+  background: #f5f8fa;
+  padding: 15px;
+  border-radius: 6px;
+}
+.lab-choices {
+  border: 1px solid #e3e9f0;
+  border-radius: 10px;
+  margin: 18px 0;
+  overflow: hidden;
+}
+.lab-choice {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 48px 82px 82px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eef1f6;
+}
+.lab-choice:last-child {
+  border-bottom: 0;
+}
+.lab-choice.selected {
+  background: #f4f9fa;
+}
+.lab-choice strong {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.lab-choice i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lab-choice > b {
+  color: #43546d;
+  font-size: 16px;
+}
+.lab-choice button {
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 4px;
+  background: #e5f4ed;
+  color: #238265;
+  font-size: 12px;
+  cursor: pointer;
+}
+.lab-choice button:last-child {
+  background: #fbeaea;
+  color: #b96565;
+}
+.lab-choice button[aria-pressed="true"] {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.lab-page .ticket-outcomes button {
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .lab-stage #physics-canvas {
+    height: 310px;
+  }
+  .lab-readout {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .lab-readout strong {
+    font-size: 20px;
+  }
+  .lab-readout .geometry-download {
+    font-size: 11px;
+  }
+  .lab-choice {
+    grid-template-columns: minmax(100px, 1fr) 38px 60px 60px;
+    gap: 8px;
+    padding: 14px 10px;
+  }
+  .lab-choice strong {
+    font-size: 12px;
+  }
+  .lab-stage .stage-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

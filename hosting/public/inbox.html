@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Owner inbox · Hypothesis</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="community.css" />
+    <script src="guest.js" defer></script>
+    <script src="inbox.js" defer></script>
+  </head>
+  <body>
+    <main class="inbox">
+      <div class="inbox-heading">
+        <div>
+          <span class="community-eyebrow">HYPOTHESIS</span>
+          <h1>Owner inbox</h1>
+          <p>
+            Feedback, community reports, and the experiments people come back
+            to.
+          </p>
+        </div>
+        <a class="community-secondary" href="index.html">← Back to markets</a>
+      </div>
+      <form class="inbox-login" id="inbox-login">
+        <label for="inbox-key">Owner access key</label
+        ><input
+          id="inbox-key"
+          type="password"
+          autocomplete="current-password"
+          required
+          minlength="32"
+        />
+        <p>
+          The key is kept in memory for this tab and is never added to a URL.
+          Guest accounts cannot access this inbox.
+        </p>
+        <button class="community-primary" type="submit">Unlock inbox</button>
+      </form>
+      <p id="inbox-status" role="status"></p>
+      <div id="inbox-dashboard" hidden>
+        <div class="inbox-toolbar">
+          <button id="inbox-refresh" class="community-secondary">Refresh</button
+          ><button id="inbox-export" class="community-secondary">
+            Export inbox JSON</button
+          ><button id="inbox-export-contacts" class="community-secondary">
+            Export update requests CSV</button
+          ><button id="inbox-lock" class="community-secondary">
+            Lock inbox
+          </button>
+        </div>
+        <h2>Game engagement</h2>
+        <p>
+          Last 90 days · Daily game-link clicks and page visits. These are
+          counts, not unique people. Visitors can opt out; Do Not Track is
+          respected.
+        </p>
+        <div id="inbox-metrics" class="inbox-metrics"></div>
+        <h2>Private feedback <span id="inbox-feedback-count"></span></h2>
+        <div id="inbox-feedback"></div>
+        <h2>Email update requests</h2>
+        <p>
+          Only explicit opt-ins appear here. Addresses are unverified; no
+          automatic emails are sent. Confirm ownership before adding contacts to
+          a mailing service.
+        </p>
+        <div id="inbox-contacts"></div>
+        <h2>Reported comments</h2>
+        <div id="inbox-reports"></div>
+        <p id="inbox-storage"></p>
+      </div>
+      <p>
+        Contact:
+        <a href="mailto:jianou.works@gmail.com">jianou.works@gmail.com</a>
+      </p>
+    </main>
+  </body>
+</html>

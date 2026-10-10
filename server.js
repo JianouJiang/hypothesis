@@ -5,6 +5,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { Market } = require("./market");
 const { Exchange } = require("./exchange");
+const { Community, adminAuthorized } = require("./community");
 
 function createApp(options = {}) {
   const dataFile =
@@ -21,6 +22,21 @@ function createApp(options = {}) {
       ? JSON.parse(fs.readFileSync(flowFile, "utf8"))
       : undefined);
   const market = options.market || new Exchange({ state: saved, flowData });
+  const communityFile =
+    options.communityFile ||
+    path.join(path.dirname(dataFile), "community.json");
+  let communityState =
+    options.persist !== false && fs.existsSync(communityFile)
+      ? JSON.parse(fs.readFileSync(communityFile, "utf8"))
+      : undefined;
+  const adminFile = path.join(
+    __dirname,
+    "../polymarket_physics_private/community-admin-token",
+  );
+  const adminToken =
+    options.adminToken ||
+    process.env.COMMUNITY_ADMIN_TOKEN ||
+    (fs.existsSync(adminFile) ? fs.readFileSync(adminFile, "utf8").trim() : "");
   const clients = new Map();
   const assets = {
     "/": ["index.html", "text/html"],
@@ -49,6 +65,10 @@ function createApp(options = {}) {
     "/market.js": ["market.js", "text/javascript"],
     "/favicon.svg": ["favicon.svg", "image/svg+xml"],
     "/deployment.json": ["deployment.json", "application/json"],
+    "/community-ui.js": ["community-ui.js", "text/javascript"],
+    "/community.css": ["community.css", "text/css"],
+    "/inbox.html": ["inbox.html", "text/html"],
+    "/inbox.js": ["inbox.js", "text/javascript"],
   };
   for (const file of [
     "naca0012.dat",
@@ -93,7 +113,6 @@ function createApp(options = {}) {
     try {
       if (url.pathname.startsWith("/api/")) {
         const marketId = url.searchParams.get("market") || "bitcoin";
-        if (market.select) market.select(marketId);
         const token = req.headers.cookie
           ?.split(";")
           .map((v) => v.trim())
@@ -105,6 +124,68 @@ function createApp(options = {}) {
           Object.hasOwn(market.players || market.state.players, token)
             ? token
             : null;
+        if (["/api/community", "/api/community-admin"].includes(url.pathname)) {
+          const admin = url.pathname === "/api/community-admin";
+          if (
+            admin
+              ? !adminAuthorized(req.headers.authorization, adminToken)
+              : !id
+          )
+            return json(admin ? 403 : 401, {
+              error: admin
+                ? "Invalid owner key."
+                : "Reconnect to your guest account.",
+            });
+          if (
+            req.headers.origin &&
+            ![
+              `http://${req.headers.host}`,
+              `https://${req.headers.host}`,
+            ].includes(req.headers.origin)
+          )
+            return json(403, { error: "Open this site to send feedback." });
+          if (!["GET", "POST"].includes(req.method))
+            return json(405, { error: "Method not allowed." });
+          let input;
+          if (req.method === "POST") {
+            if (!req.headers["content-type"]?.startsWith("application/json"))
+              return json(415, { error: "Expected JSON." });
+            let body = "";
+            for await (const chunk of req) {
+              body += chunk;
+              if (body.length > 16000)
+                return json(413, { error: "Request too large." });
+            }
+            input = JSON.parse(body || "{}");
+          }
+          const community = new Community(
+            communityState
+              ? JSON.parse(JSON.stringify(communityState))
+              : undefined,
+            market.state,
+          );
+          if (req.method === "GET")
+            return json(
+              200,
+              admin
+                ? community.adminFeed()
+                : community.feed(id, Object.fromEntries(url.searchParams)),
+            );
+          const result = admin
+            ? community.adminMutate(input)
+            : community.mutate(id, input);
+          const serialized = community.serialize();
+          if (options.persist !== false) {
+            fs.mkdirSync(path.dirname(communityFile), { recursive: true });
+            fs.writeFileSync(`${communityFile}.tmp`, serialized, {
+              mode: 0o600,
+            });
+            fs.renameSync(`${communityFile}.tmp`, communityFile);
+          }
+          communityState = community.state;
+          return json(200, result);
+        }
+        if (market.select) market.select(marketId);
         if (req.method === "GET" && url.pathname === "/api/session") {
           if (!id) {
             id = crypto.randomBytes(24).toString("hex");
@@ -230,7 +311,7 @@ if (require.main === module) {
   const host = process.env.HOST || "127.0.0.1";
   app.server.listen(port, host, () =>
     console.log(
-      `Polymarket Physics is ready at http://${host}:${port}\nScience prediction markets · 1,000 free gold coins\nPress Ctrl+C to stop. Progress is saved in data/market.json.`,
+      `Hypothesis is ready at http://${host}:${port}\nScience prediction markets · 1,000 free gold coins\nPress Ctrl+C to stop. Progress is saved in data/market.json.`,
     ),
   );
   for (const signal of ["SIGINT", "SIGTERM"])

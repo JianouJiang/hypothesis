@@ -7,7 +7,7 @@
       name="description"
       content="A proposed seasonal in-person science prediction competition. New geometries, shared conditions, and models that generalize."
     />
-    <title>Seasonal competitions · Polymarket Physics</title>
+    <title>Seasonal competitions · Hypothesis</title>
     <link rel="icon" href="favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home.css" />
@@ -17,15 +17,28 @@
     <script src="guest.js" defer></script>
     <script src="catalog.js" defer></script>
     <script src="competitions.js" defer></script>
+    <link rel="stylesheet" href="community.css" />
+    <script src="community-ui.js" defer></script>
   </head>
   <body class="home-page aero-page">
     <a class="skip-link" href="#experiment">Skip to experiment</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
+        <a class="brand" href="index.html" aria-label="Hypothesis home"
           ><svg viewBox="0 0 38 38" aria-hidden="true">
-            <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
-          ><span>Polymarket</span><span class="physics-tag">physics</span></a
+            <path
+              d="M10 7v24M28 7v24M10 21c6 0 12-5 18-5"
+              stroke-linecap="round"
+            />
+            <circle cx="10" cy="21" r="3" fill="currentColor" stroke="none" />
+            <circle
+              cx="28"
+              cy="16"
+              r="3"
+              fill="currentColor"
+              stroke="none"
+            /></svg
+          ><span>Hypothesis</span></a
         >
         <a class="aero-search" href="index.html"
           >⌕ <span>Explore science markets</span></a
@@ -308,6 +321,21 @@
             any prizes have not been announced.
           </p>
         </details>
+      </section>
+      <section class="community-contact" aria-label="Contact and feedback">
+        <div>
+          <strong>Help shape the next experiment.</strong>
+          <p>
+            Ideas, bugs, or a model to share?
+            <a href="mailto:jianou.works@gmail.com">jianou.works@gmail.com</a>
+          </p>
+        </div>
+        <div>
+          <button data-privacy>Privacy choices</button
+          ><button class="community-primary" data-feedback>
+            Send feedback ↗
+          </button>
+        </div>
       </section>
       <footer class="competition-foot">
         <span id="competition-status">Connecting to your guest profile…</span

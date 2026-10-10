@@ -3,5 +3,6 @@ declare namespace Cloudflare {
     DB?: D1Database;
     BUCKET?: R2Bucket;
     CFD_INGEST_TOKEN?: string;
+    COMMUNITY_ADMIN_TOKEN?: string;
   }
 }

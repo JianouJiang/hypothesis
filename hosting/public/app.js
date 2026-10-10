@@ -148,6 +148,12 @@
         : data.round.price;
     chartReceived = performance.now();
     snapshot = data;
+    PhysicsGuest.publishSession({
+      mode,
+      base: apiBase,
+      token: authToken,
+      snapshot: data,
+    });
     const avatarLink = document.querySelector(".avatar");
     avatarLink.innerHTML = PhysicsGuest.avatar(data.player.avatar);
     avatarLink.setAttribute("aria-label", `${data.player.name} · Your profile`);

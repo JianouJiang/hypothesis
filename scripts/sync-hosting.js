@@ -26,6 +26,10 @@ for (const name of [
   "profile.css",
   "profile.js",
   "guest.js",
+  "community-ui.js",
+  "community.css",
+  "inbox.html",
+  "inbox.js",
   "catalog.js",
   "styles.css",
   "app.js",
@@ -55,7 +59,7 @@ const exchange = fs
     "export { Exchange, AeroMarket };",
   );
 fs.writeFileSync(path.join(hosting, "lib", "exchange.js"), exchange);
-for (const name of ["physics.js", "collision-market.js"]) {
+for (const name of ["physics.js", "collision-market.js", "community.js"]) {
   let source = fs.readFileSync(path.join(root, name), "utf8");
   source = source
     .replace(

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Polymarket Physics",
+  title: "Hypothesis",
   description: "Predict fluid flow, falling balls, ring escapes, and mathematical simulations. Trade with free gold and explore science competitions.",
   icons: {
     icon: "/favicon.svg",

@@ -1,12 +1,12 @@
-# Polymarket Physics
+# Hypothesis
 
-A Polymarket-inspired **science prediction platform**. Predict aerofoil dust, Galton-board landings, ring escapes, and mathematical simulations. Explore more science experiments and seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
+**Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Predict aerofoil dust, Galton-board landings, ring escapes, and mathematical simulations. Explore more science experiments and seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
 
-**Play:** [GitHub Pages](https://jianoujiang.github.io/polymarket_physics/) · [Shared live market](https://polymarket-physics.jianou-works.chatgpt.site)
+**Play:** [GitHub Pages](https://jianoujiang.github.io/hypothesis/) · [Shared live market](https://hypothesis.jianou-works.chatgpt.site)
 
 ## What works
 
-- A Polymarket-style home page with featured experiments, subject navigation, search, topic/status filters, and a saved watchlist.
+- A science market home page with featured experiments, subject navigation, search, topic/status filters, and a saved watchlist.
 - Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. **Aerofoil dust** is live in Fluid Dynamics; **Bitcoin Up or Down** remains live in Maths & Statistics. **Galton board** and **ring escape** are live in Solid Mechanics. The other 17 experiments are coming-soon previews.
 - An aerofoil game with rounds around two minutes using genuine, precomputed OpenFOAM velocity fields and passive-tracer trajectories. Thousands of advected dust tracers and adjustable photographic trails reveal the flow. A dashed horizontal line marks the previous exit; a solid gold line and height chart show the current particle. Download the NACA 0012 geometry and public physical parameters.
 - A personal profile with an editable username, bio, and avatar; live positions, closed positions, activity, and a gold-denominated profit/loss chart.
@@ -18,13 +18,28 @@ A Polymarket-inspired **science prediction platform**. Predict aerofoil dust, Ga
 - Automatic settlement: the final simulated price at or above the opening price pays Up; otherwise Down. Winning shares pay **1 gold each**; losing shares pay zero. Unfilled orders expire and release reserved funds/shares.
 - Guest wallets, open positions, transaction activity, settled results, and a practice-wallet reset.
 - Responsive desktop/mobile layout, keyboard support, chart hover, and search.
+- Public discussions on all four live games: guest avatars, current-position badges, threaded replies, likes, Newest/Most liked sorting, a Holders filter, comment links, reports, and deletion of your own posts. Comments stay with the game across rounds; holdings reflect the current round.
+- Private feedback with optional reply email and a separate, unchecked email-updates opt-in; contact **jianou.works@gmail.com** from every page.
+- Aggregate game-link clicks and visits, with a browser opt-out and Do Not Track support. A protected owner inbox shows feedback, update requests, engagement totals, and reported comments.
+
+## Feedback, privacy, and owner inbox
+
+Open **[the owner inbox](https://jianoujiang.github.io/hypothesis/inbox.html)** and enter the owner access key. The key stays in tab memory, never in a URL or public asset. Local hosting reads `COMMUNITY_ADMIN_TOKEN`, or the owner's private `../polymarket_physics_private/community-admin-token` file; hosted deployment uses the same secret runtime variable. Neither key is committed to GitHub. Set a random secret of at least 32 characters when self-hosting.
+
+The inbox supports private feedback review, manual email replies, JSON export, an opt-in contacts CSV, comment hiding/restoration, report dismissal, and contact/message deletion. Feedback is stored in the inbox; **no automatic email notifications or campaigns are sent**. Update requests record explicit consent and time, but addresses are **unverified**; verify ownership before importing into a mailing provider. An email supplied only for a reply never enters the updates list.
+
+Visitors can remove their saved reply emails and update request through **Privacy choices**. This uses the current guest session; clearing browser data or using another browser may require contacting the owner for removal. Comments are public; feedback text and email fields are owner-only. Daily game counts are retained for 90 days and are not unique-user counts. The app does not store IP addresses, device fingerprints, or per-person browsing histories for analytics. Short-lived event receipts deduplicate navigation retries; existing guest sessions enforce basic action limits. Do Not Track disables collection, and opt-out clears queued counts. Optional email data is never joined to engagement totals or included in public snapshots.
+
+`community.js` is shared server logic. Node stores its separate state in `data/community.json` with owner-only file permissions. Hosting stores it in a separate `community` row of the existing D1 table, using revision checks so concurrent writes cannot overwrite one another. Trading state and balances remain separate. Request-size, content-length, ownership, origin, and per-guest rate checks protect the endpoints; comments are rendered as plain text. The owner endpoint requires the secret, even for reads.
+
+This is a small pilot: community state is capped at 1.5 MB, visible in the owner inbox. At capacity, submissions fail explicitly rather than discarding existing feedback. Export and clear old feedback as needed; use dedicated comment/contact tables and stronger abuse controls before growing to a large anonymous audience. No signup means guest identities and rate limits are browser-session based.
 
 ## Run locally
 
 Requires Node.js 18 or newer. The local app needs **no npm install and no build step**. A pinned MIT-licensed Planck.js 1.5.0 build is included in `vendor/` for the collision games.
 
 ```sh
-cd ~/Desktop/polymarket_physics
+cd ~/Desktop/hypothesis
 npm start
 ```
 
@@ -44,7 +59,7 @@ You can also open **index.html directly** to browse the home page, **bitcoin.htm
 
 ## Aerofoil experiment
 
-**[Play the aerofoil market](https://polymarket-physics.jianou-works.chatgpt.site/aerofoil.html)** · **[Geometry and physical conditions](geometry/)**
+**[Play the aerofoil market](https://hypothesis.jianou-works.chatgpt.site/aerofoil.html)** · **[Geometry and physical conditions](geometry/)**
 
 The geometry is NASA's sharp-trailing-edge version of the well-studied **NACA 0012**, at **20° angle of attack**. A 0.10 m chord, 0.15 m/s inlet velocity, and 1.5 × 10⁻⁵ m²/s kinematic viscosity give a chord Reynolds number of **1,000**. The two-dimensional domain spans x/c = −3…6 and y/c = −3…3. The particle starts at (−3, 0) and is advected through the unsteady separated flow. It is an ideal small-dust tracer: inertia, gravity, and feedback on the fluid are neglected.
 
@@ -58,9 +73,9 @@ NACA 0012 is a validation geometry, but **that does not validate this particular
 
 Bitcoin, CFD and Galton rounds last **1–5 minutes**. Escape attempts run for up to **60 seconds**, ending early on a successful escape, with **3 seconds between balls**. Bitcoin stays at five minutes; the CFD aerofoil keeps its arrival-based 106–168 second transits. The new collision games use [Planck.js 1.5.0](https://github.com/piqnt/planck.js), a Box2D-based rigid-body engine, with a fixed 120 Hz physics step and continuous collision detection. OpenFOAM remains responsible for fluid flow; it is not used for peg impacts.
 
-**[Galton board](https://polymarket-physics.jianou-works.chatgpt.site/galton.html):** one ball falls through eleven rows into seven slots. Each slot has its own **Yes and No** contracts, order book, limit orders, and positions. First solver-reported contact with the floor settles the containing slot Yes and all six other slots No. Every winning share pays 1 gold. Each round varies the release x within **±0.22 m of the centre**. The board marks x = 0; its launcher follows the actual starting position. The round’s signed **x₀** and initial horizontal speed **vₓ₀** remain visible throughout the fall. **Round data** downloads the full-precision initial state, release timestamp, parameters, and peg geometry; `physics.release` exposes the same state in the API snapshot even for late joiners. Positive x points right, positive y points down, and velocities use physical seconds. No slot is chosen in advance. Playback normally maps one physical second to 20 wall seconds; short falls slow down further to give at least 75 seconds of transit. A 10-second release countdown and 3.5-second result display keep rounds between about 1:29 and 4:14. Failure to land within 12 physical seconds voids the round, returns held positions’ cost basis, and releases open orders. [Download parameters](geometry/galton.json).
+**[Galton board](https://hypothesis.jianou-works.chatgpt.site/galton.html):** one ball falls through eleven rows into seven slots. Each slot has its own **Yes and No** contracts, order book, limit orders, and positions. First solver-reported contact with the floor settles the containing slot Yes and all six other slots No. Every winning share pays 1 gold. Each round varies the release x within **±0.22 m of the centre**. The board marks x = 0; its launcher follows the actual starting position. The round’s signed **x₀** and initial horizontal speed **vₓ₀** remain visible throughout the fall. **Round data** downloads the full-precision initial state, release timestamp, parameters, and peg geometry; `physics.release` exposes the same state in the API snapshot even for late joiners. Positive x points right, positive y points down, and velocities use physical seconds. No slot is chosen in advance. Playback normally maps one physical second to 20 wall seconds; short falls slow down further to give at least 75 seconds of transit. A 10-second release countdown and 3.5-second result display keep rounds between about 1:29 and 4:14. Failure to land within 12 physical seconds voids the round, returns held positions’ cost basis, and releases open orders. [Download parameters](geometry/galton.json).
 
-**[Ring escape](https://polymarket-physics.jianou-works.chatgpt.site/escape.html):** each ball launches immediately into a 60-second physical challenge. Three kinematic rings with gaps rotate around one ball. Yes settles as soon as the entire ball clears the outer ring plus the published 0.04 m detection tolerance; No settles at the deadline. Trading stays open while the ball moves. After escape or timeout, the result appears for exactly 3 seconds before the next ball launches. There is no additional prediction window. Existing rounds from the older timing finish on their original clock before adopting the new cadence, preserving open positions and their outcomes. Ring motors can transfer energy during impacts. [Download parameters](geometry/escape.json).
+**[Ring escape](https://hypothesis.jianou-works.chatgpt.site/escape.html):** each ball launches immediately into a 60-second physical challenge. Three kinematic rings with gaps rotate around one ball. Yes settles as soon as the entire ball clears the outer ring plus the published 0.04 m detection tolerance; No settles at the deadline. Trading stays open while the ball moves. After escape or timeout, the result appears for exactly 3 seconds before the next ball launches. There is no additional prediction window. Existing rounds from the older timing finish on their original clock before adopting the new cadence, preserving open positions and their outcomes. Ring motors can transfer energy during impacts. [Download parameters](geometry/escape.json).
 
 **The collisions make the music.** There is no background recording or looping track. Measured contact impulses trigger original synthesized pentatonic notes: struck ring/peg row affects pitch, impulse affects loudness, and horizontal position affects stereo pan. Harmonics decay after each hit. Click **Play collision music** to satisfy browser audio activation, and use **Mute collision music** at any time. Hidden tabs suspend audio; rejoining never plays a backlog of missed impacts.
 
@@ -68,7 +83,7 @@ Both games compute authoritative trajectories on the server and send only elapse
 
 ## Seasonal in-person competitions
 
-The **[competition page](https://polymarket-physics.jianou-works.chatgpt.site/competitions.html)** is linked from the main navigation, discovery page, and ball games. It proposes public practice, simultaneous release of new geometry/conditions at the venue, calibration, a model freeze, and scored held-out trials. Separate forecasting and trading leaderboards would expose model robustness across unseen cases rather than performance on a memorized trajectory.
+The **[competition page](https://hypothesis.jianou-works.chatgpt.site/competitions.html)** is linked from the main navigation, discovery page, and ball games. It proposes public practice, simultaneous release of new geometry/conditions at the venue, calibration, a model freeze, and scored held-out trials. Separate forecasting and trading leaderboards would expose model robustness across unseen cases rather than performance on a memorized trajectory.
 
 Dates, venue, entry arrangements, prizes, final scoring and compute budgets are **to be announced**. The page does not claim a scheduled event or fabricate a leaderboard. **Save my interest** persists a reversible preference in the guest profile; it is not an event registration and does not send notifications. Running the competition itself with new solver datasets is a future event setup task.
 
@@ -124,6 +139,8 @@ The hosted build uses the supplied Sites/Vinext starter and its lockfile. Hostin
 
 The GitHub Actions workflow tests the engine and uploads **only the public web assets** to Pages. It does not publish wallets, server data, or hosting configuration.
 
+`node tests/community-browser.cjs` covers all four comment sections, two-browser replies/likes, filters, reports and moderation, email privacy and erasure, owner exports, opt-out/Do Not Track, mobile layouts, and Hypothesis branding. These tests run against an isolated local server and never submit data to the live site or send email.
+
 ## Rendering and inspiration
 
 The new dust renderer is original Canvas code using the field-driven particle/trail approach demonstrated by [Mapbox’s WebGL wind project](https://github.com/mapbox/webgl-wind). It preserves the existing CFD data, adds metallic lighting and small seeded dust, and removes the old background streamline drawing. Its background tracers are visualization particles, not extra settlement particles.
@@ -134,4 +151,4 @@ Planck’s [body/continuous collision documentation](https://piqnt.com/planck.js
 
 ## Credits
 
-Visual references: [Polymarket home](https://polymarket.com), [public profiles](https://polymarket.com/@ImJustKen), and [Bitcoin Up or Down](https://polymarket.com/event/btc-updown-5m-1790982300). Scientific concept illustrations and avatar artwork are original SVGs. This project is an independent simulation and is not affiliated with Polymarket. It uses its own experiment and settlement rules.
+Hypothesis is an independent science playground with original identity, scientific illustrations, and avatar artwork. Each experiment publishes its own physical conditions and settlement rules.

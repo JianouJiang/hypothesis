@@ -83,6 +83,12 @@
     accept(data) {
       if (!data?.player) return;
       this.snapshot = data;
+      publishSession({
+        mode: this.mode,
+        base: this.base,
+        token: this.token,
+        snapshot: data,
+      });
       this.offset = data.now - Date.now();
       this.onUpdate(data, this.mode);
       this.onStatus(
@@ -192,5 +198,18 @@
       });
     }
   }
-  window.PhysicsGuest = { Client, storage, safe, money, avatar };
+  function publishSession(session) {
+    window.PhysicsSession = session;
+    window.dispatchEvent(
+      new CustomEvent("physics-session", { detail: session }),
+    );
+  }
+  window.PhysicsGuest = {
+    Client,
+    storage,
+    safe,
+    money,
+    avatar,
+    publishSession,
+  };
 })();

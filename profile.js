@@ -85,7 +85,7 @@
     const p = snapshot.player;
     $("home-balance").textContent = money(p.balance);
     $("profile-name").textContent = p.name;
-    document.title = `${p.name} · Polymarket Physics`;
+    document.title = `${p.name} · Hypothesis`;
     $("profile-picture").innerHTML = avatar(p.avatar);
     $("profile-joined").textContent =
       `Joined ${new Date(p.joinedAt || p.trackingSince).toLocaleDateString("en-US", { month: "short", year: "numeric" })} · Guest account`;
@@ -398,12 +398,12 @@
       type === "wallet"
         ? "Your gold wallet"
         : type === "about"
-          ? "Polymarket Physics"
+          ? "Hypothesis"
           : "Your prediction playground";
     $("home-dialog-content").innerHTML =
       type === "wallet" && p
         ? `<div class="wallet-total"><span class="coin">G</span>${money(p.balance)}</div><p>Available gold · ${safe(p.name)}</p><div class="wallet-details"><div><span>Reserved in orders</span><strong>${money(p.reserved)} G</strong></div><div><span>Total portfolio value</span><strong>${money(p.equity)} G</strong></div></div><div class="dialog-note">Gold has no cash value. This browser remembers your guest account. Different browsers get separate accounts.</div><a class="dialog-button" href="bitcoin.html">Explore the live market</a>`
-        : '<p>Explore upcoming science experiments and trade the live Bitcoin simulation with free gold. Bitcoin lives under Maths &amp; Statistics.</p><p>Every new guest starts with 1,000 gold. Each trade asks for confirmation, and each winning share pays 1 gold. Your profile tracks real guest trades and saved portfolio observations.</p><p>Positions Value uses current sell quotes. Total PnL includes available gold, reserved gold, and marked positions, less your starting 1,000 gold. Biggest Win is your largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct five-minute rounds with fills. Statistics reset when you reset your practice wallet.</p><div class="dialog-note">An independent project inspired by Polymarket. Science games are previews; all gold and Bitcoin prices are simulated.</div><a class="dialog-button" href="index.html">Explore science markets</a>';
+        : '<p>Explore upcoming science experiments and trade the live Bitcoin simulation with free gold. Bitcoin lives under Maths &amp; Statistics.</p><p>Every new guest starts with 1,000 gold. Each trade asks for confirmation, and each winning share pays 1 gold. Your profile tracks real guest trades and saved portfolio observations.</p><p>Positions Value uses current sell quotes. Total PnL includes available gold, reserved gold, and marked positions, less your starting 1,000 gold. Biggest Win is your largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct five-minute rounds with fills. Statistics reset when you reset your practice wallet.</p><div class="dialog-note">A playground for scientific predictions. Trade live aerofoil, Galton, escape, and Bitcoin experiments. Gold has no cash value.</div><a class="dialog-button" href="index.html">Explore science markets</a>';
     $("home-dialog").showModal();
   }
   $("profile-subject-nav").innerHTML =

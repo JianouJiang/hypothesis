@@ -99,7 +99,7 @@
         )
         .join(
           "",
-        )}<p class="feature-odds-caption">${m.live ? (m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Polymarket <span>physics</span></span></div>`;
+        )}<p class="feature-odds-caption">${m.live ? (m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Hypothesis</span></div>`;
     $("carousel-dots").innerHTML = featured
       .map(
         (m, i) =>
@@ -177,7 +177,7 @@
     $("watchlist-count").textContent = watchlist.size;
     $("market-grid").innerHTML =
       (isDefault
-        ? `<article class="market-card discovery-card"><h2>The science of<br><span>what happens next.</span></h2><p>Turn your curiosity into a prediction. A new playground is taking shape.</p><div class="discovery-card-art">${svg("orbit")}</div><button class="discovery-card-link" data-dialog="how">Welcome to Polymarket Physics ${icon("arrow")}</button></article>`
+        ? `<article class="market-card discovery-card"><h2>The science of<br><span>what happens next.</span></h2><p>Turn your curiosity into a prediction. A new playground is taking shape.</p><div class="discovery-card-art">${svg("orbit")}</div><button class="discovery-card-link" data-dialog="how">Welcome to Hypothesis ${icon("arrow")}</button></article>`
         : "") + matches.slice(0, limit).map(card).join("");
     $("home-empty").hidden = matches.length > 0;
     $("empty-message").textContent = state.watch
@@ -298,7 +298,7 @@
     } else if (type === "about") {
       title = "A prediction playground for curious minds";
       content =
-        '<p>Polymarket Physics is an independent project inspired by the layout of Polymarket. Explore science experiments, form a prediction, and see what happens.</p><p>Bitcoin, the OpenFOAM aerofoil experiment, the seven-slot Galton board, and ring escape are playable now. Other science markets are concept previews while their games are in development. All trades use free gold with no cash value.</p><a class="dialog-button secondary" href="https://github.com/JianouJiang/polymarket_physics" target="_blank" rel="noopener">Explore the project on GitHub ↗</a>';
+        '<p>Hypothesis is a playground for scientific predictions. Explore science experiments, form a prediction, and see what happens.</p><p>Bitcoin, the OpenFOAM aerofoil experiment, the seven-slot Galton board, and ring escape are playable now. Other science markets are concept previews while their games are in development. All trades use free gold with no cash value.</p><a class="dialog-button secondary" href="https://github.com/JianouJiang/hypothesis" target="_blank" rel="noopener">Explore the project on GitHub ↗</a>';
     } else {
       title = "A little curiosity goes a long way.";
       content =

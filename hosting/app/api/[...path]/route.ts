@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { Exchange } from "../../../lib/exchange.js";
+import { communityApi } from "../../../lib/community-api";
 
 let flowCache: any = null;
 async function loadFlow() {
@@ -78,7 +79,7 @@ async function ingest(
 
 const allowedOrigins = new Set([
   "https://jianoujiang.github.io",
-  "https://polymarket-physics.jianou-works.chatgpt.site",
+  "https://hypothesis.jianou-works.chatgpt.site",
 ]);
 
 function headers(request: Request) {
@@ -123,6 +124,8 @@ async function handle(request: Request) {
       error: "This market is not available from that origin.",
     });
   const route = new URL(request.url).pathname.split("/").pop();
+  if (route === "community" || route === "community-admin")
+    return communityApi(request, route === "community-admin", json);
   if (route === "cfd-ingest" && request.method === "POST") {
     try {
       return await ingest(request, json);

@@ -78,6 +78,32 @@ test("HTTP trades reject unauthenticated writes and foreign origins", async (t) 
   );
 });
 
+test("profile changes are authenticated and persist with the same guest account", async (t) => {
+  const { session, post, base } = await app(t);
+  const a = await session(),
+    b = await session();
+  const input = {
+    name: "Science Explorer",
+    bio: "Testing predictions",
+    avatar: 4,
+  };
+  assert.equal((await post("profile", "", input)).status, 401);
+  assert.equal((await post("profile", a.cookie, input)).status, 200);
+  assert.equal((await session(a.cookie)).state.player.name, input.name);
+  assert.notEqual((await session(b.cookie)).state.player.name, input.name);
+  assert.equal((await post("profile", b.cookie, input)).status, 400);
+  for (const asset of [
+    "/",
+    "/bitcoin.html",
+    "/profile.html",
+    "/guest.js",
+    "/catalog.js",
+    "/home.js",
+    "/profile.js",
+  ])
+    assert.equal((await fetch(base + asset)).status, 200);
+});
+
 test("only public assets are served; bot identity and saved market state stay private", async (t) => {
   const { session, base } = await app(t);
   for (const pathname of [

@@ -79,16 +79,72 @@
       if (!/^[a-zA-Z0-9_-]{8,80}$/.test(id))
         throw new Error("Invalid guest session.");
       if (!Object.hasOwn(this.state.players, id)) {
+        let guestNumber =
+          Object.values(this.state.players).filter((p) => !p.bot).length + 1;
+        while (
+          Object.values(this.state.players).some(
+            (p) => p.name.toLowerCase() === `guest ${guestNumber}`,
+          )
+        )
+          guestNumber++;
         this.state.players[id] = {
           id,
-          name: `Guest ${Object.values(this.state.players).filter((p) => !p.bot).length + 1}`,
+          name: `Guest ${guestNumber}`,
           balance: 1000,
           positions: { up: emptyPosition(), down: emptyPosition() },
           history: [],
           realized: 0,
+          joinedAt: this.clock(),
         };
       }
       return this.state.players[id];
+    }
+
+    updateProfile(id, input) {
+      const player = this.player(id);
+      const name = typeof input.name === "string" ? input.name.trim() : "";
+      const bio = typeof input.bio === "string" ? input.bio.trim() : "";
+      if (!/^[a-zA-Z0-9][a-zA-Z0-9_. -]{2,23}$/.test(name))
+        throw new Error(
+          "Use 3–24 letters, numbers, spaces, dots, underscores, or hyphens.",
+        );
+      if (bio.length > 200) throw new Error("Keep your bio to 200 characters.");
+      if (
+        !Number.isInteger(input.avatar) ||
+        input.avatar < 0 ||
+        input.avatar > 7
+      )
+        throw new Error("Choose one of the profile pictures.");
+      if (
+        Object.values(this.state.players).some(
+          (p) => p.id !== id && p.name.toLowerCase() === name.toLowerCase(),
+        )
+      )
+        throw new Error("That username is already taken. Try another.");
+      player.name = name;
+      player.bio = bio;
+      player.avatar = input.avatar;
+    }
+
+    recordActivity(player, entry) {
+      if (player.bot) return;
+      player.activity ||= [];
+      player.activity.unshift({
+        id: this.id("activity"),
+        time: this.clock(),
+        roundId: this.state.round.id,
+        ...entry,
+      });
+      player.activity = player.activity.slice(0, 500);
+      if (entry.type === "buy" || entry.type === "sell") {
+        player.totalVolume = round((player.totalVolume || 0) + entry.total);
+        if (player.lastTradedRound !== this.state.round.id) {
+          player.marketsTraded = (player.marketsTraded || 0) + 1;
+          player.lastTradedRound = this.state.round.id;
+        }
+      }
+      if (entry.profit > (player.biggestWin || 0))
+        player.biggestWin = entry.profit;
     }
 
     player(id) {
@@ -218,6 +274,7 @@
       p.cost = round(Math.max(0, p.cost - basis));
       player.balance = round(player.balance + proceeds);
       player.realized = round(player.realized + proceeds - basis);
+      return round(proceeds - basis);
     }
 
     recordTrade(side, action, quantity, price, actor, source, bot = false) {
@@ -241,6 +298,7 @@
     fill(order, offer, quantity) {
       const player = this.player(order.playerId);
       const total = round(quantity * offer.price);
+      let profit;
       if (order.action === "buy") {
         this.creditShares(player, order.side, quantity, total);
         if (order.type === "limit")
@@ -248,14 +306,31 @@
             player.balance + quantity * (order.price - offer.price),
           );
         else order.budget = round(order.budget - total);
-      } else this.sellShares(player, order.side, quantity, total);
+      } else profit = this.sellShares(player, order.side, quantity, total);
+      this.recordActivity(player, {
+        type: order.action,
+        side: order.side,
+        shares: quantity,
+        price: offer.price,
+        total,
+        profit,
+      });
 
       if (offer.order) {
         const maker = offer.order;
         const other = this.player(maker.playerId);
+        let makerProfit;
         if (maker.action === "sell")
-          this.sellShares(other, order.side, quantity, total);
+          makerProfit = this.sellShares(other, order.side, quantity, total);
         else this.creditShares(other, order.side, quantity, total);
+        this.recordActivity(other, {
+          type: maker.action,
+          side: order.side,
+          shares: quantity,
+          price: offer.price,
+          total,
+          profit: makerProfit,
+        });
         maker.remaining = round(maker.remaining - quantity);
         maker.filled = round(maker.filled + quantity);
         maker.total = round(maker.total + total);
@@ -434,6 +509,14 @@
             profit: round(payout - cost),
           });
           player.history = player.history.slice(0, 100);
+          this.recordActivity(player, {
+            type: "settlement",
+            side: outcome,
+            shares: player.positions[outcome].shares,
+            total: round(payout),
+            profit: round(payout - cost),
+            time: r.end,
+          });
         }
         player.positions = { up: emptyPosition(), down: emptyPosition() };
       }
@@ -541,6 +624,13 @@
       player.positions = { up: emptyPosition(), down: emptyPosition() };
       player.history = [];
       player.realized = 0;
+      player.activity = [];
+      player.equityHistory = [];
+      player.totalVolume = 0;
+      player.biggestWin = 0;
+      player.marketsTraded = 0;
+      player.lastTradedRound = null;
+      player.trackingSince = this.clock();
     }
 
     snapshot(id) {
@@ -566,6 +656,27 @@
           available: this.availableShares(id, side),
           mark: this.quotes(side, now).bid,
         };
+      const reserved = round(
+        orders
+          .filter((o) => o.action === "buy")
+          .reduce((n, o) => n + o.price * o.remaining, 0),
+      );
+      const equity = round(
+        player.balance +
+          reserved +
+          positions.up.shares * positions.up.mark +
+          positions.down.shares * positions.down.mark,
+      );
+      player.trackingSince ||= now;
+      player.equityHistory ||= [];
+      const lastPoint = player.equityHistory.at(-1);
+      if (!lastPoint || now - lastPoint.time >= 60000) {
+        player.equityHistory.push({ time: now, value: round(equity - 1000) });
+        if (player.equityHistory.length > 2000)
+          player.equityHistory = player.equityHistory.filter(
+            (_, i, points) => i >= points.length - 500 || i % 2 === 0,
+          );
+      }
       return {
         now,
         round: {
@@ -608,6 +719,16 @@
         ),
         player: {
           name: player.name,
+          bio: player.bio || "",
+          avatar: player.avatar || 0,
+          joinedAt: player.joinedAt || player.trackingSince,
+          activity: player.activity || [],
+          equityHistory: player.equityHistory,
+          trackingSince: player.trackingSince,
+          totalVolume: player.totalVolume || 0,
+          biggestWin: player.biggestWin || 0,
+          marketsTraded: player.marketsTraded || 0,
+          equity,
           balance: player.balance,
           reserved: round(
             orders

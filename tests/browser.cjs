@@ -17,7 +17,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
     });
     const page = await context.newPage();
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.goto(base);
+    await page.goto(`${base.replace(/\/$/, "")}/bitcoin.html`);
     await page.waitForFunction(() =>
       document
         .getElementById("connection-text")
@@ -29,6 +29,21 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
     );
     await page.locator("#trade-amount").fill("25");
     await page.locator("#submit-trade").click();
+    await page.locator("#confirm-trade").waitFor();
+    assert.equal(
+      await page.locator("#header-balance").textContent(),
+      "1,000.00",
+    );
+    await page.locator("#cancel-trade").click();
+    assert.equal(
+      await page.locator("#header-balance").textContent(),
+      "1,000.00",
+    );
+    console.log(
+      "PASS confirmation opens without spending; cancel preserves balance",
+    );
+    await page.locator("#submit-trade").click();
+    await page.locator("#confirm-trade").click();
     await page.locator(".position-row").first().waitFor();
     assert.ok(
       Number(
@@ -42,6 +57,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
 
     await page.locator('[data-sell="up"]').click();
     await page.locator("#submit-trade").click();
+    await page.locator("#confirm-trade").click();
     await page.waitForFunction(() => !document.querySelector(".position-row"));
     console.log("PASS sell position");
 
@@ -49,6 +65,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
     await page.locator('[data-side="down"]').click();
     await page.locator("#trade-amount").fill("10");
     await page.locator("#submit-trade").click();
+    await page.locator("#confirm-trade").click();
     await page.locator('[data-sell="down"]').waitFor();
     console.log("PASS Down outcome trading");
 
@@ -56,6 +73,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
     await page.locator("#limit-price").fill("1");
     await page.locator("#trade-amount").fill("30");
     await page.locator("#submit-trade").click();
+    await page.locator("#confirm-trade").click();
     await page.locator("[data-cancel]").first().waitFor();
     await page.locator("[data-cancel]").first().click();
     await page.waitForFunction(() => !document.querySelector("[data-cancel]"));
@@ -129,7 +147,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
 
     const second = await browser.newContext();
     const other = await second.newPage();
-    await other.goto(base);
+    await other.goto(`${base.replace(/\/$/, "")}/bitcoin.html`);
     await other.waitForFunction(() =>
       document
         .getElementById("connection-text")
@@ -155,7 +173,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
       local.on("pageerror", (error) => errors.push(error.message));
       await local.clock.install();
       await local.goto(
-        pathToFileURL(path.resolve(__dirname, "../index.html")).href,
+        pathToFileURL(path.resolve(__dirname, "../bitcoin.html")).href,
       );
       await local.waitForFunction(() =>
         document
@@ -164,6 +182,7 @@ const base = process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000";
       );
       await local.locator("#trade-amount").fill("10");
       await local.locator("#submit-trade").click();
+      await local.locator("#confirm-trade").click();
       await local.locator(".position-row").waitFor();
       const before = await local.evaluate(() => {
         const state = JSON.parse(

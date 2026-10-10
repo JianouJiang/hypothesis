@@ -1,13 +1,17 @@
 # Polymarket Physics
 
-A Polymarket-inspired, five-minute Bitcoin prediction playground. Every guest starts with **1,000 gold coins**. The Bitcoin price, trading capital, and bot liquidity are simulated. No signup or real money.
+A Polymarket-inspired science prediction playground. Browse upcoming experiments, customize your guest profile, and play the live five-minute Bitcoin market under **Maths & Statistics**. Every guest starts with **1,000 gold coins**. No signup or real money.
 
 **Play:** [GitHub Pages](https://jianoujiang.github.io/polymarket_physics/) · [Shared live market](https://polymarket-physics.jianou-works.chatgpt.site)
 
 ## What works
 
+- A Polymarket-style home page with featured experiments, subject navigation, search, topic/status filters, and a saved watchlist.
+- Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. The 19 science experiments are **coming-soon previews**, with illustrative odds and proposed rules; Bitcoin is the playable market.
+- A personal profile with an editable username, bio, and avatar; live positions, closed positions, activity, and a gold-denominated profit/loss chart.
 - An animated BTC/USD chart, opening price to beat, and five-minute countdown.
 - Buy **Up** or **Down** with gold, and sell shares before the round closes.
+- A review window before every market or limit order. Nothing is spent until **Confirm**; canceling or dismissing leaves the wallet unchanged. Confirmations expire when their round ends. Market execution uses prices available when confirmed.
 - Market orders, resting limit orders, partial fills, cancellation, and price improvement.
 - A live order book with real guest-to-guest matching and labeled bot traders.
 - Automatic settlement: the final simulated price at or above the opening price pays Up; otherwise Down. Winning shares pay **1 gold each**; losing shares pay zero. Unfilled orders expire and release reserved funds/shares.
@@ -33,13 +37,23 @@ HOST=0.0.0.0 PORT=3000 npm start
 
 Open `http://<your-computer-LAN-IP>:3000` on another device.
 
-You can also open **index.html directly** for a standalone practice market. That mode stores its wallet and market in your browser; it does not connect to other visitors. The interface identifies practice mode explicitly.
+You can also open **index.html directly** to browse the home page, **bitcoin.html** to play, or **profile.html** to edit your profile. Standalone mode stores the guest and market in your browser; it does not connect to other visitors. The interface identifies practice mode explicitly.
+
+## Guest profiles
+
+The profile uses the same guest account as the home page and live game. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
+
+Positions Value marks held shares at the current sell quotes. Total PnL is cash plus reserved gold plus marked positions, minus the initial 1,000 gold. The chart shows recorded portfolio observations and the current value, with time filters; it never invents historical results. Biggest Win is the largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct five-minute rounds with fills. Volume counts the guest's actual fills, including fills of their resting orders.
+
+The latest 500 activity events and 100 settled rounds are retained; chart observations are sampled once per minute and older observations are thinned as the archive grows. Detailed profile tracking begins with this update. Resetting the practice wallet resets trading statistics while keeping the username, avatar, and bio.
+
+Guest access is remembered in this browser. Clearing browser storage, changing browser profiles, or switching between the GitHub Pages and hosted site addresses creates a separate guest identity; the two online sites still share the same live market. There is no account recovery or login yet.
 
 ## Online architecture
 
 GitHub Pages serves the plain HTML, CSS, and JavaScript. `deployment.json` points the Pages app at the shared public server. The hosted app in `hosting/` runs the same market engine on a Cloudflare Worker with D1 storage through Sites. Both URLs connect to the same market.
 
-The online server creates anonymous guest sessions and stores balances, orders, and settlement centrally. Browsers poll once per second. A revision check commits the full market update atomically; a conflicting update is re-read and validated before committing, preventing concurrent trades from double-spending the same gold. Future price points and guest secrets are never returned to browsers.
+The online server creates anonymous guest sessions and stores profiles, balances, orders, and settlement centrally. The game polls once per second; discovery and profiles poll every three seconds. A revision check commits the full market update atomically; a conflicting update is re-read and validated before committing, preventing concurrent trades from double-spending the same gold. Future price points and guest secrets are never returned to browsers.
 
 Local Node hosting uses server-sent events instead of polling. When GitHub Pages cannot reach the shared server at startup, it clearly switches to an independent browser practice market. It never merges practice gold into the shared market.
 
@@ -67,6 +81,8 @@ npm test                 # Engine, settlement, matching, and HTTP checks
 node scripts/sync-hosting.js
 ```
 
+Optional browser checks (install Playwright separately and make it available with `NODE_PATH`): `node tests/browser.cjs` verifies trading, and `node tests/site-browser.cjs` verifies discovery, profiles, confirmations, offline mode, and mobile layouts. `PHYSICS_TEST_URL` selects a different preview server; `PHYSICS_SKIP_OFFLINE=1` skips file-mode checks.
+
 `market.js` is the source of truth for the engine. The synchronization script copies the static app and converts that engine into an ES module for the hosted build. Do not edit `hosting/lib/engine.js` or the copied assets directly.
 
 The hosted build uses the supplied Sites/Vinext starter and its lockfile. Hosting dependencies are separate from the zero-dependency local app. `hosting/db/schema.ts` defines the database, with generated migrations in `hosting/drizzle/`.
@@ -75,4 +91,4 @@ The GitHub Actions workflow tests the engine and uploads **only the public web a
 
 ## Credits
 
-The visual reference is [Polymarket's Bitcoin Up or Down market](https://polymarket.com/event/btc-updown-5m-1790982300). This project is an independent simulation and is not affiliated with Polymarket. It uses its own simplified simulated-price settlement rule.
+Visual references: [Polymarket home](https://polymarket.com), [public profiles](https://polymarket.com/@ImJustKen), and [Bitcoin Up or Down](https://polymarket.com/event/btc-updown-5m-1790982300). Scientific concept illustrations and avatar artwork are original SVGs. This project is an independent simulation and is not affiliated with Polymarket. It uses its own simplified simulated-price settlement rule.

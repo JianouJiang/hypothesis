@@ -12,6 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
     <script src="market.js" defer></script>
+    <script src="guest.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -69,7 +70,7 @@
     <a class="skip-link" href="#main">Skip to market</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="./" aria-label="Polymarket Physics home"
+        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
           ><svg viewBox="0 0 38 38" aria-hidden="true">
             <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
           ><span>Polymarket</span><span class="physics-tag">physics</span></a
@@ -79,25 +80,25 @@
           ><span>Search markets</span><kbd>/</kbd>
         </button>
         <div class="header-actions">
-          <button class="portfolio-link" data-open="portfolio">Portfolio</button
+          <a class="portfolio-link" href="profile.html">Portfolio</a
           ><button class="wallet-button" data-open="wallet">
             <span class="coin">G</span><span id="header-balance">1,000.00</span
             ><span class="wallet-word">Gold</span></button
-          ><button
+          ><a
             class="avatar"
-            data-open="wallet"
+            href="profile.html"
             aria-label="Your guest account"
           >
             G<span></span>
-          </button>
+          </a>
         </div>
       </div>
       <nav class="nav-inner" aria-label="Market navigation">
-        <a class="nav-item" href="#market"
-          ><svg class="icon"><use href="#i-spark" /></svg>Live markets</a
+        <a class="nav-item" href="index.html"
+          ><svg class="icon"><use href="#i-spark" /></svg>All markets</a
         >
         <a class="nav-item selected" href="#market"
-          >Crypto <span class="nav-dot"></span
+          >Maths &amp; Statistics <span class="nav-dot"></span
         ></a>
         <button class="nav-item" data-panel="positions">My positions</button
         ><button class="nav-item" data-panel="history">History</button
@@ -121,7 +122,7 @@
         <button data-open="how">Learn to trade <span>↗</span></button>
       </div>
       <div class="breadcrumb">
-        <a href="#market">Crypto</a
+        <a href="index.html?subject=maths">Maths &amp; Statistics</a
         ><svg class="icon"><use href="#i-chevron" /></svg><span>Bitcoin</span
         ><svg class="icon"><use href="#i-chevron" /></svg
         ><span>5 minute markets</span>
@@ -478,7 +479,8 @@
         </aside>
       </div>
       <footer class="site-footer">
-        <a class="footer-brand" href="./">Polymarket <span>physics</span></a
+        <a class="footer-brand" href="index.html"
+          >Polymarket <span>physics</span></a
         ><span>Built for curiosity. Powered by play money.</span
         ><button data-open="how">How it works</button
         ><a
@@ -496,7 +498,7 @@
       aria-live="polite"
       aria-atomic="false"
     ></div>
-    <dialog id="info-dialog">
+    <dialog id="info-dialog" aria-labelledby="dialog-title">
       <div class="dialog-header">
         <h2 id="dialog-title"></h2>
         <button class="icon-button" id="close-dialog" aria-label="Close dialog">

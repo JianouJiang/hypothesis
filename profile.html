@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Your science prediction profile. Track positions, activity, and profit in free gold."
+    />
+    <title>Your profile · Polymarket Physics</title>
+    <link rel="icon" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="profile.css" />
+    <script src="market.js" defer></script>
+    <script src="catalog.js" defer></script>
+    <script src="guest.js" defer></script>
+    <script src="profile.js" defer></script>
+  </head>
+  <body class="home-page profile-page">
+    <svg class="svg-defs" aria-hidden="true">
+      <defs>
+        <symbol id="i-search" viewBox="0 0 24 24">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24">
+          <path d="m9 5 7 7-7 7" />
+        </symbol>
+        <symbol id="i-info" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v6m0-10h.01" />
+        </symbol>
+        <symbol id="i-bookmark" viewBox="0 0 24 24">
+          <path d="M6 4h12v17l-6-4-6 4z" />
+        </symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 6v6l4 2" />
+        </symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24">
+          <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
+        </symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24">
+          <path d="m3 17 6-6 4 4 8-10m-6 0h6v6" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24">
+          <path d="m6 6 12 12M6 18 18 6" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+        <symbol id="i-filter" viewBox="0 0 24 24">
+          <path d="M3 7h9m4 0h5M3 17h3m4 0h11" />
+          <circle cx="14" cy="7" r="2" />
+          <circle cx="8" cy="17" r="2" />
+        </symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24">
+          <path d="M4 8h16M4 16h16" />
+        </symbol>
+        <symbol id="i-flask" viewBox="0 0 24 24">
+          <path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M5 12h14m-5-5 5 5-5 5" />
+        </symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24">
+          <rect x="4" y="4" width="6" height="6" rx="1" />
+          <rect x="14" y="4" width="6" height="6" rx="1" />
+          <rect x="4" y="14" width="6" height="6" rx="1" />
+          <rect x="14" y="14" width="6" height="6" rx="1" />
+        </symbol>
+      </defs>
+    </svg>
+    <a class="skip-link" href="#profile-main">Skip to your profile</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
+          ><svg viewBox="0 0 38 38" aria-hidden="true">
+            <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
+          ><span>Polymarket</span><span class="physics-tag">physics</span></a
+        >
+        <form class="home-search" role="search" id="home-search-form">
+          <svg class="icon"><use href="#i-search" /></svg
+          ><input
+            id="home-search"
+            type="search"
+            placeholder="Search science markets…"
+            aria-label="Search science markets"
+            autocomplete="off"
+          /><kbd>/</kbd>
+        </form>
+        <div class="header-actions">
+          <button class="home-help" data-dialog="how">
+            <svg class="icon"><use href="#i-info" /></svg>How it works</button
+          ><a class="portfolio-link" href="profile.html">Portfolio</a
+          ><button class="wallet-button" data-dialog="wallet">
+            <span class="coin">G</span><span id="home-balance">1,000.00</span
+            ><span class="wallet-word">Gold</span></button
+          ><a
+            class="guest-avatar header-profile"
+            href="profile.html"
+            data-guest-avatar
+            aria-label="Your profile"
+          ></a
+          ><button
+            class="icon-button home-menu-toggle"
+            id="home-menu-toggle"
+            aria-label="Open account menu"
+            aria-expanded="false"
+            aria-controls="home-menu"
+          >
+            <svg class="icon"><use href="#i-menu" /></svg>
+          </button>
+        </div>
+        <div class="account-menu" id="home-menu" hidden>
+          <button data-dialog="wallet">Your gold wallet</button
+          ><a href="profile.html">Your profile &amp; portfolio</a
+          ><button data-dialog="how">How it works</button
+          ><a
+            href="https://github.com/JianouJiang/polymarket_physics"
+            target="_blank"
+            rel="noopener"
+            >View on GitHub ↗</a
+          >
+        </div>
+      </div>
+      <div class="subject-nav-wrap">
+        <nav
+          class="subject-nav"
+          aria-label="Science subjects"
+          id="profile-subject-nav"
+        ></nav>
+        <span class="nav-fade" aria-hidden="true">›</span>
+      </div>
+    </header>
+    <main class="profile-container" id="profile-main">
+      <div class="profile-top-nav">
+        <span class="active">Predictions</span
+        ><a href="index.html?watchlist=1">Watchlist</a
+        ><span class="profile-guest-label"
+          ><span class="coin">G</span>Play gold account</span
+        >
+      </div>
+      <div class="profile-overview">
+        <section class="identity-card" aria-label="Profile overview">
+          <div class="profile-identity">
+            <div class="profile-picture" id="profile-picture"></div>
+            <div class="profile-name-block">
+              <h1 id="profile-name">Your profile</h1>
+              <p id="profile-joined">Connecting to your account…</p>
+            </div>
+            <button
+              id="edit-profile"
+              class="edit-profile"
+              aria-label="Edit your profile"
+              disabled
+            >
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15v5Z"
+                /></svg
+              ><span>Edit profile</span>
+            </button>
+          </div>
+          <p class="profile-bio" id="profile-bio" hidden></p>
+          <div class="profile-stats">
+            <div>
+              <strong id="profile-position-value">0.00 G</strong
+              ><span>Positions Value</span>
+            </div>
+            <div>
+              <strong id="profile-biggest-win">0.00 G</strong
+              ><span>Biggest Win</span>
+            </div>
+            <div>
+              <strong id="profile-predictions">0</strong
+              ><span>Markets Traded</span>
+            </div>
+          </div>
+          <div class="profile-totals">
+            <div>
+              <span>Total PnL</span
+              ><strong id="profile-total-pnl">0.00 G</strong>
+            </div>
+            <div>
+              <span>Total Volume</span
+              ><strong id="profile-volume">0.00 G</strong>
+            </div>
+            <div>
+              <span>Available gold</span
+              ><strong id="profile-gold">1,000.00 G</strong>
+            </div>
+          </div>
+        </section>
+        <section class="profit-card" aria-label="Profit and loss">
+          <div class="profit-card-heading">
+            <h2><span id="pnl-indicator">▴</span> Profit/Loss</h2>
+            <div class="chart-periods" aria-label="Chart time range">
+              <button data-period="1D" aria-pressed="false">1D</button
+              ><button data-period="1W" aria-pressed="false">1W</button
+              ><button data-period="1M" aria-pressed="false">1M</button
+              ><button data-period="1Y" aria-pressed="false">1Y</button
+              ><button data-period="YTD" aria-pressed="false">YTD</button
+              ><button data-period="ALL" aria-pressed="true">ALL</button>
+            </div>
+          </div>
+          <div class="pnl-amount-row">
+            <strong id="profile-period-pnl">0.00 <span>G</span></strong
+            ><span class="profile-chart-brand"
+              >Polymarket <small>physics</small></span
+            >
+          </div>
+          <p class="pnl-period-caption" id="pnl-period-caption">All time</p>
+          <div class="profile-chart-wrap">
+            <svg
+              id="profile-chart"
+              viewBox="0 0 440 130"
+              preserveAspectRatio="none"
+              role="img"
+              aria-label="Profit and loss history in gold"
+            ></svg>
+            <div
+              class="profile-chart-tooltip"
+              id="profile-chart-tooltip"
+              hidden
+            ></div>
+          </div>
+          <div class="profile-chart-caption">
+            <span id="chart-start-label">Your first prediction starts here</span
+            ><span id="chart-end-label">Now</span>
+          </div>
+        </section>
+      </div>
+      <section class="profile-market-section" aria-label="Your predictions">
+        <div class="profile-tabs" role="tablist" aria-label="Profile activity">
+          <button
+            role="tab"
+            id="positions-tab"
+            aria-selected="true"
+            aria-controls="profile-results"
+            data-tab="positions"
+          >
+            Positions</button
+          ><button
+            role="tab"
+            id="activity-tab"
+            aria-selected="false"
+            aria-controls="profile-results"
+            data-tab="activity"
+          >
+            Activity</button
+          ><span id="profile-updated">Live updates</span>
+        </div>
+        <div class="profile-filters">
+          <div
+            class="position-state"
+            id="position-state"
+            aria-label="Position status"
+          >
+            <button data-state="active" aria-pressed="true">Active</button
+            ><button data-state="closed" aria-pressed="false">Closed</button>
+          </div>
+          <select id="activity-type" aria-label="Activity type" hidden>
+            <option value="all">All activity</option>
+            <option value="buy">Buys</option>
+            <option value="sell">Sells</option>
+            <option value="settlement">Settlements</option></select
+          ><label class="profile-search"
+            ><svg class="icon"><use href="#i-search" /></svg
+            ><input
+              id="position-search"
+              type="search"
+              placeholder="Search positions"
+              aria-label="Search positions" /></label
+          ><select id="position-sort" aria-label="Sort positions">
+            <option value="value">Value</option>
+            <option value="profit">Profit/Loss</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+        <div
+          id="profile-results"
+          role="tabpanel"
+          aria-labelledby="positions-tab"
+        >
+          <div class="profile-empty">
+            <div class="empty-profile-icon">
+              <svg class="icon"><use href="#i-chart" /></svg>
+            </div>
+            <h2>Connecting to your portfolio…</h2>
+            <p>Your positions will appear here.</p>
+          </div>
+        </div>
+        <button class="profile-load-more" id="profile-load-more" hidden>
+          Show more activity
+        </button>
+        <p class="profile-history-note" id="profile-history-note" hidden></p>
+      </section>
+      <div class="profile-bottom-note">
+        <span
+          ><span class="coin">G</span>Same curiosity. Your own track
+          record.</span
+        >
+        <p>
+          No signup needed. This browser remembers your guest account. Gold has
+          no cash value.
+        </p>
+      </div>
+    </main>
+    <div class="profile-footer-container">
+      <footer class="home-footer">
+        <div class="home-footer-top">
+          <a class="footer-brand" href="index.html"
+            >Polymarket <span>physics</span></a
+          >
+          <p>Predict with science. Play with gold.</p>
+        </div>
+        <div class="home-footer-links">
+          <div>
+            <h3>Explore the science</h3>
+            <a href="index.html?subject=fluid">Fluid Dynamics</a
+            ><a href="index.html?subject=solid">Solid Mechanics</a
+            ><a href="index.html?subject=thermo">Thermodynamics</a
+            ><a href="index.html?subject=electro">Electromagnetism</a>
+          </div>
+          <div>
+            <h3>Keep exploring</h3>
+            <a href="index.html?subject=optics">Optics</a
+            ><a href="index.html?subject=quantum">Quantum Physics</a
+            ><a href="index.html?subject=astro">Astrophysics</a
+            ><a href="index.html?subject=maths">Maths &amp; Statistics</a>
+          </div>
+          <div>
+            <h3>The playground</h3>
+            <a href="bitcoin.html">Play Bitcoin Up or Down ↗</a
+            ><button data-dialog="how">How it works</button
+            ><a href="index.html?watchlist=1">Your watchlist</a
+            ><a
+              href="https://github.com/JianouJiang/polymarket_physics"
+              target="_blank"
+              rel="noopener"
+              >GitHub ↗</a
+            >
+          </div>
+          <div class="footer-about">
+            <h3>A little curiosity. A lot of possibilities.</h3>
+            <p>
+              An independent science prediction playground inspired by
+              Polymarket. Simulated markets, free gold, and experiments worth
+              watching.
+            </p>
+            <span>Play money only · No cash value</span>
+          </div>
+        </div>
+        <div class="home-footer-bottom">
+          <span>© 2026 Polymarket Physics</span
+          ><span id="profile-connection">Connecting to your guest account…</span
+          ><button data-dialog="about">About this project</button>
+        </div>
+      </footer>
+    </div>
+    <dialog id="edit-profile-dialog" aria-labelledby="edit-profile-title">
+      <div class="dialog-header">
+        <h2 id="edit-profile-title">Edit profile</h2>
+        <button
+          class="icon-button"
+          id="close-profile-editor"
+          aria-label="Close profile editor"
+        >
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <form id="edit-profile-form">
+        <label class="profile-field-label">Profile picture</label>
+        <div
+          class="avatar-picker"
+          id="avatar-picker"
+          aria-label="Choose a profile picture"
+        ></div>
+        <label class="profile-field-label" for="username">Username</label
+        ><input
+          id="username"
+          class="profile-text-input"
+          maxlength="24"
+          minlength="3"
+          autocomplete="nickname"
+          required
+          aria-describedby="username-help"
+        />
+        <p class="profile-field-help" id="username-help">
+          3–24 characters. Letters, numbers, spaces, dots, underscores, and
+          hyphens.
+        </p>
+        <div class="bio-label">
+          <label class="profile-field-label" for="profile-bio-input">Bio</label
+          ><span id="bio-count">0/200</span>
+        </div>
+        <textarea
+          id="profile-bio-input"
+          class="profile-text-input"
+          maxlength="200"
+          rows="3"
+          placeholder="A little about you and what makes you curious…"
+        ></textarea>
+        <p class="profile-edit-note">
+          Your profile is saved with this guest account. No email or wallet
+          connection needed.
+        </p>
+        <p
+          class="profile-save-error"
+          id="profile-save-error"
+          role="alert"
+          hidden
+        ></p>
+        <div class="profile-edit-actions">
+          <button
+            type="button"
+            class="dialog-button secondary"
+            id="cancel-profile-edit"
+          >
+            Cancel</button
+          ><button type="submit" class="dialog-button" id="save-profile">
+            Save changes
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="home-dialog" aria-labelledby="home-dialog-title">
+      <div class="dialog-header">
+        <h2 id="home-dialog-title"></h2>
+        <button
+          class="icon-button"
+          id="close-home-dialog"
+          aria-label="Close dialog"
+        >
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <div id="home-dialog-content"></div>
+    </dialog>
+    <div class="toast-container" id="profile-toasts" aria-live="polite"></div>
+    <noscript
+      ><div class="noscript-home">
+        Enable JavaScript to load your guest profile.
+      </div></noscript
+    >
+  </body>
+</html>

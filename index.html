@@ -6,33 +6,26 @@
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="Your five-minute Bitcoin prediction playground. Trade Up or Down with 1,000 free gold coins. Simulated prices, live orders, no signup."
+      content="A prediction playground for curious minds. Explore fluid dynamics, solid mechanics, thermodynamics, and more. Predict with science. Play with gold."
     />
-    <title>Bitcoin Up or Down · Polymarket Physics</title>
+    <title>Polymarket Physics · Predict what happens next</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
     <script src="market.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="catalog.js" defer></script>
+    <script src="guest.js" defer></script>
+    <script src="home.js" defer></script>
   </head>
-  <body>
+  <body class="home-page">
     <svg class="svg-defs" aria-hidden="true">
       <defs>
         <symbol id="i-search" viewBox="0 0 24 24">
           <circle cx="10.8" cy="10.8" r="6.8" />
           <path d="m16 16 4.5 4.5" />
         </symbol>
-        <symbol id="i-arrow" viewBox="0 0 24 24">
-          <path d="M12 19V5m-6 6 6-6 6 6" />
-        </symbol>
         <symbol id="i-chevron" viewBox="0 0 24 24">
           <path d="m9 5 7 7-7 7" />
-        </symbol>
-        <symbol id="i-wallet" viewBox="0 0 24 24">
-          <path
-            d="M20 8V5H5a2 2 0 0 1 0-4h13v4M5 5H3v15h17v-5M15 8h7v7h-7z"
-            transform="translate(0 1) scale(.94)"
-          />
-          <path d="M17.5 11.8h.01" />
         </symbol>
         <symbol id="i-info" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="9" />
@@ -40,9 +33,6 @@
         </symbol>
         <symbol id="i-bookmark" viewBox="0 0 24 24">
           <path d="M6 4h12v17l-6-4-6 4z" />
-        </symbol>
-        <symbol id="i-share" viewBox="0 0 24 24">
-          <path d="M12 16V3m-5 5 5-5 5 5M5 12v9h14v-9" />
         </symbol>
         <symbol id="i-clock" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="9" />
@@ -52,7 +42,7 @@
           <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
         </symbol>
         <symbol id="i-chart" viewBox="0 0 24 24">
-          <path d="M3 3v18h18M6 15l5-5 4 3 6-8" />
+          <path d="m3 17 6-6 4 4 8-10m-6 0h6v6" />
         </symbol>
         <symbol id="i-close" viewBox="0 0 24 24">
           <path d="m6 6 12 12M6 18 18 6" />
@@ -60,454 +50,314 @@
         <symbol id="i-check" viewBox="0 0 24 24">
           <path d="m5 12 4 4L19 6" />
         </symbol>
-        <symbol id="i-bot" viewBox="0 0 24 24">
-          <rect x="4" y="7" width="16" height="13" rx="4" />
-          <path d="M12 3v4M8 12h.01M16 12h.01M9 16h6M1 11v5m22-5v5" />
+        <symbol id="i-filter" viewBox="0 0 24 24">
+          <path d="M3 7h9m4 0h5M3 17h3m4 0h11" />
+          <circle cx="14" cy="7" r="2" />
+          <circle cx="8" cy="17" r="2" />
+        </symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24">
+          <path d="M4 8h16M4 16h16" />
+        </symbol>
+        <symbol id="i-flask" viewBox="0 0 24 24">
+          <path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M5 12h14m-5-5 5 5-5 5" />
+        </symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24">
+          <rect x="4" y="4" width="6" height="6" rx="1" />
+          <rect x="14" y="4" width="6" height="6" rx="1" />
+          <rect x="4" y="14" width="6" height="6" rx="1" />
+          <rect x="14" y="14" width="6" height="6" rx="1" />
         </symbol>
       </defs>
     </svg>
-    <a class="skip-link" href="#main">Skip to market</a>
+    <a class="skip-link" href="#all-markets">Skip to markets</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="./" aria-label="Polymarket Physics home"
+        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
           ><svg viewBox="0 0 38 38" aria-hidden="true">
             <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
           ><span>Polymarket</span><span class="physics-tag">physics</span></a
         >
-        <button class="search-trigger" id="search-trigger">
+        <form class="home-search" role="search" id="home-search-form">
           <svg class="icon"><use href="#i-search" /></svg
-          ><span>Search markets</span><kbd>/</kbd>
-        </button>
+          ><input
+            id="home-search"
+            type="search"
+            placeholder="Search science markets…"
+            aria-label="Search science markets"
+            autocomplete="off"
+          /><kbd>/</kbd>
+        </form>
         <div class="header-actions">
-          <button class="portfolio-link" data-open="portfolio">Portfolio</button
-          ><button class="wallet-button" data-open="wallet">
-            <span class="coin">G</span><span id="header-balance">1,000.00</span
+          <button class="home-help" data-dialog="how">
+            <svg class="icon"><use href="#i-info" /></svg>How it works</button
+          ><a class="portfolio-link" href="profile.html">Portfolio</a
+          ><button class="wallet-button" data-dialog="wallet">
+            <span class="coin">G</span><span id="home-balance">1,000.00</span
             ><span class="wallet-word">Gold</span></button
+          ><a
+            class="guest-avatar header-profile"
+            href="profile.html"
+            data-guest-avatar
+            aria-label="Your profile"
+          ></a
           ><button
-            class="avatar"
-            data-open="wallet"
-            aria-label="Your guest account"
+            class="icon-button home-menu-toggle"
+            id="home-menu-toggle"
+            aria-label="Open account menu"
+            aria-expanded="false"
+            aria-controls="home-menu"
           >
-            G<span></span>
+            <svg class="icon"><use href="#i-menu" /></svg>
           </button>
         </div>
+        <div class="account-menu" id="home-menu" hidden>
+          <button data-dialog="wallet">Your gold wallet</button
+          ><a href="profile.html">Your profile &amp; portfolio</a
+          ><button data-dialog="how">How it works</button
+          ><a
+            href="https://github.com/JianouJiang/polymarket_physics"
+            target="_blank"
+            rel="noopener"
+            >View on GitHub ↗</a
+          >
+        </div>
       </div>
-      <nav class="nav-inner" aria-label="Market navigation">
-        <a class="nav-item" href="#market"
-          ><svg class="icon"><use href="#i-spark" /></svg>Live markets</a
-        >
-        <a class="nav-item selected" href="#market"
-          >Crypto <span class="nav-dot"></span
-        ></a>
-        <button class="nav-item" data-panel="positions">My positions</button
-        ><button class="nav-item" data-panel="history">History</button
-        ><button class="nav-item" data-open="how">How it works</button>
-        <span class="nav-spacer"></span
-        ><span class="play-money-badge"
-          ><span></span>Play money. Real-time markets.</span
-        >
-      </nav>
+      <div class="subject-nav-wrap">
+        <nav
+          class="subject-nav"
+          aria-label="Science subjects"
+          id="subject-nav"
+        ></nav>
+        <span class="nav-fade" aria-hidden="true">›</span>
+      </div>
     </header>
 
-    <main id="main" class="container">
-      <div class="welcome-strip">
-        <span class="welcome-icon"
-          ><svg class="icon"><use href="#i-spark" /></svg
-        ></span>
-        <p>
-          A little conviction goes a long way.
-          <strong>Start with 1,000 free gold.</strong>
-        </p>
-        <button data-open="how">Learn to trade <span>↗</span></button>
-      </div>
-      <div class="breadcrumb">
-        <a href="#market">Crypto</a
-        ><svg class="icon"><use href="#i-chevron" /></svg><span>Bitcoin</span
-        ><svg class="icon"><use href="#i-chevron" /></svg
-        ><span>5 minute markets</span>
-      </div>
-
-      <div class="market-layout" id="market">
-        <section class="market-main" aria-label="Bitcoin market">
-          <div class="market-heading">
-            <div class="bitcoin-logo">₿</div>
-            <div>
-              <div class="title-line">
-                <h1>Bitcoin Up or Down</h1>
-                <span class="interval-badge">5 min</span>
-              </div>
-              <p id="round-label">Loading the current round…</p>
-            </div>
-            <div class="heading-actions">
+    <main class="home-container" id="main">
+      <section
+        class="featured-layout"
+        aria-label="Featured science markets"
+        id="featured-layout"
+      >
+        <div class="feature-column">
+          <article
+            class="featured-market"
+            id="featured-market"
+            aria-label="Featured market preview"
+          ></article>
+          <div class="feature-controls">
+            <div
+              class="carousel-dots"
+              id="carousel-dots"
+              aria-label="Choose featured market"
+            ></div>
+            <div class="carousel-buttons">
               <button
-                class="icon-button"
-                id="bookmark"
-                aria-label="Add market to favorites"
-                aria-pressed="false"
+                id="previous-feature"
+                aria-label="Previous featured market"
               >
-                <svg class="icon"><use href="#i-bookmark" /></svg></button
-              ><button
-                class="icon-button"
-                id="share"
-                aria-label="Share this market"
-              >
-                <svg class="icon"><use href="#i-share" /></svg>
+                <svg class="icon"><use href="#i-chevron" /></svg
+                ><span id="previous-feature-name"
+                  >Magnetic pendulum</span
+                ></button
+              ><button id="next-feature" aria-label="Next featured market">
+                <span id="next-feature-name">Galton board</span
+                ><svg class="icon"><use href="#i-chevron" /></svg>
               </button>
             </div>
           </div>
-          <div class="chart-stats">
-            <div class="price-stat">
-              <span class="eyebrow"
-                >PRICE TO BEAT
-                <svg class="icon" aria-hidden="true">
-                  <use href="#i-info" /></svg></span
-              ><strong id="opening-price">$97,426.50</strong>
-            </div>
-            <div class="price-stat current-stat">
-              <span class="eyebrow"
-                >CURRENT PRICE <span class="live-dot"></span
-              ></span>
-              <div class="current-row">
-                <strong id="current-price">$97,426.50</strong
-                ><span id="price-difference" class="price-difference"
-                  >+$0.00</span
-                >
-              </div>
-            </div>
-            <div class="countdown">
-              <div class="countdown-digits">
-                <span id="countdown-min">05</span><b>:</b
-                ><span id="countdown-sec">00</span>
-              </div>
-              <span class="eyebrow" id="countdown-label">TIME REMAINING</span>
-            </div>
-          </div>
-          <div class="chart-wrap" id="chart-wrap">
-            <canvas
-              id="price-chart"
-              role="img"
-              aria-label="Live simulated Bitcoin price chart with the round opening price marked as the price to beat"
-            ></canvas>
-            <div class="chart-tooltip" id="chart-tooltip" hidden></div>
-            <div class="chart-watermark">Polymarket <span>physics</span></div>
-            <div class="chart-live-label">
-              <span class="live-dot"></span
-              ><span id="chart-mode">LIVE SIMULATION</span>
-            </div>
-          </div>
-          <div class="chart-footer">
-            <span
-              ><span class="status-dot"></span
-              ><span id="connection-text">Connecting to market</span></span
-            ><span
-              >Simulated BTC/USD <svg class="icon"><use href="#i-info" /></svg
-            ></span>
-          </div>
-          <div class="round-selector">
-            <button class="round-history" data-panel="history">
-              <svg class="icon"><use href="#i-clock" /></svg>Past
-            </button>
-            <div class="round-chips" id="round-chips"></div>
-            <button
-              class="icon-button"
-              id="return-live"
-              aria-label="Return to live round"
-            >
-              <svg class="icon"><use href="#i-chevron" /></svg>
-            </button>
-          </div>
-          <div class="market-meta">
-            <span
-              ><svg class="icon"><use href="#i-chart" /></svg
-              ><strong id="volume">0</strong> gold volume</span
-            ><span
-              ><svg class="icon"><use href="#i-clock" /></svg>Resolves every 5
-              minutes</span
-            ><span class="live-status"><span class="live-dot"></span>Live</span>
-          </div>
-
-          <section class="details-section" id="details">
-            <div class="detail-tabs" role="tablist" aria-label="Market details">
-              <button role="tab" aria-selected="true" data-panel="book">
-                Order book</button
-              ><button role="tab" aria-selected="false" data-panel="positions">
-                Positions
-                <span id="positions-count" class="tab-count">0</span></button
-              ><button role="tab" aria-selected="false" data-panel="activity">
-                Activity</button
-              ><button role="tab" aria-selected="false" data-panel="history">
-                History</button
-              ><button role="tab" aria-selected="false" data-panel="rules">
-                Rules
-              </button>
-            </div>
-            <div id="panel-book" class="detail-panel" role="tabpanel">
-              <div class="book-heading">
-                <div class="small-segment" aria-label="Order book outcome">
-                  <button data-book-side="up" class="active">Up</button
-                  ><button data-book-side="down">Down</button>
-                </div>
-                <span
-                  ><span class="live-dot"></span> Live orders
-                  <span class="muted">·</span>
-                  <button class="text-button" data-open="bots">
-                    Bot liquidity
-                    <svg class="icon"><use href="#i-info" /></svg></button
-                ></span>
-              </div>
-              <div class="order-book">
-                <div>
-                  <div class="book-label">
-                    <span>Bid (buy)</span><span>Shares</span
-                    ><span>Total <span class="gold-symbol">G</span></span>
-                  </div>
-                  <div id="book-bids"></div>
-                </div>
-                <div>
-                  <div class="book-label">
-                    <span>Ask (sell)</span><span>Shares</span
-                    ><span>Total <span class="gold-symbol">G</span></span>
-                  </div>
-                  <div id="book-asks"></div>
-                </div>
-              </div>
-              <div class="book-footer">
-                <span>Click a price to place a limit order</span
-                ><span>Spread <strong id="spread">2¢</strong></span>
-              </div>
-            </div>
-            <div
-              id="panel-positions"
-              class="detail-panel"
-              role="tabpanel"
-              hidden
-            ></div>
-            <div
-              id="panel-activity"
-              class="detail-panel"
-              role="tabpanel"
-              hidden
-            ></div>
-            <div
-              id="panel-history"
-              class="detail-panel"
-              role="tabpanel"
-              hidden
-            ></div>
-            <div id="panel-rules" class="detail-panel" role="tabpanel" hidden>
-              <h3>A five-minute forecast.</h3>
-              <p>
-                This market resolves to <strong class="up-text">Up</strong> if
-                the simulated Bitcoin price at the end of the round is greater
-                than or equal to its opening price. Otherwise, it resolves to
-                <strong class="down-text">Down</strong>. A tie resolves to Up.
-              </p>
-              <p>
-                Each winning share pays <strong>1 gold coin</strong>. Losing
-                shares pay zero. Payouts are automatic, and unfilled orders
-                expire with reserved gold and shares released at the end of the
-                round.
-              </p>
-              <p>
-                Prices, gold, and liquidity are simulated. This is an
-                independent Polymarket-inspired playground. Gold has no cash
-                value. There are no deposits, withdrawals, or trading fees.
-              </p>
-              <div class="rule-facts">
-                <div>
-                  <span>Market duration</span><strong>5 minutes</strong>
-                </div>
-                <div>
-                  <span>Resolution source</span
-                  ><strong>Simulated BTC/USD</strong>
-                </div>
-                <div>
-                  <span>Winning share payout</span><strong>1 gold</strong>
-                </div>
-              </div>
-            </div>
-          </section>
-          <div class="learning-card">
-            <div class="learning-art">
-              <svg class="icon"><use href="#i-chart" /></svg>
-            </div>
-            <div>
-              <h3>A view on Bitcoin? Put it to the test.</h3>
-              <p>
-                Pick a direction. Watch the market. Build your gold balance.
-              </p>
-            </div>
-            <button
-              class="icon-button"
-              data-open="how"
-              aria-label="Learn how to trade"
-            >
-              <svg class="icon"><use href="#i-chevron" /></svg>
-            </button>
-          </div>
-        </section>
-
-        <aside class="trade-sidebar" aria-label="Trade Bitcoin predictions">
-          <form class="trade-card" id="trade-form">
-            <div class="trade-top">
-              <div class="trade-tabs">
-                <button type="button" class="active" data-action="buy">
-                  Buy</button
-                ><button type="button" data-action="sell">Sell</button>
-              </div>
-              <label class="order-type-label"
-                ><select id="order-type" aria-label="Order type">
-                  <option value="market">Market</option>
-                  <option value="limit">Limit</option></select
-                ><svg class="icon"><use href="#i-chevron" /></svg
-              ></label>
-            </div>
-            <div class="outcome-buttons">
-              <button
-                type="button"
-                class="outcome up selected"
-                data-side="up"
-                aria-pressed="true"
-              >
-                <svg class="icon"><use href="#i-arrow" /></svg><span>Up</span
-                ><strong id="up-price">51¢</strong></button
-              ><button
-                type="button"
-                class="outcome down"
-                data-side="down"
-                aria-pressed="false"
-              >
-                <svg class="icon"><use href="#i-arrow" /></svg><span>Down</span
-                ><strong id="down-price">51¢</strong>
-              </button>
-            </div>
-            <div class="limit-price-field" id="limit-price-field" hidden>
-              <label for="limit-price">Limit price</label>
-              <div class="input-box">
-                <input
-                  id="limit-price"
-                  type="number"
-                  min="1"
-                  max="99"
-                  step="1"
-                  value="50"
-                  inputmode="numeric"
-                /><span>¢ per share</span>
-              </div>
-            </div>
-            <div class="amount-label">
-              <label for="trade-amount" id="amount-label">Amount</label
-              ><span id="available-balance">Balance: 1,000.00 gold</span>
-            </div>
-            <div class="amount-box">
-              <input
-                id="trade-amount"
-                type="number"
-                min="0"
-                step="any"
-                inputmode="decimal"
-                value="10"
-                placeholder="0"
-                autocomplete="off"
-              /><span id="amount-unit"><span class="coin">G</span> Gold</span>
-            </div>
-            <div class="quick-amounts">
-              <button type="button" data-amount="10">+10</button
-              ><button type="button" data-amount="50">+50</button
-              ><button type="button" data-amount="100">+100</button
-              ><button type="button" id="max-amount">Max</button>
-            </div>
-            <div class="order-summary">
-              <div>
-                <span id="estimate-label">Estimated shares</span
-                ><span id="estimate-shares">19.61</span>
-              </div>
-              <div>
-                <span>Average price</span><span id="average-price">51¢</span>
-              </div>
-              <div class="payout-row">
-                <span id="payout-label"
-                  >To win <svg class="icon"><use href="#i-info" /></svg></span
-                ><strong
-                  ><span class="coin small">G</span
-                  ><span id="payout-value">19.61</span></strong
-                >
-              </div>
-            </div>
-            <div class="trade-error" id="trade-error" role="alert" hidden></div>
-            <button class="submit-trade" id="submit-trade" type="submit">
-              Buy Up <svg class="icon"><use href="#i-arrow" /></svg>
-            </button>
-            <p class="trade-caption" id="trade-caption">
-              Win 1 gold per share if Bitcoin finishes up.
-            </p>
-            <div class="trade-card-footer">
-              <svg class="icon"><use href="#i-check" /></svg>No signup
-              <span>·</span> No real money <span>·</span> No fees
-            </div>
-          </form>
-          <div class="your-gold-card">
-            <div class="gold-icon"><span class="coin">G</span></div>
-            <div>
-              <span>Your gold balance</span
-              ><strong id="card-balance">1,000.00 <small>GOLD</small></strong>
-            </div>
-            <button
-              class="icon-button"
-              data-open="wallet"
-              aria-label="Manage your gold"
-            >
-              <svg class="icon"><use href="#i-chevron" /></svg>
-            </button>
-          </div>
-          <div class="why-card">
-            <span class="why-icon"
-              ><svg class="icon"><use href="#i-bot" /></svg
-            ></span>
-            <div>
-              <strong>The market never sits still.</strong>
-              <p>
-                Simulated traders keep the order book moving, even when you're
-                first here.
-              </p>
-              <button class="text-button" data-open="bots">
-                Meet the market makers <span>↗</span>
-              </button>
-            </div>
-          </div>
-        </aside>
-      </div>
-      <footer class="site-footer">
-        <a class="footer-brand" href="./">Polymarket <span>physics</span></a
-        ><span>Built for curiosity. Powered by play money.</span
-        ><button data-open="how">How it works</button
-        ><a
-          id="github-link"
-          href="https://github.com/JianouJiang/polymarket_physics"
-          target="_blank"
-          rel="noopener"
-          >GitHub ↗</a
+        </div>
+        <aside
+          class="discovery-sidebar"
+          aria-label="Explore Polymarket Physics"
         >
+          <div class="discovery-promo gold-promo">
+            <div>
+              <h2>Curiosity comes with 1,000 gold.</h2>
+              <p>No signup. Just a little conviction.</p>
+              <button data-dialog="how">How it works</button>
+            </div>
+            <div class="promo-coins" aria-hidden="true">
+              <span class="coin">G</span><span class="coin">G</span
+              ><span class="coin">G</span>
+            </div>
+          </div>
+          <div class="discovery-promo bitcoin-promo">
+            <div>
+              <h2>
+                <span class="mini-bitcoin" aria-hidden="true">₿</span>Bitcoin is
+                live
+              </h2>
+              <p>
+                Five minutes. Up or down.<br />Your first prediction starts
+                here.
+              </p>
+            </div>
+            <a href="bitcoin.html">Play now <span>↗</span></a>
+          </div>
+          <div class="hot-subjects">
+            <h2>
+              Explore subjects <svg class="icon"><use href="#i-chevron" /></svg>
+            </h2>
+            <div id="subject-ranking"></div>
+          </div>
+          <button class="explore-all" id="explore-all">
+            Explore all markets
+          </button>
+        </aside>
+      </section>
+
+      <section
+        class="markets-section"
+        id="all-markets"
+        aria-labelledby="markets-heading"
+      >
+        <div class="market-grid-heading">
+          <div>
+            <h1 id="markets-heading">All markets</h1>
+            <span id="market-result-count" aria-live="polite"></span>
+          </div>
+          <div class="market-grid-tools">
+            <button
+              class="icon-button"
+              id="focus-search"
+              aria-label="Search markets"
+            >
+              <svg class="icon"><use href="#i-search" /></svg></button
+            ><button
+              class="icon-button"
+              id="toggle-filters"
+              aria-label="Filter and sort markets"
+              aria-expanded="false"
+              aria-controls="filter-options"
+            >
+              <svg class="icon"><use href="#i-filter" /></svg></button
+            ><button
+              class="icon-button"
+              id="watchlist-filter"
+              aria-label="Show your watchlist"
+              aria-pressed="false"
+            >
+              <svg class="icon"><use href="#i-bookmark" /></svg
+              ><span id="watchlist-count" hidden>0</span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="market-topic-bar"
+          id="market-topic-bar"
+          aria-label="Filter market topics"
+        ></div>
+        <div class="filter-options" id="filter-options" hidden>
+          <label
+            >Status<select id="status-filter">
+              <option value="all">All markets</option>
+              <option value="live">Live now</option>
+              <option value="preview">Coming soon</option>
+            </select></label
+          ><label
+            >Sort by<select id="sort-filter">
+              <option value="featured">Featured</option>
+              <option value="title">Alphabetical</option>
+              <option value="subject">Subject</option>
+            </select></label
+          ><button class="text-button" id="reset-filters">Reset filters</button>
+        </div>
+        <div class="preview-note">
+          <span
+            ><svg class="icon"><use href="#i-flask" /></svg>A new kind of
+            prediction market.
+            <strong>Science games are coming soon.</strong></span
+          ><span class="preview-note-detail"
+            >Preview odds are illustrative.</span
+          >
+        </div>
+        <div class="market-grid" id="market-grid"></div>
+        <div class="home-empty" id="home-empty" hidden>
+          <svg class="icon"><use href="#i-search" /></svg>
+          <h2>No markets found</h2>
+          <p id="empty-message">Try another subject or a different search.</p>
+          <button id="clear-search">Show all markets</button>
+        </div>
+        <div class="load-more-wrap">
+          <button id="load-more">
+            Show more markets <svg class="icon"><use href="#i-chevron" /></svg>
+          </button>
+        </div>
+      </section>
+
+      <footer class="home-footer">
+        <div class="home-footer-top">
+          <a class="footer-brand" href="index.html"
+            >Polymarket <span>physics</span></a
+          >
+          <p>Predict with science. Play with gold.</p>
+        </div>
+        <div class="home-footer-links">
+          <div>
+            <h3>Explore the science</h3>
+            <a href="?subject=fluid">Fluid Dynamics</a
+            ><a href="?subject=solid">Solid Mechanics</a
+            ><a href="?subject=thermo">Thermodynamics</a
+            ><a href="?subject=electro">Electromagnetism</a>
+          </div>
+          <div>
+            <h3>Keep exploring</h3>
+            <a href="?subject=optics">Optics</a
+            ><a href="?subject=quantum">Quantum Physics</a
+            ><a href="?subject=astro">Astrophysics</a
+            ><a href="?subject=maths">Maths &amp; Statistics</a>
+          </div>
+          <div>
+            <h3>The playground</h3>
+            <a href="bitcoin.html">Play Bitcoin Up or Down ↗</a
+            ><button data-dialog="how">How it works</button
+            ><button data-watchlist-link>Your watchlist</button
+            ><a
+              href="https://github.com/JianouJiang/polymarket_physics"
+              target="_blank"
+              rel="noopener"
+              >GitHub ↗</a
+            >
+          </div>
+          <div class="footer-about">
+            <h3>A little curiosity. A lot of possibilities.</h3>
+            <p>
+              An independent science prediction playground inspired by
+              Polymarket. Simulated markets, free gold, and experiments worth
+              watching.
+            </p>
+            <span>Play money only · No cash value</span>
+          </div>
+        </div>
+        <div class="home-footer-bottom">
+          <span>© 2026 Polymarket Physics</span
+          ><span id="home-connection">Connecting to your guest wallet…</span
+          ><button data-dialog="about">About this project</button>
+        </div>
       </footer>
     </main>
-    <div
-      class="toast-container"
-      id="toasts"
-      aria-live="polite"
-      aria-atomic="false"
-    ></div>
-    <dialog id="info-dialog">
+    <dialog id="home-dialog" aria-labelledby="home-dialog-title">
       <div class="dialog-header">
-        <h2 id="dialog-title"></h2>
-        <button class="icon-button" id="close-dialog" aria-label="Close dialog">
+        <h2 id="home-dialog-title"></h2>
+        <button
+          class="icon-button"
+          id="close-home-dialog"
+          aria-label="Close dialog"
+        >
           <svg class="icon"><use href="#i-close" /></svg>
         </button>
       </div>
-      <div id="dialog-content"></div>
+      <div id="home-dialog-content"></div>
     </dialog>
+    <div class="toast-container" id="home-toasts" aria-live="polite"></div>
     <noscript
-      >This market needs JavaScript to simulate prices and place play-money
-      trades.</noscript
+      ><div class="noscript-home">
+        Enable JavaScript to browse the market previews.
+        <a href="bitcoin.html">Visit the Bitcoin market.</a>
+      </div></noscript
     >
   </body>
 </html>

@@ -8,6 +8,14 @@ fs.mkdirSync(path.join(hosting, "lib"), { recursive: true });
 fs.mkdirSync(path.join(hosting, "public"), { recursive: true });
 for (const name of [
   "index.html",
+  "bitcoin.html",
+  "profile.html",
+  "home.css",
+  "home.js",
+  "profile.css",
+  "profile.js",
+  "guest.js",
+  "catalog.js",
   "styles.css",
   "app.js",
   "market.js",
@@ -18,13 +26,19 @@ for (const name of [
 }
 fs.copyFileSync(
   path.join(root, "index.html"),
+  path.join(hosting, "lib", "home.html"),
+);
+fs.copyFileSync(
+  path.join(root, "bitcoin.html"),
   path.join(hosting, "lib", "market.html"),
 );
 const source = fs.readFileSync(path.join(root, "market.js"), "utf8");
 const bodyStart = source.search(/["']use strict["'];/);
 const bodyEnd = source.lastIndexOf("\n});");
 if (bodyStart < 0 || bodyEnd < bodyStart) {
-  throw new Error("Cannot locate the shared engine factory. Check market.js before publishing.");
+  throw new Error(
+    "Cannot locate the shared engine factory. Check market.js before publishing.",
+  );
 }
 const body = source.slice(bodyStart, bodyEnd);
 fs.writeFileSync(

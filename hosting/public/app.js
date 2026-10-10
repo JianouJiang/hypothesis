@@ -54,7 +54,10 @@
     busy = false,
     timeOffset = 0;
   let action = "buy",
-    side = "up",
+    side =
+      new URLSearchParams(location.search).get("side") === "down"
+        ? "down"
+        : "up",
     bookSide = "up",
     panel = "book",
     selectedRound = null;
@@ -70,6 +73,7 @@
     chartReceived = 0,
     hoverIndex = null;
   let localStateMemory = null;
+  let pendingTrade = null;
   const localKey = "polymarket-physics-market-v1";
 
   function toast(title, detail = "", error = false) {
@@ -144,6 +148,9 @@
         : data.round.price;
     chartReceived = performance.now();
     snapshot = data;
+    const avatarLink = document.querySelector(".avatar");
+    avatarLink.innerHTML = PhysicsGuest.avatar(data.player.avatar);
+    avatarLink.setAttribute("aria-label", `${data.player.name} · Your profile`);
     timeOffset = data.now - Date.now();
     lastUpdate = Date.now();
     connection = true;
@@ -362,6 +369,16 @@
     $("countdown-label").textContent = selectedRound
       ? "ROUND RESOLVED"
       : "TIME REMAINING";
+    if (
+      pendingTrade &&
+      !busy &&
+      (pendingTrade.roundId !== snapshot.round.id || remaining === 0)
+    ) {
+      $("confirm-error").textContent =
+        "This round has ended. Close this window and review the new round.";
+      $("confirm-error").hidden = false;
+      $("confirm-trade").disabled = true;
+    }
     document
       .querySelector(".countdown")
       .classList.toggle("urgent", !selectedRound && remaining <= 30);
@@ -504,7 +521,7 @@
       });
   }
 
-  async function submitTrade(event) {
+  function submitTrade(event) {
     event.preventDefault();
     if (!snapshot || busy || !connection || selectedRound) return;
     const type = $("order-type").value;
@@ -514,27 +531,94 @@
       $("trade-error").hidden = false;
       return;
     }
-    busy = true;
+    const request = {
+      side,
+      action,
+      type,
+      amount,
+      quantity: PhysicsMarket.floorShares(amount),
+      price: Number($("limit-price").value) / 100,
+      roundId: snapshot.round.id,
+    };
+    const reserve =
+      action === "buy"
+        ? type === "market"
+          ? amount
+          : request.quantity * request.price
+        : 0;
+    let error;
+    if (
+      type === "limit" &&
+      (!Number.isFinite(request.price) ||
+        request.price < 0.01 ||
+        request.price > 0.99 ||
+        Math.abs(request.price * 100 - Math.round(request.price * 100)) > 1e-7)
+    )
+      error = "Limit price must be 1–99 cents.";
+    else if (type === "market" && action === "buy" && amount < 0.01)
+      error = "Enter at least 0.01 gold.";
+    else if (
+      amount > 1000000 ||
+      ((type === "limit" || action === "sell") && request.quantity < 0.0001)
+    )
+      error = "Enter a valid number of shares.";
+    else if (reserve > snapshot.player.balance + 0.0000001)
+      error = "Not enough gold for this order.";
+    else if (
+      action === "sell" &&
+      request.quantity > snapshot.player.positions[side].available + 0.0000001
+    )
+      error =
+        "Not enough available shares. Cancel any reserved sell orders first.";
+    if (error) {
+      $("trade-error").textContent = error;
+      $("trade-error").hidden = false;
+      return;
+    }
     $("trade-error").hidden = true;
+    pendingTrade = request;
+    const e = estimate();
+    $("dialog-title").textContent = "Review your trade";
+    $("dialog-content").innerHTML =
+      `<div class="confirm-market"><span class="bitcoin-logo">₿</span><div><strong>Bitcoin Up or Down</strong><span>${time(snapshot.round.start)} – ${time(snapshot.round.end)} · 5-minute round</span></div></div><div class="confirm-direction ${side}"><span>${cap(action)} ${cap(side)} ${side === "up" ? "↗" : "↘"}</span><small>${type === "limit" ? "Limit order" : "Market order"}</small></div><div class="confirm-summary"><div><span>${action === "buy" ? (type === "limit" ? "Gold reserved" : "Maximum spend") : "Shares to sell"}</span><strong>${money(action === "buy" ? reserve : request.quantity)} ${action === "buy" ? "G" : "shares"}</strong></div><div><span>${type === "limit" ? "Limit price" : "Estimated average price"}</span><strong>${money(e.price * 100, 1)}¢</strong></div><div><span>${action === "buy" ? "Estimated shares" : "Estimated proceeds"}</span><strong>${money(action === "buy" ? e.shares : e.total)}${action === "sell" ? " G" : ""}</strong></div>${action === "buy" ? `<div class="confirm-payout"><span>Payout if ${cap(side)} wins</span><strong>${money(e.shares)} G</strong></div>` : ""}<div><span>Your available gold</span><span>${money(snapshot.player.balance)} G</span></div></div><p class="confirm-note">${type === "limit" ? "Your order stays open until filled, canceled, or the round ends. Only filled shares can earn a payout." : "Prices move in real time. Your trade executes at the best available prices when you confirm; final shares and proceeds may differ."}</p><div class="confirm-gold"><span class="coin">G</span>Play gold only · No real payment</div><p id="confirm-error" class="trade-error" role="alert" hidden></p><div class="confirm-actions"><button id="cancel-trade" class="dialog-button secondary">Cancel</button><button id="confirm-trade" class="dialog-button">Confirm ${type === "limit" ? "order" : action}</button></div>`;
+    $("cancel-trade").onclick = () => $("info-dialog").close();
+    $("confirm-trade").onclick = confirmTrade;
+    $("info-dialog").showModal();
+    $("cancel-trade").focus();
+  }
+
+  async function confirmTrade() {
+    if (!pendingTrade || busy) return;
+    const request = pendingTrade;
+    if (
+      !connection ||
+      request.roundId !== snapshot.round.id ||
+      Date.now() + timeOffset >= snapshot.round.end
+    ) {
+      $("confirm-error").textContent =
+        "This quote has expired. Close this window and review the live round.";
+      $("confirm-error").hidden = false;
+      $("confirm-trade").disabled = true;
+      return;
+    }
+    busy = true;
+    $("confirm-trade").disabled = true;
+    $("confirm-trade").textContent = "Confirming…";
+    $("cancel-trade").disabled = true;
+    $("close-dialog").disabled = true;
     renderTrade();
     try {
-      const result = await mutate("order", {
-        side,
-        action,
-        type,
-        amount,
-        quantity: amount,
-        price: Number($("limit-price").value) / 100,
-        roundId: snapshot.round.id,
-      });
+      const result = await mutate("order", request);
+      $("info-dialog").close();
+      pendingTrade = null;
       if (result.remaining > 0.00001)
         toast(
           "Limit order placed",
-          `${money(result.remaining)} ${side} shares waiting at ${$("limit-price").value}¢.${result.filled ? ` ${money(result.filled)} already filled.` : ""}`,
+          `${money(result.remaining)} ${request.side} shares waiting at ${Math.round(request.price * 100)}¢.${result.filled ? ` ${money(result.filled)} already filled.` : ""}`,
         );
       else if (result.filled > 0)
         toast(
-          `${action === "buy" ? "Bought" : "Sold"} ${cap(side)}`,
+          `${request.action === "buy" ? "Bought" : "Sold"} ${cap(request.side)}`,
           `${money(result.filled)} shares · ${money(result.total)} gold${result.partial ? " · Partially filled; unused gold returned." : ""}`,
         );
       else
@@ -545,10 +629,16 @@
         );
       showPanel("positions");
     } catch (error) {
-      $("trade-error").textContent = error.message;
-      $("trade-error").hidden = false;
+      $("confirm-error").textContent = error.message;
+      $("confirm-error").hidden = false;
+      // A network timeout can occur after a committed trade. Require a fresh
+      // review instead of offering a blind retry that might place it twice.
+      $("confirm-trade").textContent = "Close and review order";
+      $("cancel-trade").textContent = "Close";
     } finally {
       busy = false;
+      $("close-dialog").disabled = false;
+      $("cancel-trade").disabled = false;
       renderTrade();
     }
   }
@@ -593,11 +683,11 @@
         const query = $("market-search").value.toLowerCase().trim();
         $("search-results").innerHTML =
           !query ||
-          ["bitcoin", "btc", "up", "down", "crypto", "5 min"].some(
+          ["bitcoin", "btc", "up", "down", "maths", "statistics", "5 min"].some(
             (s) => s.includes(query) || query.includes(s),
           )
             ? `<button class="search-result" data-dismiss><span class="bitcoin-logo">₿</span><span>Bitcoin Up or Down<small>5-minute rounds · Live · Play gold</small></span>${icon("chevron")}</button>`
-            : "<p>No matching markets. Try “Bitcoin”.</p>";
+            : '<p>Explore more subjects on the home page.</p><a class="dialog-button" href="./">Browse all science markets</a>';
       };
       $("market-search").addEventListener("input", results);
       results();
@@ -711,8 +801,14 @@
   };
   $("search-trigger").onclick = () => showDialog("search");
   $("close-dialog").onclick = () => $("info-dialog").close();
+  $("info-dialog").addEventListener("close", () => {
+    pendingTrade = null;
+  });
+  $("info-dialog").addEventListener("cancel", (event) => {
+    if (busy) event.preventDefault();
+  });
   $("info-dialog").addEventListener("click", (event) => {
-    if (event.target === $("info-dialog")) {
+    if (event.target === $("info-dialog") && !busy) {
       const r = $("info-dialog").getBoundingClientRect();
       if (
         event.clientX < r.left ||
@@ -731,6 +827,16 @@
     const active = $("bookmark").getAttribute("aria-pressed") !== "true";
     $("bookmark").setAttribute("aria-pressed", active);
     storage.set("physics-favorite", String(active));
+    let saved;
+    try {
+      saved = JSON.parse(storage.get("physics-watchlist-v1") || "[]");
+    } catch {
+      saved = [];
+    }
+    const watchlist = new Set(Array.isArray(saved) ? saved : []);
+    if (active) watchlist.add("bitcoin");
+    else watchlist.delete("bitcoin");
+    storage.set("physics-watchlist-v1", JSON.stringify([...watchlist]));
     toast(active ? "Added to your favorites" : "Removed from favorites");
   };
   $("share").onclick = async () => {

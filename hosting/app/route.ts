@@ -1,4 +1,4 @@
-import html from '../lib/market.html?raw';
+import html from '../lib/home.html?raw';
 
 export function GET() {
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' } });

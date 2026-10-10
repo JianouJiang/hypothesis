@@ -23,7 +23,7 @@ async function handle(request: Request) {
   if (request.headers.has('Origin') && !responseHeaders['Access-Control-Allow-Origin']) return json(403, { error: 'This market is not available from that origin.' });
   const route = new URL(request.url).pathname.split('/').pop();
   if (request.method === 'GET' && route !== 'session') return json(404, { error: 'Not found.' });
-  if (request.method === 'POST' && !['order', 'cancel', 'reset'].includes(route || '')) return json(404, { error: 'Not found.' });
+  if (request.method === 'POST' && !['order', 'cancel', 'reset', 'profile'].includes(route || '')) return json(404, { error: 'Not found.' });
   if (!env.DB) return json(503, { error: 'The shared market is initializing. Please try again.' });
   const database = env.DB;
   let token = request.headers.get('Authorization')?.replace(/^Bearer /, '') || '';
@@ -64,6 +64,7 @@ async function handle(request: Request) {
         if (route === 'order') result = market.place(token, input);
         if (route === 'cancel') market.cancel(token, input.orderId);
         if (route === 'reset') market.reset(token);
+        if (route === 'profile') market.updateProfile(token, input);
       }
       const snapshot = market.snapshot(token);
       const changed = created || request.method === 'POST' || previousTick !== market.state.round.lastTick || previousRound !== market.state.round.id;

@@ -40,6 +40,84 @@ test("new guests receive exactly 1,000 gold, and reconnecting never tops up a wa
   assert.ok(market.player("player-one").balance < 976);
 });
 
+test("profile edits validate names, are isolated, and survive wallet resets and serialization", () => {
+  const { market } = setup();
+  market.updateProfile("player-one", {
+    name: "Fluid Explorer",
+    bio: "Curious about chaos.",
+    avatar: 3,
+  });
+  assert.throws(
+    () =>
+      market.updateProfile("player-two", {
+        name: "fluid explorer",
+        bio: "",
+        avatar: 0,
+      }),
+    /taken/,
+  );
+  assert.throws(
+    () =>
+      market.updateProfile("player-one", {
+        name: "<script>",
+        bio: "",
+        avatar: 0,
+      }),
+    /3–24/,
+  );
+  assert.throws(
+    () =>
+      market.updateProfile("player-one", {
+        name: "Fluid Explorer",
+        bio: "x".repeat(201),
+        avatar: 0,
+      }),
+    /200/,
+  );
+  market.reset("player-one");
+  const restored = new Market({
+    state: JSON.parse(JSON.stringify(market.state)),
+    now: market.clock,
+    bots: false,
+  });
+  const profile = restored.snapshot("player-one").player;
+  assert.equal(profile.name, "Fluid Explorer");
+  assert.equal(profile.bio, "Curious about chaos.");
+  assert.equal(profile.avatar, 3);
+  assert.equal(profile.balance, 1000);
+  assert.notEqual(restored.player("player-two").name, profile.name);
+});
+
+test("both maker and taker receive persistent activity and profile statistics", () => {
+  const { market, order, next } = setup({ liquidity: false });
+  market.player("player-two").positions.up = { shares: 100, cost: 50 };
+  order("player-one", { type: "limit", price: 0.6, quantity: 50 });
+  order("player-two", { action: "sell", quantity: 20 });
+  const a = market.snapshot("player-one").player;
+  const b = market.snapshot("player-two").player;
+  assert.equal(a.activity[0].type, "buy");
+  assert.equal(b.activity[0].type, "sell");
+  assert.equal(a.totalVolume, 12);
+  assert.equal(b.totalVolume, 12);
+  assert.equal(a.marketsTraded, 1);
+  assert.equal(b.biggestWin, 2);
+  assert.ok(a.equityHistory.length);
+  next(ROUND_MS);
+  assert.equal(
+    market.snapshot("player-one").player.activity[0].type,
+    "settlement",
+  );
+  assert.ok(
+    market.snapshot("player-one").player.activity.some((a) => a.type === "buy"),
+  );
+  market.reset("player-one");
+  const reset = market.snapshot("player-one").player;
+  assert.deepEqual(reset.activity, []);
+  assert.equal(reset.totalVolume, 0);
+  assert.equal(reset.equity, 1000);
+  assert.equal(reset.marketsTraded, 0);
+});
+
 test("market buy and sell fill at book prices, accounting for the spread", () => {
   const { market, order } = setup();
   const buy = order("player-one", { amount: 50 });

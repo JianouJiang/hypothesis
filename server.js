@@ -16,6 +16,14 @@ function createApp(options = {}) {
   const assets = {
     "/": ["index.html", "text/html"],
     "/index.html": ["index.html", "text/html"],
+    "/bitcoin.html": ["bitcoin.html", "text/html"],
+    "/profile.html": ["profile.html", "text/html"],
+    "/home.css": ["home.css", "text/css"],
+    "/home.js": ["home.js", "text/javascript"],
+    "/profile.css": ["profile.css", "text/css"],
+    "/profile.js": ["profile.js", "text/javascript"],
+    "/guest.js": ["guest.js", "text/javascript"],
+    "/catalog.js": ["catalog.js", "text/javascript"],
     "/styles.css": ["styles.css", "text/css"],
     "/app.js": ["app.js", "text/javascript"],
     "/market.js": ["market.js", "text/javascript"],
@@ -111,6 +119,8 @@ function createApp(options = {}) {
           else if (url.pathname === "/api/cancel")
             market.cancel(id, input.orderId);
           else if (url.pathname === "/api/reset") market.reset(id);
+          else if (url.pathname === "/api/profile")
+            market.updateProfile(id, input);
           else return json(404, { error: "Not found." });
           save();
           json(200, { result, snapshot: market.snapshot(id) });

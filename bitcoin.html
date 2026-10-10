@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="Your five-minute Bitcoin prediction playground. Trade Up or Down with 1,000 free gold coins. Simulated prices, live orders, no signup."
+    />
+    <title>Bitcoin Up or Down · Polymarket Physics</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="market.js" defer></script>
+    <script src="guest.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <svg class="svg-defs" aria-hidden="true">
+      <defs>
+        <symbol id="i-search" viewBox="0 0 24 24">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M12 19V5m-6 6 6-6 6 6" />
+        </symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24">
+          <path d="m9 5 7 7-7 7" />
+        </symbol>
+        <symbol id="i-wallet" viewBox="0 0 24 24">
+          <path
+            d="M20 8V5H5a2 2 0 0 1 0-4h13v4M5 5H3v15h17v-5M15 8h7v7h-7z"
+            transform="translate(0 1) scale(.94)"
+          />
+          <path d="M17.5 11.8h.01" />
+        </symbol>
+        <symbol id="i-info" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v6m0-10h.01" />
+        </symbol>
+        <symbol id="i-bookmark" viewBox="0 0 24 24">
+          <path d="M6 4h12v17l-6-4-6 4z" />
+        </symbol>
+        <symbol id="i-share" viewBox="0 0 24 24">
+          <path d="M12 16V3m-5 5 5-5 5 5M5 12v9h14v-9" />
+        </symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 6v6l4 2" />
+        </symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24">
+          <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
+        </symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24">
+          <path d="M3 3v18h18M6 15l5-5 4 3 6-8" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24">
+          <path d="m6 6 12 12M6 18 18 6" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+        <symbol id="i-bot" viewBox="0 0 24 24">
+          <rect x="4" y="7" width="16" height="13" rx="4" />
+          <path d="M12 3v4M8 12h.01M16 12h.01M9 16h6M1 11v5m22-5v5" />
+        </symbol>
+      </defs>
+    </svg>
+    <a class="skip-link" href="#main">Skip to market</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Polymarket Physics home"
+          ><svg viewBox="0 0 38 38" aria-hidden="true">
+            <path d="M4 28V10l29-6v30L4 28Zm0-18 29 7M4 19l29 8" /></svg
+          ><span>Polymarket</span><span class="physics-tag">physics</span></a
+        >
+        <button class="search-trigger" id="search-trigger">
+          <svg class="icon"><use href="#i-search" /></svg
+          ><span>Search markets</span><kbd>/</kbd>
+        </button>
+        <div class="header-actions">
+          <a class="portfolio-link" href="profile.html">Portfolio</a
+          ><button class="wallet-button" data-open="wallet">
+            <span class="coin">G</span><span id="header-balance">1,000.00</span
+            ><span class="wallet-word">Gold</span></button
+          ><a
+            class="avatar"
+            href="profile.html"
+            aria-label="Your guest account"
+          >
+            G<span></span>
+          </a>
+        </div>
+      </div>
+      <nav class="nav-inner" aria-label="Market navigation">
+        <a class="nav-item" href="index.html"
+          ><svg class="icon"><use href="#i-spark" /></svg>All markets</a
+        >
+        <a class="nav-item selected" href="#market"
+          >Maths &amp; Statistics <span class="nav-dot"></span
+        ></a>
+        <button class="nav-item" data-panel="positions">My positions</button
+        ><button class="nav-item" data-panel="history">History</button
+        ><button class="nav-item" data-open="how">How it works</button>
+        <span class="nav-spacer"></span
+        ><span class="play-money-badge"
+          ><span></span>Play money. Real-time markets.</span
+        >
+      </nav>
+    </header>
+
+    <main id="main" class="container">
+      <div class="welcome-strip">
+        <span class="welcome-icon"
+          ><svg class="icon"><use href="#i-spark" /></svg
+        ></span>
+        <p>
+          A little conviction goes a long way.
+          <strong>Start with 1,000 free gold.</strong>
+        </p>
+        <button data-open="how">Learn to trade <span>↗</span></button>
+      </div>
+      <div class="breadcrumb">
+        <a href="index.html?subject=maths">Maths &amp; Statistics</a
+        ><svg class="icon"><use href="#i-chevron" /></svg><span>Bitcoin</span
+        ><svg class="icon"><use href="#i-chevron" /></svg
+        ><span>5 minute markets</span>
+      </div>
+
+      <div class="market-layout" id="market">
+        <section class="market-main" aria-label="Bitcoin market">
+          <div class="market-heading">
+            <div class="bitcoin-logo">₿</div>
+            <div>
+              <div class="title-line">
+                <h1>Bitcoin Up or Down</h1>
+                <span class="interval-badge">5 min</span>
+              </div>
+              <p id="round-label">Loading the current round…</p>
+            </div>
+            <div class="heading-actions">
+              <button
+                class="icon-button"
+                id="bookmark"
+                aria-label="Add market to favorites"
+                aria-pressed="false"
+              >
+                <svg class="icon"><use href="#i-bookmark" /></svg></button
+              ><button
+                class="icon-button"
+                id="share"
+                aria-label="Share this market"
+              >
+                <svg class="icon"><use href="#i-share" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-stats">
+            <div class="price-stat">
+              <span class="eyebrow"
+                >PRICE TO BEAT
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-info" /></svg></span
+              ><strong id="opening-price">$97,426.50</strong>
+            </div>
+            <div class="price-stat current-stat">
+              <span class="eyebrow"
+                >CURRENT PRICE <span class="live-dot"></span
+              ></span>
+              <div class="current-row">
+                <strong id="current-price">$97,426.50</strong
+                ><span id="price-difference" class="price-difference"
+                  >+$0.00</span
+                >
+              </div>
+            </div>
+            <div class="countdown">
+              <div class="countdown-digits">
+                <span id="countdown-min">05</span><b>:</b
+                ><span id="countdown-sec">00</span>
+              </div>
+              <span class="eyebrow" id="countdown-label">TIME REMAINING</span>
+            </div>
+          </div>
+          <div class="chart-wrap" id="chart-wrap">
+            <canvas
+              id="price-chart"
+              role="img"
+              aria-label="Live simulated Bitcoin price chart with the round opening price marked as the price to beat"
+            ></canvas>
+            <div class="chart-tooltip" id="chart-tooltip" hidden></div>
+            <div class="chart-watermark">Polymarket <span>physics</span></div>
+            <div class="chart-live-label">
+              <span class="live-dot"></span
+              ><span id="chart-mode">LIVE SIMULATION</span>
+            </div>
+          </div>
+          <div class="chart-footer">
+            <span
+              ><span class="status-dot"></span
+              ><span id="connection-text">Connecting to market</span></span
+            ><span
+              >Simulated BTC/USD <svg class="icon"><use href="#i-info" /></svg
+            ></span>
+          </div>
+          <div class="round-selector">
+            <button class="round-history" data-panel="history">
+              <svg class="icon"><use href="#i-clock" /></svg>Past
+            </button>
+            <div class="round-chips" id="round-chips"></div>
+            <button
+              class="icon-button"
+              id="return-live"
+              aria-label="Return to live round"
+            >
+              <svg class="icon"><use href="#i-chevron" /></svg>
+            </button>
+          </div>
+          <div class="market-meta">
+            <span
+              ><svg class="icon"><use href="#i-chart" /></svg
+              ><strong id="volume">0</strong> gold volume</span
+            ><span
+              ><svg class="icon"><use href="#i-clock" /></svg>Resolves every 5
+              minutes</span
+            ><span class="live-status"><span class="live-dot"></span>Live</span>
+          </div>
+
+          <section class="details-section" id="details">
+            <div class="detail-tabs" role="tablist" aria-label="Market details">
+              <button role="tab" aria-selected="true" data-panel="book">
+                Order book</button
+              ><button role="tab" aria-selected="false" data-panel="positions">
+                Positions
+                <span id="positions-count" class="tab-count">0</span></button
+              ><button role="tab" aria-selected="false" data-panel="activity">
+                Activity</button
+              ><button role="tab" aria-selected="false" data-panel="history">
+                History</button
+              ><button role="tab" aria-selected="false" data-panel="rules">
+                Rules
+              </button>
+            </div>
+            <div id="panel-book" class="detail-panel" role="tabpanel">
+              <div class="book-heading">
+                <div class="small-segment" aria-label="Order book outcome">
+                  <button data-book-side="up" class="active">Up</button
+                  ><button data-book-side="down">Down</button>
+                </div>
+                <span
+                  ><span class="live-dot"></span> Live orders
+                  <span class="muted">·</span>
+                  <button class="text-button" data-open="bots">
+                    Bot liquidity
+                    <svg class="icon"><use href="#i-info" /></svg></button
+                ></span>
+              </div>
+              <div class="order-book">
+                <div>
+                  <div class="book-label">
+                    <span>Bid (buy)</span><span>Shares</span
+                    ><span>Total <span class="gold-symbol">G</span></span>
+                  </div>
+                  <div id="book-bids"></div>
+                </div>
+                <div>
+                  <div class="book-label">
+                    <span>Ask (sell)</span><span>Shares</span
+                    ><span>Total <span class="gold-symbol">G</span></span>
+                  </div>
+                  <div id="book-asks"></div>
+                </div>
+              </div>
+              <div class="book-footer">
+                <span>Click a price to place a limit order</span
+                ><span>Spread <strong id="spread">2¢</strong></span>
+              </div>
+            </div>
+            <div
+              id="panel-positions"
+              class="detail-panel"
+              role="tabpanel"
+              hidden
+            ></div>
+            <div
+              id="panel-activity"
+              class="detail-panel"
+              role="tabpanel"
+              hidden
+            ></div>
+            <div
+              id="panel-history"
+              class="detail-panel"
+              role="tabpanel"
+              hidden
+            ></div>
+            <div id="panel-rules" class="detail-panel" role="tabpanel" hidden>
+              <h3>A five-minute forecast.</h3>
+              <p>
+                This market resolves to <strong class="up-text">Up</strong> if
+                the simulated Bitcoin price at the end of the round is greater
+                than or equal to its opening price. Otherwise, it resolves to
+                <strong class="down-text">Down</strong>. A tie resolves to Up.
+              </p>
+              <p>
+                Each winning share pays <strong>1 gold coin</strong>. Losing
+                shares pay zero. Payouts are automatic, and unfilled orders
+                expire with reserved gold and shares released at the end of the
+                round.
+              </p>
+              <p>
+                Prices, gold, and liquidity are simulated. This is an
+                independent Polymarket-inspired playground. Gold has no cash
+                value. There are no deposits, withdrawals, or trading fees.
+              </p>
+              <div class="rule-facts">
+                <div>
+                  <span>Market duration</span><strong>5 minutes</strong>
+                </div>
+                <div>
+                  <span>Resolution source</span
+                  ><strong>Simulated BTC/USD</strong>
+                </div>
+                <div>
+                  <span>Winning share payout</span><strong>1 gold</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+          <div class="learning-card">
+            <div class="learning-art">
+              <svg class="icon"><use href="#i-chart" /></svg>
+            </div>
+            <div>
+              <h3>A view on Bitcoin? Put it to the test.</h3>
+              <p>
+                Pick a direction. Watch the market. Build your gold balance.
+              </p>
+            </div>
+            <button
+              class="icon-button"
+              data-open="how"
+              aria-label="Learn how to trade"
+            >
+              <svg class="icon"><use href="#i-chevron" /></svg>
+            </button>
+          </div>
+        </section>
+
+        <aside class="trade-sidebar" aria-label="Trade Bitcoin predictions">
+          <form class="trade-card" id="trade-form">
+            <div class="trade-top">
+              <div class="trade-tabs">
+                <button type="button" class="active" data-action="buy">
+                  Buy</button
+                ><button type="button" data-action="sell">Sell</button>
+              </div>
+              <label class="order-type-label"
+                ><select id="order-type" aria-label="Order type">
+                  <option value="market">Market</option>
+                  <option value="limit">Limit</option></select
+                ><svg class="icon"><use href="#i-chevron" /></svg
+              ></label>
+            </div>
+            <div class="outcome-buttons">
+              <button
+                type="button"
+                class="outcome up selected"
+                data-side="up"
+                aria-pressed="true"
+              >
+                <svg class="icon"><use href="#i-arrow" /></svg><span>Up</span
+                ><strong id="up-price">51¢</strong></button
+              ><button
+                type="button"
+                class="outcome down"
+                data-side="down"
+                aria-pressed="false"
+              >
+                <svg class="icon"><use href="#i-arrow" /></svg><span>Down</span
+                ><strong id="down-price">51¢</strong>
+              </button>
+            </div>
+            <div class="limit-price-field" id="limit-price-field" hidden>
+              <label for="limit-price">Limit price</label>
+              <div class="input-box">
+                <input
+                  id="limit-price"
+                  type="number"
+                  min="1"
+                  max="99"
+                  step="1"
+                  value="50"
+                  inputmode="numeric"
+                /><span>¢ per share</span>
+              </div>
+            </div>
+            <div class="amount-label">
+              <label for="trade-amount" id="amount-label">Amount</label
+              ><span id="available-balance">Balance: 1,000.00 gold</span>
+            </div>
+            <div class="amount-box">
+              <input
+                id="trade-amount"
+                type="number"
+                min="0"
+                step="any"
+                inputmode="decimal"
+                value="10"
+                placeholder="0"
+                autocomplete="off"
+              /><span id="amount-unit"><span class="coin">G</span> Gold</span>
+            </div>
+            <div class="quick-amounts">
+              <button type="button" data-amount="10">+10</button
+              ><button type="button" data-amount="50">+50</button
+              ><button type="button" data-amount="100">+100</button
+              ><button type="button" id="max-amount">Max</button>
+            </div>
+            <div class="order-summary">
+              <div>
+                <span id="estimate-label">Estimated shares</span
+                ><span id="estimate-shares">19.61</span>
+              </div>
+              <div>
+                <span>Average price</span><span id="average-price">51¢</span>
+              </div>
+              <div class="payout-row">
+                <span id="payout-label"
+                  >To win <svg class="icon"><use href="#i-info" /></svg></span
+                ><strong
+                  ><span class="coin small">G</span
+                  ><span id="payout-value">19.61</span></strong
+                >
+              </div>
+            </div>
+            <div class="trade-error" id="trade-error" role="alert" hidden></div>
+            <button class="submit-trade" id="submit-trade" type="submit">
+              Buy Up <svg class="icon"><use href="#i-arrow" /></svg>
+            </button>
+            <p class="trade-caption" id="trade-caption">
+              Win 1 gold per share if Bitcoin finishes up.
+            </p>
+            <div class="trade-card-footer">
+              <svg class="icon"><use href="#i-check" /></svg>No signup
+              <span>·</span> No real money <span>·</span> No fees
+            </div>
+          </form>
+          <div class="your-gold-card">
+            <div class="gold-icon"><span class="coin">G</span></div>
+            <div>
+              <span>Your gold balance</span
+              ><strong id="card-balance">1,000.00 <small>GOLD</small></strong>
+            </div>
+            <button
+              class="icon-button"
+              data-open="wallet"
+              aria-label="Manage your gold"
+            >
+              <svg class="icon"><use href="#i-chevron" /></svg>
+            </button>
+          </div>
+          <div class="why-card">
+            <span class="why-icon"
+              ><svg class="icon"><use href="#i-bot" /></svg
+            ></span>
+            <div>
+              <strong>The market never sits still.</strong>
+              <p>
+                Simulated traders keep the order book moving, even when you're
+                first here.
+              </p>
+              <button class="text-button" data-open="bots">
+                Meet the market makers <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <footer class="site-footer">
+        <a class="footer-brand" href="index.html"
+          >Polymarket <span>physics</span></a
+        ><span>Built for curiosity. Powered by play money.</span
+        ><button data-open="how">How it works</button
+        ><a
+          id="github-link"
+          href="https://github.com/JianouJiang/polymarket_physics"
+          target="_blank"
+          rel="noopener"
+          >GitHub ↗</a
+        >
+      </footer>
+    </main>
+    <div
+      class="toast-container"
+      id="toasts"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+    <dialog id="info-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-header">
+        <h2 id="dialog-title"></h2>
+        <button class="icon-button" id="close-dialog" aria-label="Close dialog">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <div id="dialog-content"></div>
+    </dialog>
+    <noscript
+      >This market needs JavaScript to simulate prices and place play-money
+      trades.</noscript
+    >
+  </body>
+</html>

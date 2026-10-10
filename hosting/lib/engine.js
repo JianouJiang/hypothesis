@@ -20,6 +20,12 @@ export const { Market, ROUND_MS, floorShares } = (() => {
   class Market {
     constructor(options = {}) {
       this.clock = options.now || Date.now;
+      this.duration = options.duration || ROUND_MS;
+      this.seconds = this.duration / 1000;
+      this.marketId = options.marketId || "bitcoin";
+      this.accounts = options.accounts;
+      this.flowData = options.flowData;
+      this.trackProfile = options.trackProfile !== false;
       this.liquidity = options.liquidity !== false;
       this.botsEnabled = options.bots !== false && this.liquidity;
       this.state = options.state || {
@@ -34,13 +40,51 @@ export const { Market, ROUND_MS, floorShares } = (() => {
       };
       if (this.state.version !== 1)
         throw new Error("Unsupported saved market version.");
+      for (const player of Object.values(this.state.players))
+        this.attachAccount(player);
       if (!this.state.round)
-        this.newRound(Math.floor(this.clock() / ROUND_MS) * ROUND_MS, 97426.5);
+        this.newRound(
+          Math.floor(this.clock() / this.duration) * this.duration,
+          97426.5,
+        );
       this.advance();
     }
 
     id(prefix) {
-      return `${prefix}-${++this.state.seq}`;
+      return `${this.marketId}-${prefix}-${++this.state.seq}`;
+    }
+
+    attachAccount(player) {
+      if (!this.accounts || player.id.startsWith("bot-")) return player;
+      const keys = [
+        "name",
+        "bio",
+        "avatar",
+        "joinedAt",
+        "balance",
+        "realized",
+        "activity",
+        "totalVolume",
+        "biggestWin",
+        "marketsTraded",
+        "tradedRounds",
+        "equityHistory",
+        "trackingSince",
+      ];
+      const account = (this.accounts[player.id] ||= { id: player.id });
+      for (const key of keys) {
+        if (!Object.hasOwn(account, key) && player[key] !== undefined)
+          account[key] = player[key];
+        Object.defineProperty(player, key, {
+          configurable: true,
+          enumerable: false,
+          get: () => account[key],
+          set: (value) => {
+            account[key] = value;
+          },
+        });
+      }
+      return player;
     }
 
     newRound(start, opening) {
@@ -93,7 +137,7 @@ export const { Market, ROUND_MS, floorShares } = (() => {
           joinedAt: this.clock(),
         };
       }
-      return this.state.players[id];
+      return this.attachAccount(this.state.players[id]);
     }
 
     updateProfile(id, input) {
@@ -129,14 +173,19 @@ export const { Market, ROUND_MS, floorShares } = (() => {
         id: this.id("activity"),
         time: this.clock(),
         roundId: this.state.round.id,
+        marketId: this.marketId,
         ...entry,
       });
       player.activity = player.activity.slice(0, 500);
       if (entry.type === "buy" || entry.type === "sell") {
         player.totalVolume = round((player.totalVolume || 0) + entry.total);
-        if (player.lastTradedRound !== this.state.round.id) {
+        player.tradedRounds ||= {};
+        if (
+          (player.tradedRounds[this.marketId] || player.lastTradedRound) !==
+          this.state.round.id
+        ) {
           player.marketsTraded = (player.marketsTraded || 0) + 1;
-          player.lastTradedRound = this.state.round.id;
+          player.tradedRounds[this.marketId] = this.state.round.id;
         }
       }
       if (entry.profit > (player.biggestWin || 0))
@@ -152,7 +201,11 @@ export const { Market, ROUND_MS, floorShares } = (() => {
 
     price(now = this.clock()) {
       return this.state.round.path[
-        clamp(Math.floor((now - this.state.round.start) / 1000), 0, 300)
+        clamp(
+          Math.floor((now - this.state.round.start) / 1000),
+          0,
+          this.seconds,
+        )
       ];
     }
 
@@ -477,11 +530,12 @@ export const { Market, ROUND_MS, floorShares } = (() => {
 
     settle() {
       const r = this.state.round;
-      const close = r.path[300];
+      const close = r.path.at(-1);
       const outcome = close >= r.opening ? "up" : "down";
       for (const order of [...this.state.orders])
         this.cancel(order.playerId, order.id, false);
       const result = {
+        marketId: this.marketId,
         id: r.id,
         start: r.start,
         end: r.end,
@@ -527,8 +581,8 @@ export const { Market, ROUND_MS, floorShares } = (() => {
         const close = this.settle();
         // After a long shutdown, settle the held round once and resume the current window.
         this.newRound(
-          now - nextStart > ROUND_MS * 24
-            ? Math.floor(now / ROUND_MS) * ROUND_MS
+          now - nextStart > this.duration * 24
+            ? Math.floor(now / this.duration) * this.duration
             : nextStart,
           close,
         );
@@ -571,7 +625,7 @@ export const { Market, ROUND_MS, floorShares } = (() => {
       const rng = random(
         this.state.seed ^ (this.state.round.start + tick * 191),
       );
-      const index = clamp(tick, 0, 300);
+      const index = clamp(tick, 0, this.seconds);
       const momentum =
         this.state.round.path[index] -
         this.state.round.path[Math.max(0, index - 12)];
@@ -626,6 +680,7 @@ export const { Market, ROUND_MS, floorShares } = (() => {
       player.biggestWin = 0;
       player.marketsTraded = 0;
       player.lastTradedRound = null;
+      player.tradedRounds = {};
       player.trackingSince = this.clock();
     }
 
@@ -666,7 +721,7 @@ export const { Market, ROUND_MS, floorShares } = (() => {
       player.trackingSince ||= now;
       player.equityHistory ||= [];
       const lastPoint = player.equityHistory.at(-1);
-      if (!lastPoint || now - lastPoint.time >= 60000) {
+      if (this.trackProfile && (!lastPoint || now - lastPoint.time >= 60000)) {
         player.equityHistory.push({ time: now, value: round(equity - 1000) });
         if (player.equityHistory.length > 2000)
           player.equityHistory = player.equityHistory.filter(
@@ -674,6 +729,7 @@ export const { Market, ROUND_MS, floorShares } = (() => {
           );
       }
       return {
+        marketId: this.marketId,
         now,
         round: {
           id: r.id,
@@ -683,7 +739,10 @@ export const { Market, ROUND_MS, floorShares } = (() => {
           price: this.price(now),
           volume: r.volume,
           points: r.path
-            .slice(0, clamp(Math.floor((now - r.start) / 1000), 0, 300) + 1)
+            .slice(
+              0,
+              clamp(Math.floor((now - r.start) / 1000), 0, this.seconds) + 1,
+            )
             .map((price, i) => ({ time: r.start + i * 1000, price })),
         },
         probability: this.probability(now),
@@ -699,6 +758,9 @@ export const { Market, ROUND_MS, floorShares } = (() => {
                   source,
                   id: orderId,
                   mine: order?.playerId === id,
+                  bot: order
+                    ? this.state.players[order.playerId]?.bot === true
+                    : true,
                 }),
               ),
               bids: this.offers(side, "sell", null, now).map(
@@ -708,6 +770,9 @@ export const { Market, ROUND_MS, floorShares } = (() => {
                   source,
                   id: orderId,
                   mine: order?.playerId === id,
+                  bot: order
+                    ? this.state.players[order.playerId]?.bot === true
+                    : true,
                 }),
               ),
             },

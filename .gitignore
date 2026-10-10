@@ -5,3 +5,8 @@ test-results/
 _site/
 .env
 .env.*
+.dev.vars*
+*.npz
+*.foam
+flow-bank.json
+CFD_INGEST_TOKEN

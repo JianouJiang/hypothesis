@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { Market } = require("./market");
+const { Exchange } = require("./exchange");
 
 function createApp(options = {}) {
   const dataFile =
@@ -11,12 +12,23 @@ function createApp(options = {}) {
   let saved;
   if (options.persist !== false && fs.existsSync(dataFile))
     saved = JSON.parse(fs.readFileSync(dataFile, "utf8"));
-  const market = options.market || new Market({ state: saved });
+  const flowFile =
+    process.env.PHYSICS_CFD_DATA ||
+    path.join(__dirname, "../polymarket_physics_private/flow-bank.json");
+  const flowData =
+    options.flowData ||
+    (fs.existsSync(flowFile)
+      ? JSON.parse(fs.readFileSync(flowFile, "utf8"))
+      : undefined);
+  const market = options.market || new Exchange({ state: saved, flowData });
   const clients = new Map();
   const assets = {
     "/": ["index.html", "text/html"],
     "/index.html": ["index.html", "text/html"],
     "/bitcoin.html": ["bitcoin.html", "text/html"],
+    "/aerofoil.html": ["aerofoil.html", "text/html"],
+    "/aerofoil.js": ["aerofoil.js", "text/javascript"],
+    "/aerofoil.css": ["aerofoil.css", "text/css"],
     "/profile.html": ["profile.html", "text/html"],
     "/home.css": ["home.css", "text/css"],
     "/home.js": ["home.js", "text/javascript"],
@@ -30,6 +42,18 @@ function createApp(options = {}) {
     "/favicon.svg": ["favicon.svg", "image/svg+xml"],
     "/deployment.json": ["deployment.json", "application/json"],
   };
+  for (const file of [
+    "naca0012.dat",
+    "naca0012-tilted.csv",
+    "naca0012.stl",
+    "parameters.json",
+    "provenance.json",
+    "README.txt",
+  ])
+    assets[`/geometry/${file}`] = [
+      `geometry/${file}`,
+      file.endsWith("json") ? "application/json" : "text/plain",
+    ];
   function save() {
     if (options.persist === false) return;
     fs.mkdirSync(path.dirname(dataFile), { recursive: true });
@@ -39,12 +63,12 @@ function createApp(options = {}) {
     fs.renameSync(`${dataFile}.tmp`, dataFile);
   }
   function broadcast() {
-    for (const [res, id] of clients) {
+    for (const [res, { id, marketId }] of clients) {
       if (res.destroyed) {
         clients.delete(res);
         continue;
       }
-      res.write(`data: ${JSON.stringify(market.snapshot(id))}\n\n`);
+      res.write(`data: ${JSON.stringify(market.snapshot(id, marketId))}\n\n`);
     }
   }
   const server = http.createServer(async (req, res) => {
@@ -58,6 +82,8 @@ function createApp(options = {}) {
     };
     try {
       if (url.pathname.startsWith("/api/")) {
+        const marketId = url.searchParams.get("market") || "bitcoin";
+        if (market.select) market.select(marketId);
         const token = req.headers.cookie
           ?.split(";")
           .map((v) => v.trim())
@@ -66,7 +92,7 @@ function createApp(options = {}) {
         let id =
           token &&
           /^[a-f0-9]{48}$/.test(token) &&
-          Object.hasOwn(market.state.players, token)
+          Object.hasOwn(market.players || market.state.players, token)
             ? token
             : null;
         if (req.method === "GET" && url.pathname === "/api/session") {
@@ -79,7 +105,7 @@ function createApp(options = {}) {
             );
             save();
           }
-          return json(200, market.snapshot(id));
+          return json(200, market.snapshot(id, marketId));
         }
         if (!id)
           return json(401, {
@@ -91,8 +117,10 @@ function createApp(options = {}) {
             Connection: "keep-alive",
             "X-Accel-Buffering": "no",
           });
-          res.write(`data: ${JSON.stringify(market.snapshot(id))}\n\n`);
-          clients.set(res, id);
+          res.write(
+            `data: ${JSON.stringify(market.snapshot(id, marketId))}\n\n`,
+          );
+          clients.set(res, { id, marketId });
           req.on("close", () => clients.delete(res));
           return;
         }
@@ -115,15 +143,23 @@ function createApp(options = {}) {
           }
           const input = JSON.parse(body || "{}");
           let result;
-          if (url.pathname === "/api/order") result = market.place(id, input);
+          if (url.pathname === "/api/order")
+            result =
+              market instanceof Exchange
+                ? market.place(id, input, marketId)
+                : market.place(id, input);
           else if (url.pathname === "/api/cancel")
-            market.cancel(id, input.orderId);
+            market.cancel(
+              id,
+              input.orderId,
+              market instanceof Exchange ? marketId : true,
+            );
           else if (url.pathname === "/api/reset") market.reset(id);
           else if (url.pathname === "/api/profile")
             market.updateProfile(id, input);
           else return json(404, { error: "Not found." });
           save();
-          json(200, { result, snapshot: market.snapshot(id) });
+          json(200, { result, snapshot: market.snapshot(id, marketId) });
           broadcast();
           return;
         }
@@ -179,7 +215,7 @@ if (require.main === module) {
   const host = process.env.HOST || "127.0.0.1";
   app.server.listen(port, host, () =>
     console.log(
-      `Polymarket Physics is ready at http://${host}:${port}\nSimulated Bitcoin · 5-minute rounds · 1,000 free gold coins\nPress Ctrl+C to stop. Progress is saved in data/market.json.`,
+      `Polymarket Physics is ready at http://${host}:${port}\nScience prediction markets · 1,000 free gold coins\nPress Ctrl+C to stop. Progress is saved in data/market.json.`,
     ),
   );
   for (const signal of ["SIGINT", "SIGTERM"])

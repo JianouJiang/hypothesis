@@ -39,10 +39,10 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
       "PASS Maths & Statistics includes playable Bitcoin; all science subjects filter",
     );
     await page.locator('#subject-nav [data-subject=""]').click();
-    await page.locator("#home-search").fill("aerofoil");
+    await page.locator("#home-search").fill("galton");
     assert.equal(await page.locator(".market-card").count(), 1);
     await page
-      .locator('.market-card [data-preview="aerofoil"]')
+      .locator('.market-card [data-preview="galton"]')
       .first()
       .click();
     assert.match(
@@ -56,7 +56,7 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     await page.locator("#home-search").fill("");
     await page.locator("#watchlist-filter").click();
     assert.equal(await page.locator(".market-card").count(), 1);
-    assert.equal(await page.locator('[data-market="aerofoil"]').count(), 1);
+    assert.equal(await page.locator('[data-market="galton"]').count(), 1);
     await page.locator("#watchlist-filter").click();
     await page.locator("#next-feature").click();
     assert.match(

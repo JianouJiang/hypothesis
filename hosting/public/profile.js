@@ -4,6 +4,18 @@
   const { safe, money, avatar } = PhysicsGuest;
   const icon = (name) =>
     `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const marketTitle = (id) =>
+    id === "aerofoil"
+      ? "Dust above or below · ~2 min"
+      : "Bitcoin Up or Down · 5 min";
+  const marketWords = (id) =>
+    id === "aerofoil"
+      ? "Aerofoil NACA dust fluid dynamics Above Below 2 min"
+      : "Bitcoin BTC Maths Statistics Up Down 5 min";
+  const outcome = (side, id) =>
+    id === "aerofoil" ? (side === "up" ? "Above" : "Below") : cap(side);
+  const marketLink = (id) =>
+    `${id === "aerofoil" ? "aerofoil" : "bitcoin"}.html`;
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const signed = (n) =>
     `${n > 0 ? "+" : n < 0 ? "−" : ""}${money(Math.abs(n))}`;
@@ -58,7 +70,7 @@
     $("profile-bio").hidden = !p.bio;
     $("edit-profile").disabled = false;
     $("profile-position-value").textContent =
-      `${money(p.positions.up.shares * p.positions.up.mark + p.positions.down.shares * p.positions.down.mark)} G`;
+      `${money(p.positionValue ?? p.positions.up.shares * p.positions.up.mark + p.positions.down.shares * p.positions.down.mark)} G`;
     $("profile-biggest-win").textContent = `${money(p.biggestWin)} G`;
     $("profile-predictions").textContent = money(p.marketsTraded, 0);
     $("profile-total-pnl").textContent = `${signed(p.equity - 1000)} G`;
@@ -155,11 +167,11 @@
       : "Your first prediction starts here";
     $("chart-end-label").textContent = "Now";
   }
-  function marketCell(side, label, subtitle) {
-    return `<div class="profile-market-cell"><span class="mini-bitcoin">₿</span><div><a href="bitcoin.html?side=${side || "up"}">Bitcoin Up or Down · 5 min</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
+  function marketCell(side, label, subtitle, marketId) {
+    return `<div class="profile-market-cell"><span class="mini-bitcoin">${marketId === "aerofoil" ? "∿" : "₿"}</span><div><a href="${marketLink(marketId)}?side=${side || "up"}">${marketTitle(marketId)}</a><p><span class="position-pill ${side === "down" ? "down" : ""}">${safe(label)}</span>${safe(subtitle)}</p></div></div>`;
   }
   function empty(title, detail, action = true) {
-    return `<div class="profile-empty"><div class="empty-profile-icon">${icon(tab === "activity" ? "clock" : "chart")}</div><h2>${safe(title)}</h2><p>${safe(detail)}</p>${action ? `<a href="bitcoin.html">Explore the live market ${icon("arrow")}</a>` : ""}</div>`;
+    return `<div class="profile-empty"><div class="empty-profile-icon">${icon(tab === "activity" ? "clock" : "chart")}</div><h2>${safe(title)}</h2><p>${safe(detail)}</p>${action ? `<a href="index.html?status=live">Explore live markets ${icon("arrow")}</a>` : ""}</div>`;
   }
   function renderResults() {
     if (!snapshot) return;
@@ -179,9 +191,7 @@
         (a) =>
           ($("activity-type").value === "all" ||
             a.type === $("activity-type").value) &&
-          queryMatches(
-            `Bitcoin BTC 5 min ${a.type} ${a.side} Maths Statistics`,
-          ),
+          queryMatches(`${marketWords(a.marketId)} ${a.type} ${a.side}`),
       );
       if (!items.length)
         html = empty(
@@ -198,7 +208,7 @@
           .slice(0, activityLimit)
           .map(
             (a) =>
-              `<tr><td>${marketCell(a.side, `${a.type === "settlement" ? "Settled" : a.type === "buy" ? "Bought" : "Sold"} ${cap(a.side)}`, `${money(a.shares)} shares`)}</td><td class="price-column">${a.type === "settlement" ? "1 gold" : cents(a.price)}</td><td class="price-column">${money(a.shares)}</td><td><span class="position-value-main ${a.type !== "buy" ? "positive" : ""}">${a.type === "buy" ? "−" : "+"}${money(a.total)} G</span><span class="position-date">${date(a.time)} · ${time(a.time)}</span></td><td><span class="position-date">${time(a.time)}</span></td></tr>`,
+              `<tr><td>${marketCell(a.side, `${a.type === "settlement" ? "Settled" : a.type === "buy" ? "Bought" : "Sold"} ${outcome(a.side, a.marketId)}`, `${money(a.shares)} shares`, a.marketId)}</td><td class="price-column">${a.type === "settlement" ? "1 gold" : cents(a.price)}</td><td class="price-column">${money(a.shares)}</td><td><span class="position-value-main ${a.type !== "buy" ? "positive" : ""}">${a.type === "buy" ? "−" : "+"}${money(a.total)} G</span><span class="position-date">${date(a.time)} · ${time(a.time)}</span></td><td><span class="position-date">${time(a.time)}</span></td></tr>`,
           )
           .join("")}</tbody></table>`;
         $("profile-load-more").hidden = items.length <= activityLimit;
@@ -207,13 +217,14 @@
           `Your last 500 fills and settlements are retained. Tracking since ${date(p.trackingSince)}. No simulated activity is added to your profile.`;
       }
     } else if (positionState === "active") {
-      let items = ["up", "down"]
-        .map((side) => ({ side, ...p.positions[side] }))
-        .filter(
-          (pos) =>
-            pos.shares > 0.00001 &&
-            queryMatches(`Bitcoin BTC 5 min ${pos.side} Maths Statistics`),
-        );
+      let items = (
+        p.allPositions ||
+        ["up", "down"].map((side) => ({ side, ...p.positions[side] }))
+      ).filter(
+        (pos) =>
+          pos.shares > 0.00001 &&
+          queryMatches(`${marketWords(pos.marketId)} ${pos.side}`),
+      );
       items.sort((a, b) =>
         sort === "profit"
           ? b.shares * b.mark - b.cost - (a.shares * a.mark - a.cost)
@@ -227,29 +238,28 @@
               ? "No active positions"
               : "Make your first prediction",
           query
-            ? "Try searching for Bitcoin or an outcome."
-            : `You have ${money(p.balance)} gold available. Pick Up or Down in the live Bitcoin market and follow your position here.`,
+            ? "Try searching for Aerofoil, Bitcoin, or an outcome."
+            : `You have ${money(p.balance)} gold available. Choose a live science market and follow your positions here.`,
         );
       else
         html = `<table class="profile-table"><thead><tr><th>Market</th><th class="price-column">Avg</th><th class="price-column">Current</th><th class="value-col">Value</th><th></th></tr></thead><tbody>${items
           .map((pos) => {
             const value = pos.shares * pos.mark,
               profit = value - pos.cost;
-            return `<tr><td>${marketCell(pos.side, `${cap(pos.side)} ${cents(pos.cost / pos.shares)}`, `${money(pos.shares)} shares`)}</td><td class="price-column">${cents(pos.cost / pos.shares)}</td><td class="price-column">${cents(pos.mark)}</td><td><span class="position-value-main">${money(value)} G</span><span class="position-profit ${cls(profit)}">${signed(profit)} (${money(pos.cost ? (profit / pos.cost) * 100 : 0)}%)</span></td><td><a class="profile-trade-link" href="bitcoin.html?side=${pos.side}" aria-label="Trade your ${pos.side} position">Trade ↗</a></td></tr>`;
+            return `<tr><td>${marketCell(pos.side, `${outcome(pos.side, pos.marketId)} ${cents(pos.cost / pos.shares)}`, `${money(pos.shares)} shares`, pos.marketId)}</td><td class="price-column">${cents(pos.cost / pos.shares)}</td><td class="price-column">${cents(pos.mark)}</td><td><span class="position-value-main">${money(value)} G</span><span class="position-profit ${cls(profit)}">${signed(profit)} (${money(pos.cost ? (profit / pos.cost) * 100 : 0)}%)</span></td><td><a class="profile-trade-link" href="${marketLink(pos.marketId)}?side=${pos.side}" aria-label="Trade your ${pos.side} position">Trade ↗</a></td></tr>`;
           })
           .join("")}</tbody></table>`;
-      const orders = p.orders.filter((o) =>
-        queryMatches(
-          `Bitcoin BTC 5 min ${o.side} ${o.action} Maths Statistics`,
-        ),
+      const orders = (p.allOrders || p.orders).filter((o) =>
+        queryMatches(`${marketWords(o.marketId)} ${o.side} ${o.action}`),
       );
       if (orders.length)
-        html += `<div class="profile-orders"><h3>Open orders <span>(${orders.length})</span></h3>${orders.map((o) => `<div class="profile-order-row"><span>${cap(o.action)} ${cap(o.side)} · ${money(o.remaining)} shares at ${cents(o.price)}</span><a href="bitcoin.html?side=${o.side}">Manage order ↗</a></div>`).join("")}</div>`;
+        html += `<div class="profile-orders"><h3>Open orders <span>(${orders.length})</span></h3>${orders.map((o) => `<div class="profile-order-row"><span>${cap(o.action)} ${outcome(o.side, o.marketId)} · ${money(o.remaining)} shares at ${cents(o.price)}</span><a href="${marketLink(o.marketId)}?side=${o.side}">Manage order ↗</a></div>`).join("")}</div>`;
     } else {
       let items = p.history.map((h) => ({
+        marketId: h.marketId,
         time: h.end,
         side: h.outcome,
-        label: `${cap(h.outcome)} won`,
+        label: `${outcome(h.outcome, h.marketId)} won`,
         detail: `${date(h.start)} · ${time(h.start)}`,
         cost: h.cost,
         value: h.payout,
@@ -259,9 +269,10 @@
         ...(p.activity || [])
           .filter((a) => a.type === "sell")
           .map((a) => ({
+            marketId: a.marketId,
             time: a.time,
             side: a.side,
-            label: `Sold ${cap(a.side)}`,
+            label: `Sold ${outcome(a.side, a.marketId)}`,
             detail: `${money(a.shares)} shares · ${date(a.time)}`,
             cost: a.total - (a.profit || 0),
             value: a.total,
@@ -269,7 +280,7 @@
           })),
       );
       items = items.filter((i) =>
-        queryMatches(`Bitcoin BTC 5 min ${i.label} Maths Statistics`),
+        queryMatches(`${marketWords(i.marketId)} ${i.label}`),
       );
       items.sort((a, b) =>
         sort === "value"
@@ -281,7 +292,7 @@
       if (!items.length)
         html = empty(
           query ? "No matching positions" : "No closed positions yet",
-          "Sold shares and settled five-minute predictions will appear here.",
+          "Sold shares and settled predictions will appear here.",
           !query,
         );
       else {
@@ -289,7 +300,7 @@
           .slice(0, activityLimit)
           .map(
             (i) =>
-              `<tr><td>${marketCell(i.side, i.label, i.detail)}</td><td class="price-column">${money(i.cost)} G</td><td class="price-column">Closed</td><td><span class="position-value-main">${money(i.value)} G</span><span class="position-profit ${cls(i.profit)}">${signed(i.profit)} G</span></td><td><a class="profile-trade-link" href="bitcoin.html">Play ↗</a></td></tr>`,
+              `<tr><td>${marketCell(i.side, i.label, i.detail, i.marketId)}</td><td class="price-column">${money(i.cost)} G</td><td class="price-column">Closed</td><td><span class="position-value-main">${money(i.value)} G</span><span class="position-profit ${cls(i.profit)}">${signed(i.profit)} G</span></td><td><a class="profile-trade-link" href="${marketLink(i.marketId)}">Play ↗</a></td></tr>`,
           )
           .join("")}</tbody></table>`;
         $("profile-load-more").hidden = items.length <= activityLimit;

@@ -56,17 +56,21 @@
       this.token = storage.get("physics-server-guest");
       this.snapshot = null;
       this.polling = false;
+      this.marketId = "bitcoin";
     }
     async api(path, body) {
       const headers = { "Content-Type": "application/json" };
       if (this.token) headers.Authorization = `Bearer ${this.token}`;
-      const response = await fetch(`${this.base}/api/${path}`, {
-        method: body === undefined ? "GET" : "POST",
-        headers,
-        credentials: this.base ? "omit" : "same-origin",
-        body: body === undefined ? undefined : JSON.stringify(body),
-        signal: AbortSignal.timeout(12000),
-      });
+      const response = await fetch(
+        `${this.base}/api/${path}?market=${encodeURIComponent(this.marketId)}`,
+        {
+          method: body === undefined ? "GET" : "POST",
+          headers,
+          credentials: this.base ? "omit" : "same-origin",
+          body: body === undefined ? undefined : JSON.stringify(body),
+          signal: AbortSignal.timeout(12000),
+        },
+      );
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Could not reach your guest account.");
@@ -94,6 +98,12 @@
         .forEach((el) => (el.innerHTML = avatar(data.player.avatar)));
     }
     async local(path, body) {
+      if (this.marketId === "aerofoil") {
+        this.onStatus(
+          "OpenFOAM data requires a connection. Reconnect to play.",
+        );
+        return;
+      }
       const work = () => {
         let state;
         try {
@@ -155,7 +165,7 @@
           if (!location.hostname.endsWith(".github.io")) {
             this.mode = "server";
             this.onStatus("Connection lost · Trying to reconnect…");
-          } else this.mode = "local";
+          } else this.mode = this.marketId === "aerofoil" ? "server" : "local";
         }
       } else this.mode = "local";
       if (this.mode === "local") {
@@ -167,7 +177,7 @@
       }
       this.timer = setInterval(() => {
         if (!document.hidden) this.refresh();
-      }, 3000);
+      }, this.intervalMs || 3000);
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) this.refresh();
       });
@@ -178,7 +188,7 @@
         clearInterval(this.timer);
         this.timer = setInterval(() => {
           if (!document.hidden) this.refresh();
-        }, 3000);
+        }, this.intervalMs || 3000);
       });
     }
   }

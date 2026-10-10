@@ -9,6 +9,9 @@ fs.mkdirSync(path.join(hosting, "public"), { recursive: true });
 for (const name of [
   "index.html",
   "bitcoin.html",
+  "aerofoil.html",
+  "aerofoil.css",
+  "aerofoil.js",
   "profile.html",
   "home.css",
   "home.js",
@@ -24,6 +27,22 @@ for (const name of [
 ]) {
   fs.copyFileSync(path.join(root, name), path.join(hosting, "public", name));
 }
+fs.cpSync(
+  path.join(root, "geometry"),
+  path.join(hosting, "public", "geometry"),
+  { recursive: true },
+);
+const exchange = fs
+  .readFileSync(path.join(root, "exchange.js"), "utf8")
+  .replace(
+    'const { Market } = require("./market");',
+    'import { Market } from "./engine.js";',
+  )
+  .replace(
+    "module.exports = { Exchange, AeroMarket };",
+    "export { Exchange, AeroMarket };",
+  );
+fs.writeFileSync(path.join(hosting, "lib", "exchange.js"), exchange);
 fs.copyFileSync(
   path.join(root, "index.html"),
   path.join(hosting, "lib", "home.html"),

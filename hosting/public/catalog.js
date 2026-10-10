@@ -1,4 +1,4 @@
-/* Catalog only: science entries describe future games, never executable markets. */
+/* Science catalog: only entries marked live have executable markets. */
 (function () {
   "use strict";
   const subjects = [
@@ -67,18 +67,20 @@
     },
     {
       id: "aerofoil",
-      title: "Will the particle pass above the aerofoil?",
+      title: "Will the dust exit above the previous particle?",
       short: "Flow over an aerofoil",
       subject: "fluid",
       topic: "Aerofoils",
       art: "aerofoil",
-      chance: 62,
+      chance: 50,
+      live: true,
+      isNew: true,
       featured: true,
-      duration: "60 sec",
+      duration: "~2 min",
       description:
-        "One particle. One aerofoil. Follow a tracer through the flow and predict which side it will pass.",
-      rule: "The planned market resolves Yes if the selected tracer crosses the outlet above the aerofoil reference line. Initial conditions will be shown before each round.",
-      outcomes: ["Above the aerofoil", "Below the aerofoil"],
+        "A tilted NACA 0012. A separated wake. Follow real OpenFOAM flow and predict the dust particle’s exit height.",
+      rule: "Above wins when the particle exits at or above the previous particle’s exit height. Below wins otherwise. Each round ends at the outlet, usually around two minutes.",
+      outcomes: ["Above previous exit", "Below previous exit"],
     },
     {
       id: "galton",
@@ -107,7 +109,7 @@
       art: "convection",
       featured: true,
       isNew: true,
-      duration: "2 min",
+      duration: "~2 min",
       chance: 57,
       description:
         "Heat from below. Cooling from above. A tiny disturbance could decide which way the fluid starts to circulate.",
@@ -167,7 +169,7 @@
       topic: "Heat transfer",
       art: "heat",
       chance: 71,
-      duration: "2 min",
+      duration: "~2 min",
       description:
         "A warm boundary heats a cool plate. Predict whether its center crosses the target temperature in time.",
       rule: "The planned market compares the center temperature against the displayed target at the deadline. Plate properties, starting temperature, and boundary conditions will be public.",
@@ -210,7 +212,7 @@
       topic: "Orbits",
       art: "orbit",
       chance: 36,
-      duration: "2 min",
+      duration: "~2 min",
       description:
         "Three bodies tug on one another. Predict whether they stay together or one escapes.",
       rule: "The planned market uses a published escape criterion at a fixed simulation time. Initial positions, masses, and velocities will be visible before trading.",

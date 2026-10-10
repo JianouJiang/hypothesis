@@ -1,0 +1,19 @@
+{
+  "dataset": "naca0012-re1000-a20-v1",
+  "fingerprint": "c67ef418708e5478abb5ef30d60c39f18bddfb5c1b58eb81a6cfede6daf044b4",
+  "provenance": "Computed with OpenFOAM. Passive particles postprocessed from its velocity fields.",
+  "meshChecks": "Topology and geometry checks passed.",
+  "trajectories": 129,
+  "particleIntegrationCheck": "Halving the particle integration time step changes retained endpoints by less than 0.003 chord lengths.",
+  "observedReverseParticleMotion": 16,
+  "roundDurationRange_seconds": [
+    106.194,
+    168.118
+  ],
+  "limitations": [
+    "2D exploratory low-Reynolds-number simulation",
+    "No claim of mesh-converged or experimentally validated flow",
+    "High-angle real flows can be three-dimensional",
+    "Finite library of preselected completed transits; raw solver setup remains private"
+  ]
+}

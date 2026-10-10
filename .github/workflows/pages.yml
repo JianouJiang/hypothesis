@@ -29,7 +29,8 @@ jobs:
       - name: Prepare public files
         run: |
           mkdir -p _site
-          cp index.html bitcoin.html profile.html styles.css home.css profile.css app.js home.js profile.js guest.js catalog.js market.js favicon.svg deployment.json _site/
+          cp index.html bitcoin.html aerofoil.html profile.html styles.css home.css aerofoil.css profile.css app.js home.js aerofoil.js profile.js guest.js catalog.js market.js favicon.svg deployment.json _site/
+          cp -r geometry _site/geometry
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

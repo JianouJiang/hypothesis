@@ -1,23 +1,27 @@
 "use strict";
 const { Market } = require("./market");
-const {
-  experiment,
-  atTime,
-  slotProbabilities,
-  GALTON,
-  ESCAPE,
-} = require("./physics");
+const { experiment, atTime, slotProbabilities, GALTON } = require("./physics");
 
 class CollisionMarket extends Market {
   constructor(options) {
     super({ ...options, duration: 65000 });
   }
-  model(start = this.state.round.start) {
-    return experiment(this.simulation.kind, this.simulation.seed, start);
+  model(start = this.state.round.start, fresh = false) {
+    const legacy =
+      this.simulation.kind === "escape" &&
+      !fresh &&
+      this.state.round?.start === start &&
+      this.state.round.timingVersion !== 2;
+    return experiment(
+      this.simulation.kind,
+      this.simulation.seed,
+      start,
+      legacy ? 1 : 2,
+    );
   }
   newRound(start) {
-    const model = this.model(start),
-      end = start + model.resolveMs + 3500;
+    const model = this.model(start, true),
+      end = start + model.resolveMs + (model.config.cooldownMs ?? 3500);
     this.duration = end - start;
     this.seconds = Math.ceil(this.duration / 1000);
     const path = Array.from({ length: this.seconds + 1 }, (_, i) =>
@@ -35,6 +39,7 @@ class CollisionMarket extends Market {
       id: String(start),
       start,
       end,
+      timingVersion: 2,
       settlementAt: start + model.resolveMs,
       opening: 0.5,
       path,
@@ -149,11 +154,13 @@ class CollisionMarket extends Market {
       sample = atTime(model, elapsed);
     s.round.resolved = r.resolved;
     s.round.closed = r.resolved;
-    s.round.end = model.kind === "escape" ? r.start + ESCAPE.durationMs : null;
+    s.round.end =
+      model.kind === "escape" ? r.start + model.config.durationMs : null;
     s.round.nextAt = r.resolved ? r.end : null;
     s.physics = {
       kind: model.kind,
       config: model.config,
+      release: model.release,
       pegs: model.pegs,
       phases: model.phases,
       frames: model.frames.slice(

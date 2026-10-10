@@ -17,11 +17,28 @@
   gap: 25px;
 }
 .aero-page .subject-nav > a {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 0;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 550;
+  letter-spacing: 0.03px;
+  color: #697586;
   white-space: nowrap;
 }
 .aero-page .subject-nav > a[aria-current="true"] {
   color: #2675e9;
   font-weight: 600;
+  border-bottom-color: #2675e9;
+}
+@media (max-width: 700px) {
+  .aero-page .subject-nav > a {
+    font-size: 11px;
+  }
 }
 .aero-main {
   max-width: 1240px;

@@ -46,6 +46,7 @@
       renderPositions();
       renderPanel();
       renderSlots();
+      renderRelease();
     },
     (message) => {
       $("aero-connection").textContent = message;
@@ -284,6 +285,54 @@
     }
   };
 
+  function renderRelease() {
+    if (!isGalton) return;
+    const release = scene?.physics.release;
+    $("download-release").disabled = !release;
+    if (!release) return;
+    const signed = (n) => `${n >= 0 ? "+" : ""}${n.toFixed(6)}`;
+    $("release-x").textContent = `${signed(release.x)} m`;
+    $("release-vx").textContent = `${signed(release.vx)} m/s`;
+    $("release-x").title = `${release.x} m`;
+    $("release-vx").title = `${release.vx} m/s`;
+  }
+  if (isGalton)
+    $("download-release").onclick = () => {
+      const data = scene;
+      if (!data?.physics.release) return;
+      const payload = {
+        schemaVersion: 1,
+        experiment: "galton",
+        roundId: data.round.id,
+        roundStartUtc: new Date(data.round.start).toISOString(),
+        releaseAtUtc: new Date(
+          data.round.start + data.physics.config.preludeMs,
+        ).toISOString(),
+        coordinateSystem: {
+          x: "metres from the board centre; positive right",
+          y: "metres downwards from the board top",
+          velocity: "metres per physical second",
+          angle: "radians; positive clockwise on screen",
+          angularVelocity: "radians per physical second",
+        },
+        initialConditions: data.physics.release,
+        parameters: data.physics.config,
+        pegs: data.physics.pegs,
+      };
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(payload, null, 2) + "\n"], {
+          type: "application/json",
+        }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `galton-round-${data.round.id}-release.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+
   function renderSlots() {
     if (!isGalton || !snapshot?.outcomes) return;
     const host = $("slot-markets");
@@ -492,6 +541,20 @@
       10,
     );
     ctx.fill();
+    const centre = position(0, 0);
+    ctx.save();
+    ctx.strokeStyle = "#94b4d038";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]);
+    ctx.beginPath();
+    ctx.moveTo(centre[0], centre[1]);
+    ctx.lineTo(centre[0], position(0, c.floor)[1]);
+    ctx.stroke();
+    ctx.restore();
+    ctx.font = "10px system-ui";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#9bb0c7";
+    ctx.fillText("x = 0", centre[0] + 8, centre[1] - 9);
     for (let slot = 0; slot < 7; slot++) {
       const a = position(slot - 3.5, c.binTop),
         b = position(slot - 2.5, c.floor),
@@ -530,7 +593,7 @@
       metal.addColorStop(1, "#37424d");
       circle(p[0], p[1], r, metal);
     }
-    const release = position(0, 0.05);
+    const release = position(physics.release?.x ?? 0, 0.05);
     ctx.strokeStyle = "#dbc69c50";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -691,8 +754,12 @@
         0,
         Math.ceil((physics.config.preludeMs - elapsed) / 1000),
       );
-      const seconds =
-        physics.phase === "release"
+      const seconds = resolved
+        ? Math.max(
+            0,
+            Math.ceil((scene.round.nextAt - Date.now() - client.offset) / 1000),
+          )
+        : physics.phase === "release"
           ? release
           : isGalton
             ? Math.max(

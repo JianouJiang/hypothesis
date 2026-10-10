@@ -112,11 +112,11 @@
       featured: true,
       live: true,
       isNew: true,
-      duration: "1–2 min",
+      duration: "60 sec",
       chance: 50,
       description:
         "Three rotating rings. A luminous ball. Real collisions make the music. Predict an escape before time runs out.",
-      rule: "After a one-minute prediction window, the ball has 60 seconds to clear all three rings. Yes pays on escape, No on timeout.",
+      rule: "The ball has 60 seconds to clear all three rings. Yes pays on escape, No on timeout. The next ball launches after a 3-second result countdown.",
       outcomes: ["Escapes in time", "Stays inside"],
     },
     {

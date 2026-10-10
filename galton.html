@@ -79,6 +79,24 @@
               <p>One ball. Seven slots. Every bounce changes the odds.</p>
             </div>
           </div>
+          <section
+            class="release-readout"
+            aria-label="This round's release conditions"
+          >
+            <div>
+              <span>Release position x₀</span>
+              <strong id="release-x">— m</strong>
+            </div>
+            <div>
+              <span>Initial horizontal speed vₓ₀</span>
+              <strong id="release-vx">— m/s</strong>
+            </div>
+            <button id="download-release" disabled>↓ Round data</button>
+            <p>
+              x = 0 at the centre · positive to the right, negative to the left.
+              Each release starts within ±0.22 m of the centre.
+            </p>
+          </section>
           <div class="collision-stage" id="collision-stage">
             <div class="stage-hud">
               <span
@@ -88,7 +106,7 @@
             </div>
             <canvas
               id="physics-canvas"
-              aria-label="One ball falling through a Galton board into seven labeled slots"
+              aria-label="One ball falling through a Galton board, with a marked centre line and seven labeled slots"
             ></canvas>
             <div
               class="stage-result"
@@ -185,9 +203,14 @@
                 Gravity, circular contact geometry, friction and restitution
                 drive the ball; no bin is selected in advance. Small variations
                 in the release position and horizontal velocity create new
-                trajectories each round. Motion plays at a slower pace, with
-                each transit lasting at least 75 seconds and full rounds lasting
-                1–5 minutes so there is time to observe and trade.
+                trajectories each round. The release position varies within
+                ±0.22 m of the centre. This round's x₀ and vₓ₀ stay visible
+                above the board throughout the fall. Download Round data for the
+                full-precision starting state, geometry and release time; y is
+                measured downwards from the board's top, in metres. Motion plays
+                at a slower pace, with each transit lasting at least 75 seconds
+                and full rounds lasting 1–5 minutes so there is time to observe
+                and trade.
               </p>
               <p>
                 This is a two-dimensional rigid-body model using

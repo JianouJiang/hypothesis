@@ -358,5 +358,13 @@
   "timestepSeconds": 0.008333333333333333,
   "continuousCollisionDetection": true,
   "playbackRule": "20 wall seconds per physical second, increased for short falls to ensure at least 75 seconds of transit. Actual factor is in the observed round config.",
-  "settlement": "First floor contact inside the slot. Void with cost-basis refund after 12 physical seconds without a landing."
+  "settlement": "First floor contact inside the slot. Void with cost-basis refund after 12 physical seconds without a landing.",
+  "coordinateSystem": {
+    "x": "metres from the board centre; positive right, negative left",
+    "y": "metres downwards from the board top",
+    "velocity": "metres per physical second",
+    "angle": "radians; positive clockwise on screen"
+  },
+  "releaseRule": "Each round varies the starting x uniformly within [-0.22, 0.22] m around the centre, and vx within [-0.24, 0.24] m/s. The ball begins at y = 0.32 m, vy = 0, angle = 0, angular velocity = 0.",
+  "roundReleaseData": "The Round data button above the board downloads the current round ID, release time, full-precision initial conditions, parameters and peg coordinates. The same initial state is available in physics.release in the current API snapshot, including after the release frame leaves the observation window."
 }

@@ -17,13 +17,15 @@
   "restitution": 1,
   "friction": 0,
   "initialSpeed": 2.2,
-  "preludeMs": 60000,
-  "durationMs": 120000,
+  "preludeMs": 0,
+  "durationMs": 60000,
   "deadlineSeconds": 60,
   "timestepSeconds": 0.008333333333333333,
   "continuousCollisionDetection": true,
   "segmentsPerRing": 84,
   "settlement": "Yes when the entire ball clears outer radius plus 0.04 m detection tolerance at or before 60 physical seconds; No otherwise.",
   "motorDrivenRings": true,
-  "audio": "Each measured collision impulse creates a tuned note; surface, impulse strength and horizontal position set pitch, loudness and pan."
+  "audio": "Each measured collision impulse creates a tuned note; surface, impulse strength and horizontal position set pitch, loudness and pan.",
+  "cooldownMs": 3000,
+  "roundTiming": "Launch immediately; resolve on escape or the 60-second deadline; show the result for 3 seconds, then launch the next ball."
 }

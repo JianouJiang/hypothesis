@@ -40,9 +40,10 @@ const ESCAPE = {
   restitution: 1,
   friction: 0,
   initialSpeed: 2.2,
-  preludeMs: 60000,
-  durationMs: 120000,
+  preludeMs: 0,
+  durationMs: 60000,
   deadlineSeconds: 60,
+  cooldownMs: 3000,
 };
 function random(seed) {
   return () => {
@@ -93,6 +94,16 @@ function galton(seed) {
   });
   ball.createFixture(pl.Circle(c.ballRadius), { density: 1, ...material });
   ball.setLinearVelocity(V((rng() - 0.5) * 0.48, 0));
+  // Keep the actual starting state available even after the visible history
+  // window no longer contains the release. Do not consume another random draw.
+  const release = {
+    x: ball.getPosition().x,
+    y: ball.getPosition().y,
+    vx: ball.getLinearVelocity().x,
+    vy: ball.getLinearVelocity().y,
+    angle: ball.getAngle(),
+    angularVelocity: ball.getAngularVelocity(),
+  };
   let collisions = 0,
     stepTime = 0,
     lastImpact = -1000,
@@ -164,6 +175,7 @@ function galton(seed) {
   return {
     kind: "galton",
     config: { ...c, playbackScale: c.playbackScale * factor },
+    release,
     pegs: PEGS,
     frames,
     impacts,
@@ -173,8 +185,13 @@ function galton(seed) {
     void: slot === null,
   };
 }
-function escape(seed) {
-  const c = ESCAPE,
+function escape(seed, timingVersion) {
+  // Finish rounds opened by the previous release on their original clock.
+  // New rounds launch immediately, with only a three-second result interval.
+  const c =
+      timingVersion === 1
+        ? { ...ESCAPE, preludeMs: 60000, durationMs: 120000, cooldownMs: 3500 }
+        : ESCAPE,
     rng = random(seed),
     world = new pl.World(V(0, c.gravity));
   const phases = c.radii.map(() => rng() * Math.PI * 2);
@@ -276,15 +293,17 @@ function escape(seed) {
     void: false,
   };
 }
-function experiment(kind, seed, start) {
-  const key = `${kind}:${seed}:${start}`;
+function experiment(kind, seed, start, timingVersion = 2) {
+  const key = `${kind}:${seed}:${start}:${timingVersion}`;
   if (!cache.has(key)) {
     if (cache.size > 24) cache.delete(cache.keys().next().value);
+    const physicalSeed =
+      seed ^ ((start / 1000) | 0) ^ Math.imul(start % 100000, 65537);
     cache.set(
       key,
-      (kind === "galton" ? galton : escape)(
-        seed ^ ((start / 1000) | 0) ^ Math.imul(start % 100000, 65537),
-      ),
+      kind === "galton"
+        ? galton(physicalSeed)
+        : escape(physicalSeed, timingVersion),
     );
   }
   return cache.get(key);

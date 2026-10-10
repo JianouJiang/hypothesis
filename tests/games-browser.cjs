@@ -1,10 +1,11 @@
 /* Browser + real HTTP checks using an injectable clock; no shortened production rounds. */
 const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
 const { chromium } = require("playwright");
 const { Exchange } = require("../exchange");
 const { createApp } = require("../server");
 (async () => {
-  let now = 5000;
+  let now = 0;
   const exchange = new Exchange({ now: () => now, seed: 7123, bots: false });
   const app = createApp({ market: exchange, persist: false });
   await new Promise((resolve) => app.server.listen(0, "127.0.0.1", resolve));
@@ -31,6 +32,29 @@ const { createApp } = require("../server");
     await page.locator("#review-trade:not([disabled])").waitFor();
     const original = await session();
     assert.equal(original.player.balance, 1000);
+    const signed = (n) => `${n >= 0 ? "+" : ""}${n.toFixed(6)}`;
+    assert.equal(
+      await page.locator("#release-x").textContent(),
+      `${signed(original.physics.release.x)} m`,
+    );
+    assert.equal(
+      await page.locator("#release-vx").textContent(),
+      `${signed(original.physics.release.vx)} m/s`,
+    );
+    const downloading = page.waitForEvent("download");
+    await page.locator("#download-release").click();
+    const download = await downloading;
+    const roundData = JSON.parse(readFileSync(await download.path(), "utf8"));
+    assert.equal(roundData.roundId, original.round.id);
+    assert.deepEqual(roundData.initialConditions, original.physics.release);
+    assert.deepEqual(roundData.pegs, original.physics.pegs);
+    assert.equal(
+      Date.parse(roundData.releaseAtUtc),
+      original.round.start + original.physics.config.preludeMs,
+    );
+    console.log(
+      "PASS visible release coordinates and full-precision round download match the simulation",
+    );
     await page.locator("#trade-amount").fill("8");
     await page.locator("#review-trade").click();
     assert.match(
@@ -131,7 +155,7 @@ const { createApp } = require("../server");
     assert.equal(
       await page.evaluate(() => window.__physicsNotes.length),
       0,
-      "prediction window must not play a background track",
+      "no music before the first actual impact",
     );
     const escape = exchange.select("escape"),
       hits = escape.model().impacts;
@@ -165,7 +189,30 @@ const { createApp } = require("../server");
     );
     await page.screenshot({ path: "/tmp/escape-mobile.png", fullPage: true });
     console.log(
-      "PASS collision-triggered music, silent prediction window, and functional mute",
+      "PASS collision-triggered music, silence before impacts, and functional mute",
+    );
+    const finishedRound = escape.state.round;
+    now = finishedRound.settlementAt + 1500;
+    await page.locator("#stage-result:not([hidden])").waitFor();
+    assert.equal(finishedRound.end - finishedRound.settlementAt, 3000);
+    assert.match(
+      await page.locator("#stage-result").textContent(),
+      /Next round in [0-3]s/,
+    );
+    now = finishedRound.end + 1500;
+    await page.waitForFunction(
+      () =>
+        document.getElementById("stage-result").hidden &&
+        document.getElementById("physics-phase").textContent ===
+          "LIVE EXPERIMENT",
+    );
+    const nextEscape = await session("escape");
+    assert.notEqual(nextEscape.round.id, finishedRound.id);
+    assert.equal(nextEscape.physics.config.preludeMs, 0);
+    assert.equal(nextEscape.physics.phase, "running");
+    assert.ok(nextEscape.physics.particle[0] > 0);
+    console.log(
+      "PASS escape restarts a moving ball after exactly 3 seconds, without a prediction wait",
     );
     await page.setViewportSize({ width: 1440, height: 1100 });
     await page.goto(base + "/galton.html?slot=2&side=down");

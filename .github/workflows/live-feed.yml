@@ -4,11 +4,17 @@ name: Push the official record to the hosted market
 # scheduled job reads the USGS HVO notice feed from a GitHub-hosted runner and
 # hands each observation to the live market through the owner endpoint.
 # GitHub may delay or skip scheduled runs, and it drops more of them at the
-# busy round minutes (:00, :10, ...), so this runs at :03, :13, ... instead.
+# busy round minutes (:00, :10, ...), so this runs at :04, :14, ... instead.
 # The market only ever waits for the next successful check, it never guesses.
+#
+# GitHub runs a schedule as the account that last changed the cron line below,
+# and it silently never fires when that account has no write access to this
+# repository. Commit any change to the cron line with an e-mail linked to the
+# repository owner's GitHub account (for example the owner's
+# <id>+<login>@users.noreply.github.com address), not an unlinked address.
 on:
   schedule:
-    - cron: '3-59/10 * * * *'
+    - cron: '4-59/10 * * * *'
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,33 @@
+name: Push the official record to the hosted market
+
+# The hosted Worker cannot reach usgs.gov from its own network, so this
+# scheduled job reads the USGS HVO notice feed from a GitHub-hosted runner and
+# hands each observation to the live market through the owner endpoint.
+# GitHub may delay or skip scheduled runs; the market only ever waits for the
+# next successful check, it never guesses.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-feed
+  cancel-in-progress: false
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read the record and push one observation
+        env:
+          COMMUNITY_ADMIN_TOKEN: ${{ secrets.COMMUNITY_ADMIN_TOKEN }}
+          HYPOTHESIS_API_BASE: https://hypothesis.jianou-works.chatgpt.site
+        run: node scripts/push-live-feed.js

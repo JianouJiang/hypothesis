@@ -157,21 +157,16 @@
       this.accept(data.snapshot);
     }
     async start() {
+      // One hosted site serves both pages and API, so the shared market is
+      // always same-origin. Only a file:// preview uses the browser wallet.
       if (location.protocol !== "file:") {
         try {
-          if (location.hostname.endsWith(".github.io"))
-            this.base =
-              (await (await fetch("deployment.json")).json()).apiBase || "";
-          if (location.hostname.endsWith(".github.io") && !this.base)
-            throw new Error("Practice mode");
           const data = await this.api("session");
           this.mode = "server";
           this.accept(data.snapshot || data);
         } catch {
-          if (!location.hostname.endsWith(".github.io")) {
-            this.mode = "server";
-            this.onStatus("Connection lost · Trying to reconnect…");
-          } else this.mode = this.marketId !== "bitcoin" ? "server" : "local";
+          this.mode = "server";
+          this.onStatus("Connection lost · Trying to reconnect…");
         }
       } else this.mode = "local";
       if (this.mode === "local") {

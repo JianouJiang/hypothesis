@@ -75,7 +75,6 @@ function createApp(options = {}) {
     "/app.js": ["app.js", "text/javascript"],
     "/market.js": ["market.js", "text/javascript"],
     "/favicon.svg": ["favicon.svg", "image/svg+xml"],
-    "/deployment.json": ["deployment.json", "application/json"],
     "/community-ui.js": ["community-ui.js", "text/javascript"],
     "/community.css": ["community.css", "text/css"],
     "/inbox.html": ["inbox.html", "text/html"],

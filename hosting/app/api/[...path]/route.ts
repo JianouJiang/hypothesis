@@ -101,10 +101,9 @@ async function ingest(
   });
 }
 
-const allowedOrigins = new Set([
-  "https://jianoujiang.github.io",
-  "https://hypothesis.jianou-works.chatgpt.site",
-]);
+// Pages and API share one origin now; the old GitHub Pages address only
+// redirects here, so no cross-origin browser traffic is expected.
+const allowedOrigins = new Set(["https://hypothesis.jianou-works.chatgpt.site"]);
 
 function headers(request: Request) {
   const origin = request.headers.get("Origin");

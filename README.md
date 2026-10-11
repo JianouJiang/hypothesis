@@ -2,7 +2,7 @@
 
 **Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Trade 22 live experiments covering fluids, mechanics, heat, light, fields, quantum physics, gravity, probability, and a live-streamed volcano. Explore seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
 
-**Play:** [GitHub Pages](https://jianoujiang.github.io/hypothesis/) · [Shared live market](https://hypothesis.jianou-works.chatgpt.site)
+**Play:** [hypothesis.jianou-works.chatgpt.site](https://hypothesis.jianou-works.chatgpt.site) — one hosted site serves the pages, the shared live market, and the owner inbox. The old GitHub Pages address redirects there.
 
 ## What works
 
@@ -24,7 +24,7 @@
 
 ## Feedback, privacy, and owner inbox
 
-Open **[the owner inbox](https://jianoujiang.github.io/hypothesis/inbox.html)** and enter the owner access key. The key stays in tab memory, never in a URL or public asset. Local hosting reads `COMMUNITY_ADMIN_TOKEN`, or the owner's private `../polymarket_physics_private/community-admin-token` file; hosted deployment uses the same secret runtime variable. Neither key is committed to GitHub. Set a random secret of at least 32 characters when self-hosting.
+Open **[the owner inbox](https://hypothesis.jianou-works.chatgpt.site/inbox.html)** and enter the owner access key. The key stays in tab memory, never in a URL or public asset. Local hosting reads `COMMUNITY_ADMIN_TOKEN`, or the owner's private `../polymarket_physics_private/community-admin-token` file; hosted deployment uses the same secret runtime variable. Neither key is committed to GitHub. Set a random secret of at least 32 characters when self-hosting.
 
 The inbox supports private feedback review, manual email replies, JSON export, an opt-in contacts CSV, comment hiding/restoration, report dismissal, and contact/message deletion. Feedback is stored in the inbox; **no automatic email notifications or campaigns are sent**. Update requests record explicit consent and time, but addresses are **unverified**; verify ownership before importing into a mailing provider. An email supplied only for a reply never enters the updates list.
 
@@ -139,15 +139,15 @@ Positions Value marks held shares at the current sell quotes. Total PnL is cash 
 
 The latest 500 activity events and 100 settled rounds per market are retained; chart observations are sampled once per minute and older observations are thinned as the archive grows. Detailed profile tracking begins with this update. Resetting the practice wallet resets trading statistics while keeping the username, avatar, and bio.
 
-Guest access is remembered in this browser. Clearing browser storage, changing browser profiles, or switching between the GitHub Pages and hosted site addresses creates a separate guest identity; the two online sites still share the same live market. There is no account recovery or login yet.
+Guest access is remembered in this browser. Clearing browser storage or changing browser profiles creates a separate guest identity. There is no account recovery or login yet.
 
 ## Online architecture
 
-GitHub Pages serves the plain HTML, CSS, and JavaScript. `deployment.json` points the Pages app at the shared public server. The hosted app in `hosting/` runs the same market engine on a Cloudflare Worker with D1 wallet storage and a private R2 CFD replay library through Sites. Both URLs connect to the same market.
+The hosted app in `hosting/` serves the plain HTML, CSS, and JavaScript and runs the market engine on a Cloudflare Worker with D1 wallet storage and a private R2 CFD replay library through Sites. Pages and API share one origin, so there is exactly one public address. GitHub holds the source and runs the tests on every push; the former GitHub Pages address keeps a redirect so old links and deep links still work.
 
 The online server creates anonymous guest sessions and stores profiles, balances, orders, and settlement centrally. The numerical experiments poll every 750 ms and the original live games once per second; discovery and profiles poll every three seconds. A revision check commits the full market update atomically; a conflicting update is re-read and validated before committing, preventing concurrent trades from double-spending the same gold. Future price points and guest secrets are never returned to browsers.
 
-Local Node hosting provides server-sent events for Bitcoin and polling for the other pages. When GitHub Pages cannot reach the shared server at startup, Bitcoin and profile pages clearly switch to an independent browser practice market. Aerofoil trading requires a live connection and never falls back to synthetic CFD. It never merges practice gold into the shared market.
+Local Node hosting provides server-sent events for Bitcoin and polling for the other pages. Opening the HTML files directly from disk gives an independent browser practice market on the Bitcoin and profile pages; online, a lost connection is reported and retried rather than silently replaced. Aerofoil trading requires a live connection and never falls back to synthetic CFD. Practice gold is never merged into the shared market.
 
 ## Early-market bot liquidity
 
@@ -181,7 +181,7 @@ Optional browser checks (install Playwright separately and make it available wit
 
 The hosted build uses the supplied Sites/Vinext starter and its lockfile. Hosting dependencies are separate from the zero-dependency local app. `hosting/db/schema.ts` defines the database, with generated migrations in `hosting/drizzle/`.
 
-The GitHub Actions workflow tests the engine and uploads **only the public web assets** to Pages. It does not publish wallets, server data, or hosting configuration.
+The GitHub Actions workflow tests the engine on every push and publishes only the two redirect pages in `redirect/` to the old GitHub Pages address. It does not publish wallets, server data, or hosting configuration; the playable site is published from `hosting/` through Sites.
 
 `node tests/community-browser.cjs` covers the original four comment sections, two-browser replies/likes, filters, reports and moderation, email privacy and erasure, owner exports, opt-out/Do Not Track, mobile layouts, and Hypothesis branding. These tests run against an isolated local server and never submit data to the live site or send email.
 

@@ -1120,38 +1120,18 @@
     }
   }
   async function init() {
+    // The shared market is served from this same origin; file:// previews
+    // use the browser practice wallet instead.
     if (location.protocol === "file:") return startLocal();
-    try {
-      const configResponse = await fetch("deployment.json", {
-        cache: "no-store",
-      });
-      if (configResponse.ok) {
-        const config = await configResponse.json();
-        if (location.hostname.endsWith(".github.io"))
-          apiBase = config.apiBase || "";
-      }
-    } catch {
-      /* Local server does not need a deployment config. */
-    }
     authToken = storage.get("physics-server-guest");
-    if (location.hostname.endsWith(".github.io") && !apiBase)
-      return startLocal();
     try {
       await connectServer();
     } catch (error) {
-      if (location.hostname.endsWith(".github.io")) {
-        await startLocal();
-        toast(
-          "Practice market is ready",
-          "The shared server is unavailable. This session is saved only in your browser.",
-        );
-      } else {
-        $("connection-text").textContent = "Unable to reach the market";
-        $("trade-error").textContent = `${error.message} Refresh to reconnect.`;
-        $("trade-error").hidden = false;
-        $("submit-trade").disabled = true;
-        toast("Market connection unavailable", error.message, true);
-      }
+      $("connection-text").textContent = "Unable to reach the market";
+      $("trade-error").textContent = `${error.message} Refresh to reconnect.`;
+      $("trade-error").hidden = false;
+      $("submit-trade").disabled = true;
+      toast("Market connection unavailable", error.message, true);
     }
   }
   init();

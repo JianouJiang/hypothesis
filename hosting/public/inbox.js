@@ -151,8 +151,6 @@
     key = $("inbox-key").value.trim();
     $("inbox-status").textContent = "Unlocking…";
     try {
-      if (location.hostname.endsWith(".github.io"))
-        base = (await (await fetch("deployment.json")).json()).apiBase || "";
       await refresh();
       $("inbox-key").value = "";
       $("inbox-login").hidden = true;

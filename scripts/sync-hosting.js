@@ -44,7 +44,6 @@ for (const name of [
   "app.js",
   "market.js",
   "favicon.svg",
-  "deployment.json",
 ]) {
   fs.copyFileSync(path.join(root, name), path.join(hosting, "public", name));
 }

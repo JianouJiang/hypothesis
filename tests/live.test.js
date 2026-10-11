@@ -316,6 +316,8 @@ test("windows, feed state and positions survive restart; the community lists the
   assert.ok(s.player.positions.up.shares > 0);
   assert.equal(copy.liveFeedsDue(now() + 60000).length, 0);
   assert.deepEqual(copy.liveFeedsDue(now() + def.source.intervalMs + 1), ["kilauea"]);
+  assert.equal(copy.liveFeedsDue(now() + def.source.intervalMs + 1, 20 * 60000).length, 0);
+  assert.deepEqual(copy.liveFeedsDue(now() + 20 * 60000, 20 * 60000), ["kilauea"]);
   const community = new Community(undefined, ex.state);
   assert.equal(community.contracts("kilauea").length, 1);
   assert.equal(community.positions(guest, "kilauea")[0].label, "Yes");
@@ -356,6 +358,27 @@ test("the HTTP owner endpoint reads status and resolves with the owner key; the 
   assert.equal(guestState.live.feed.ok, true);
   assert.equal(guestState.live.feed.meta.streams.v1cam, "abc123def45");
   assert.equal(guestState.live.feed.events.length, def.seedEvents.length);
+  // A trusted poller can hand observations to a server that cannot reach the record.
+  const pushed = await (
+    await call("POST", {
+      action: "observe",
+      game: "kilauea",
+      observation: {
+        at: 1,
+        ok: true,
+        source: "pushed",
+        events: [...def.seedEvents, event(55, "2026-10-10T22:00:00Z")],
+        meta: { streams: { v2cam: "pushedVideo1" } },
+      },
+    })
+  ).json();
+  assert.equal(pushed.result.ok, true);
+  assert.equal(pushed.live[0].feed.source, "pushed");
+  assert.equal(pushed.live[0].feed.checkedAt, now, "the server's clock stamps the observation");
+  assert.equal(pushed.live[0].feed.events.length, def.seedEvents.length + 1);
+  assert.equal(pushed.live[0].resolved, false, "an event before the window does not settle");
+  assert.equal((await call("POST", { action: "observe", game: "kilauea", observation: "bad" })).status, 400);
+  assert.equal((await call("POST", { action: "observe", game: "nope", observation: {} })).status, 400);
   const resolved = await (await call("POST", { game: "kilauea", outcome: "no", note: "Manual test" })).json();
   assert.equal(resolved.result.outcome, "no");
   assert.equal(resolved.live[0].resolution.by, "owner");

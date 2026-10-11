@@ -147,11 +147,16 @@ function createApp(options = {}) {
           let body = "";
           for await (const chunk of req) {
             body += chunk;
-            if (body.length > 4096)
+            if (body.length > 262144)
               return json(413, { error: "Request too large." });
           }
           const input = JSON.parse(body || "{}");
-          const result = market.resolveLive(input.game, input);
+          // "observe" lets a trusted poller that can reach the official
+          // record hand observations to a server that cannot.
+          const result =
+            input.action === "observe"
+              ? (market.observeLive(input.game, input.observation), { ok: true })
+              : market.resolveLive(input.game, input);
           save();
           json(200, { result, live: market.liveStatus() });
           broadcast();

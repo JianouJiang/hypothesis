@@ -100,12 +100,12 @@ async function getJson(fetchImpl, url, ms = 9000) {
   if (!response.ok) throw new Error(`HTTP ${response.status} from ${url}`);
   return response.json();
 }
-async function resolveShortLink(fetchImpl, url) {
+async function resolveShortLink(fetchImpl, url, ms = 6000) {
   try {
     const response = await fetchImpl(url, {
       method: "HEAD",
       redirect: "manual",
-      signal: signal(6000),
+      signal: signal(ms),
     });
     const location = response.headers.get("location") || "";
     const id = /[?&]v=([\w-]{6,})/.exec(location)?.[1] || /youtu\.be\/([\w-]{6,})/.exec(location)?.[1];
@@ -119,12 +119,13 @@ async function resolveShortLink(fetchImpl, url) {
 async function fetchObservation(def, options = {}) {
   const fetchImpl = options.fetch || globalThis.fetch;
   const now = options.now ? options.now() : Date.now();
+  const timeoutMs = options.timeoutMs || 9000;
   const src = def.source;
   const notices = { ...(options.previousMeta?.notices || {}) };
   const streams = { ...(options.previousMeta?.streams || {}) };
   const observation = { at: now, source: src.name, ok: false, error: null, events: [], meta: null };
   try {
-    const list = await getJson(fetchImpl, src.feedUrl);
+    const list = await getJson(fetchImpl, src.feedUrl, timeoutMs);
     if (!Array.isArray(list)) throw new Error("Unexpected notice list.");
     const mine = list.filter(
       (n) =>
@@ -145,7 +146,7 @@ async function fetchObservation(def, options = {}) {
       }
       fetched++;
       try {
-        const notice = await getJson(fetchImpl, src.noticeUrl + encodeURIComponent(n.notice_identifier));
+        const notice = await getJson(fetchImpl, src.noticeUrl + encodeURIComponent(n.notice_identifier), timeoutMs);
         const sentMs = Number(notice.sent_unixtime) * 1000 || Date.parse(String(notice.sent_utc).replace(" ", "T") + "Z") || Number(n.sent_unixtime) * 1000;
         const starts = parseEpisodeStarts(noticeText(notice.notice_html), sentMs);
         notices[n.notice_identifier] = {
@@ -199,7 +200,7 @@ async function fetchObservation(def, options = {}) {
   ) {
     for (const camera of def.stream.cameras) {
       if (!camera.short) continue;
-      const id = await resolveShortLink(fetchImpl, camera.short);
+      const id = await resolveShortLink(fetchImpl, camera.short, Math.min(timeoutMs, 6000));
       if (id) streams[camera.id] = id;
     }
     observation.meta = { ...(observation.meta || options.previousMeta || {}), streams, streamsAt: now };

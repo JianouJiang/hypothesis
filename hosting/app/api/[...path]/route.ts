@@ -5,18 +5,23 @@ import { adminAuthorized } from "../../../lib/community.js";
 import Live from "../../../lib/livestreams.js";
 import { fetchObservation } from "../../../lib/live-feeds.js";
 
-// Official-record observations are shared across requests for a minute so a
-// burst of traffic cannot hammer the USGS feed; the engine stores the result.
+// The owner's poller (scripts/push-live-feed.js) normally delivers official-
+// record observations through /api/live-admin every few minutes, because this
+// Worker's outbound fetches to usgs.gov have been observed to time out. The
+// in-request fetch below is only a bounded fallback when no observation has
+// arrived for twenty minutes, cached per isolate for five minutes.
 const feedCache = new Map<string, { at: number; observation: any }>();
 async function observeDue(market: any) {
   let changed = false;
-  for (const game of market.liveFeedsDue()) {
+  for (const game of market.liveFeedsDue(Date.now(), 20 * 60000)) {
     const cached = feedCache.get(game);
-    let observation = cached && Date.now() - cached.at < 60000 ? cached.observation : null;
+    let observation = cached && Date.now() - cached.at < 5 * 60000 ? cached.observation : null;
     if (!observation) {
       observation = await fetchObservation((Live.definitions as Record<string, any>)[game], {
         previousMeta: market.liveFeedMeta(game),
-        maxNotices: 4,
+        maxNotices: 2,
+        timeoutMs: 3000,
+        resolveStreams: false,
       });
       feedCache.set(game, { at: Date.now(), observation });
     }
@@ -195,7 +200,8 @@ async function handle(request: Request) {
       if (!request.headers.get("Content-Type")?.startsWith("application/json"))
         return json(415, { error: "Expected a JSON trade request." });
       const body = await request.text();
-      if (body.length > 4096) return json(413, { error: "Request too large." });
+      if (body.length > (owner ? 262144 : 4096))
+        return json(413, { error: "Request too large." });
       input = JSON.parse(body);
       if (!token && !owner)
         return json(401, { error: "Reconnect to restore your guest wallet." });
@@ -237,7 +243,10 @@ async function handle(request: Request) {
         // from the published record. No guest wallet is involved.
         let result;
         if (request.method === "POST")
-          result = market.resolveLive(input.game, input);
+          result =
+            input.action === "observe"
+              ? (market.observeLive(input.game, input.observation), { ok: true })
+              : market.resolveLive(input.game, input);
         const live = market.liveStatus();
         if (request.method === "POST" || observed) {
           const update = await database

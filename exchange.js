@@ -249,11 +249,14 @@ class Exchange {
   }
   // Live-stream markets read an official record. The server polls it and
   // hands each observation here; nothing is fetched inside the engine.
-  liveFeedsDue(now = this.nowSource()) {
+  liveFeedsDue(now = this.nowSource(), minAgeMs = 0) {
     return Live.ids.filter((key) => {
       const m = this.markets[key],
         feed = m.state.feed,
-        interval = Live.definitions[key].source.intervalMs;
+        interval = Math.max(
+          minAgeMs,
+          Live.definitions[key].source.intervalMs,
+        );
       if (!feed) return true;
       return now - feed.checkedAt >= (m.state.round.resolved ? 3 : 1) * interval;
     });
@@ -263,8 +266,15 @@ class Exchange {
   }
   observeLive(game, observation) {
     if (!Live.definitions[game]) throw new Error("Unknown live market.");
+    if (!observation || typeof observation !== "object" || Array.isArray(observation))
+      throw new Error("Send one observation object.");
+    if (observation.events !== undefined && !Array.isArray(observation.events))
+      throw new Error("Observation events must be a list.");
+    if ((observation.events || []).length > 400)
+      throw new Error("Too many events in one observation.");
     this.requestTime = this.nowSource();
-    this.markets[game].observe(observation);
+    // The clock of record is this server's, never the sender's.
+    this.markets[game].observe({ ...observation, at: this.requestTime });
   }
   liveStatus() {
     this.advance();

@@ -6,6 +6,8 @@ const crypto = require("node:crypto");
 const { Market } = require("./market");
 const { Exchange } = require("./exchange");
 const { Community, adminAuthorized } = require("./community");
+const Live = require("./livestreams");
+const { fetchObservation } = require("./live-feeds");
 
 function createApp(options = {}) {
   const dataFile =
@@ -53,6 +55,10 @@ function createApp(options = {}) {
     "/lab-renderer.js": ["lab-renderer.js", "text/javascript"],
     "/experiment.css": ["experiment.css", "text/css"],
     "/escape.html": ["escape.html", "text/html"],
+    "/live.html": ["live.html", "text/html"],
+    "/live.js": ["live.js", "text/javascript"],
+    "/live.css": ["live.css", "text/css"],
+    "/livestreams.js": ["livestreams.js", "text/javascript"],
     "/collision.js": ["collision.js", "text/javascript"],
     "/collision.css": ["collision.css", "text/css"],
     "/competitions.html": ["competitions.html", "text/html"],
@@ -129,6 +135,29 @@ function createApp(options = {}) {
           Object.hasOwn(market.players || market.state.players, token)
             ? token
             : null;
+        if (url.pathname === "/api/live-admin") {
+          if (!adminAuthorized(req.headers.authorization, adminToken))
+            return json(403, { error: "Invalid owner key." });
+          if (!(market instanceof Exchange))
+            return json(404, { error: "Not found." });
+          if (req.method === "GET") return json(200, { live: market.liveStatus() });
+          if (req.method !== "POST")
+            return json(405, { error: "Method not allowed." });
+          if (!req.headers["content-type"]?.startsWith("application/json"))
+            return json(415, { error: "Expected JSON." });
+          let body = "";
+          for await (const chunk of req) {
+            body += chunk;
+            if (body.length > 4096)
+              return json(413, { error: "Request too large." });
+          }
+          const input = JSON.parse(body || "{}");
+          const result = market.resolveLive(input.game, input);
+          save();
+          json(200, { result, live: market.liveStatus() });
+          broadcast();
+          return;
+        }
         if (["/api/community", "/api/community-admin"].includes(url.pathname)) {
           const admin = url.pathname === "/api/community-admin";
           if (
@@ -294,15 +323,42 @@ function createApp(options = {}) {
     broadcast();
   }, 1000);
   const persist = setInterval(save, 5000);
+  // Live-stream markets: poll the official record and hand observations to
+  // the engine. Network failures are recorded, never thrown into trading.
+  const readFeed = options.fetchObservation || fetchObservation;
+  let polling = false;
+  async function pollFeeds() {
+    if (polling || !(market instanceof Exchange)) return;
+    polling = true;
+    try {
+      for (const game of market.liveFeedsDue()) {
+        const observation = await readFeed(Live.definitions[game], {
+          previousMeta: market.liveFeedMeta(game),
+        });
+        market.observeLive(game, observation);
+        save();
+        broadcast();
+      }
+    } catch (error) {
+      console.error("Live feed check failed:", error.message);
+    } finally {
+      polling = false;
+    }
+  }
+  const feeds =
+    options.liveFeeds === false ? null : setInterval(pollFeeds, 30000);
+  if (feeds) pollFeeds();
   server.on("close", () => {
     clearInterval(tick);
     clearInterval(persist);
+    if (feeds) clearInterval(feeds);
     save();
   });
   return {
     server,
     market,
     save,
+    pollFeeds,
     stop: () => {
       for (const res of clients.keys()) res.end();
       server.close();

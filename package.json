@@ -2,7 +2,7 @@
   "name": "hypothesis",
   "version": "1.0.0",
   "private": true,
-  "description": "21 live science prediction games: fluid flow, mechanics, quantum waves, optics, thermodynamics and probability, with shared free-gold trading.",
+  "description": "22 live science prediction games: fluid flow, mechanics, quantum waves, optics, thermodynamics, probability and a live-streamed volcano, with shared free-gold trading.",
   "scripts": {
     "start": "node server.js",
     "test": "node --test tests/*.test.js"

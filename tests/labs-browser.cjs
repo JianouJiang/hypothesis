@@ -148,7 +148,7 @@ const { ids, definitions } = require("../experiments");
     await page.locator(".market-card[data-market]").first().waitFor();
     while (await page.locator("#load-more").isVisible())
       await page.locator("#load-more").click();
-    assert.equal(await page.locator(".market-card[data-market]").count(), 21);
+    assert.equal(await page.locator(".market-card[data-market]").count(), 22);
     assert.equal(await page.locator(".market-card [data-preview]").count(), 0);
     assert.equal(
       await page

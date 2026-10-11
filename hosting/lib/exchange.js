@@ -3,8 +3,10 @@
 import { Market } from "./engine.js";
 import { CollisionMarket } from "./collision-market.js";
 import { LabMarket } from "./lab-market.js";
+import { LiveMarket } from "./live-market.js";
 import { randomBytes } from "node:crypto";
 import Labs from "./experiments.js";
+import Live from "./livestreams.js";
 const round = (n) => Math.round(n * 1e8) / 1e8;
 
 class AeroMarket extends Market {
@@ -234,7 +236,61 @@ class Exchange {
       });
       this.state.markets[key] = this.markets[key].state;
     }
+    for (const key of Live.ids) {
+      this.markets[key] = new LiveMarket({
+        ...shared,
+        marketId: key,
+        state: this.state.markets[key],
+        simulation: { kind: key },
+      });
+      this.state.markets[key] = this.markets[key].state;
+    }
     for (const id of Object.keys(this.state.accounts)) this.addPlayer(id);
+  }
+  // Live-stream markets read an official record. The server polls it and
+  // hands each observation here; nothing is fetched inside the engine.
+  liveFeedsDue(now = this.nowSource()) {
+    return Live.ids.filter((key) => {
+      const m = this.markets[key],
+        feed = m.state.feed,
+        interval = Live.definitions[key].source.intervalMs;
+      if (!feed) return true;
+      return now - feed.checkedAt >= (m.state.round.resolved ? 3 : 1) * interval;
+    });
+  }
+  liveFeedMeta(game) {
+    return this.markets[game]?.state.feed?.meta || null;
+  }
+  observeLive(game, observation) {
+    if (!Live.definitions[game]) throw new Error("Unknown live market.");
+    this.requestTime = this.nowSource();
+    this.markets[game].observe(observation);
+  }
+  liveStatus() {
+    this.advance();
+    return Live.ids.map((key) => {
+      const m = this.markets[key],
+        r = m.state.round;
+      return {
+        game: key,
+        title: Live.definitions[key].title,
+        roundId: r.id,
+        start: r.start,
+        deadline: r.deadline,
+        resolved: r.resolved,
+        resolution: r.resolution,
+        nextAt: r.nextAt,
+        volume: r.volume,
+        probability: m.probability(),
+        feed: m.feedView(),
+        history: m.state.history.slice(0, 6),
+      };
+    });
+  }
+  resolveLive(game, input) {
+    if (!Live.definitions[game]) throw new Error("Unknown live market.");
+    this.advance();
+    return this.markets[game].override(input);
   }
   get players() {
     return this.state.accounts;
@@ -352,6 +408,8 @@ class Exchange {
             volume: m.round.volume,
             closed: m.round.closed === true,
             nextAt: m.round.nextAt || null,
+            phase: m.round.phase,
+            deadline: m.round.deadline,
           },
         },
       ]),

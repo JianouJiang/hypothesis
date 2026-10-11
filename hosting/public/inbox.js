@@ -12,10 +12,67 @@
         ([id, d]) => [id, d.short],
       ),
     ),
+    ...Object.fromEntries(
+      Object.entries(window.HypothesisLive?.definitions || {}).map(
+        ([id, d]) => [id, d.short],
+      ),
+    ),
   };
   let key = "",
     base = "",
-    data;
+    data,
+    live;
+  async function liveApi(body) {
+    const response = await fetch(`${base}/api/live-admin`, {
+      method: body ? "POST" : "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      credentials: "omit",
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(15000),
+    });
+    const result = await response.json();
+    if (!response.ok)
+      throw new Error(result.error || "Could not load live markets.");
+    return result;
+  }
+  function renderLive() {
+    const outcomeLabel = (r) =>
+      !r
+        ? "—"
+        : r.outcome === "void"
+          ? "Void"
+          : r.outcome === "yes"
+            ? "Yes"
+            : "No";
+    $("inbox-live").innerHTML = live
+      ? live
+          .map((m) => {
+            const feed = m.feed;
+            const phase = m.resolved
+              ? `Resolved ${outcomeLabel(m.resolution)} · ${safe(m.resolution.by)}${m.resolution.note ? " · " + safe(m.resolution.note) : ""}`
+              : Date.now() >= m.deadline
+                ? "Deadline passed · awaiting official record"
+                : "Open";
+            const feedLine = feed
+              ? `Record ${feed.ok ? "checked" : "check failed"} ${date(feed.checkedAt)}${feed.fetchedAt ? " · last success " + date(feed.fetchedAt) : ""} · ${feed.events.length} events${feed.error ? " · " + safe(feed.error) : ""}${feed.meta?.newest ? ` · newest HVO notice ${safe(feed.meta.newest.type)} ${date(feed.meta.newest.sent)}` : ""}`
+              : "Record not checked yet";
+            return `<article class="inbox-card ${m.resolved ? "inbox-resolved" : ""}"><strong>${safe(titles[m.game] || m.game)} · ${phase}</strong><p>Window ${date(m.start)} → ${date(m.deadline)} · Yes quote ${Math.round(m.probability * 100)}% · ${Math.round(m.volume)} G volume</p><small>${feedLine}</small><div>${
+              m.resolved
+                ? `<small>Next window opens ${date(m.nextAt)}</small>`
+                : ["yes", "no", "void"]
+                    .map(
+                      (o) =>
+                        `<button class="community-secondary" data-live-resolve="${o}" data-game="${safe(m.game)}">Resolve ${o === "void" ? "Void (refund)" : o[0].toUpperCase() + o.slice(1)}</button>`,
+                    )
+                    .join("")
+            }</div></article>`;
+          })
+          .join("") || "<p>No live-stream markets configured.</p>"
+      : "<p>Live-market status unavailable on this server.</p>";
+  }
   async function api(body) {
     const response = await fetch(`${base}/api/community-admin`, {
       method: body ? "POST" : "GET",
@@ -77,7 +134,13 @@
   }
   async function refresh() {
     data = await api();
+    try {
+      live = (await liveApi()).live;
+    } catch {
+      live = null;
+    }
     render();
+    renderLive();
     $("inbox-status").textContent =
       `Updated ${new Date().toLocaleTimeString()}`;
   }
@@ -112,17 +175,37 @@
     key = "";
     data = undefined;
     $("inbox-dashboard").hidden = true;
+    live = undefined;
     [
       "inbox-feedback",
       "inbox-reports",
       "inbox-contacts",
       "inbox-metrics",
+      "inbox-live",
     ].forEach((id) => $(id).replaceChildren());
     $("inbox-login").hidden = false;
     $("inbox-status").textContent = "Inbox locked.";
     $("inbox-key").focus();
   };
   $("inbox-dashboard").addEventListener("click", async (event) => {
+    const resolver = event.target.closest("[data-live-resolve]");
+    if (resolver) {
+      const outcome = resolver.dataset.liveResolve;
+      const note = prompt(
+        `Resolve ${titles[resolver.dataset.game] || resolver.dataset.game} as ${outcome.toUpperCase()}. Cite the official record (shown publicly):`,
+      );
+      if (!note || !note.trim()) return;
+      if (!confirm(`Settle this window as ${outcome.toUpperCase()} now? This pays or refunds every holder and cannot be undone.`)) return;
+      resolver.disabled = true;
+      try {
+        await liveApi({ game: resolver.dataset.game, outcome, note: note.trim() });
+        await refresh();
+      } catch (error) {
+        $("inbox-status").textContent = error.message;
+        resolver.disabled = false;
+      }
+      return;
+    }
     const button = event.target.closest("[data-action]");
     if (!button) return;
     if (

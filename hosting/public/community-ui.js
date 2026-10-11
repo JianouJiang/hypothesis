@@ -13,6 +13,11 @@
         ([id, d]) => [id, d.short],
       ),
     ),
+    ...Object.fromEntries(
+      Object.entries(window.HypothesisLive?.definitions || {}).map(
+        ([id, d]) => [id, d.short],
+      ),
+    ),
   };
   const uid = () =>
     crypto.randomUUID

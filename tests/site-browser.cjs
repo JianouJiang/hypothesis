@@ -25,7 +25,7 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     );
     assert.equal(await page.locator(".market-card").count(), 12);
     await page.locator("#load-more").click();
-    assert.equal(await page.locator(".market-card").count(), 22);
+    assert.equal(await page.locator(".market-card").count(), 23);
     await page.locator('#subject-nav [data-subject="maths"]').click();
     assert.equal(
       await page.locator("#markets-heading").textContent(),
@@ -55,6 +55,11 @@ const base = (process.env.PHYSICS_TEST_URL || "http://127.0.0.1:3000").replace(
     assert.equal(await page.locator(".market-card").count(), 1);
     assert.equal(await page.locator('[data-market="convection"]').count(), 1);
     await page.locator("#watchlist-filter").click();
+    await page.locator("#next-feature").click();
+    assert.match(
+      await page.locator("#featured-market h2").textContent(),
+      /Kīlauea/,
+    );
     await page.locator("#next-feature").click();
     assert.match(
       await page.locator("#featured-market h2").textContent(),

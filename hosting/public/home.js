@@ -37,9 +37,14 @@
       { label: m.outcomes?.[1] || "No", chance: 100 - m.chance },
     ];
   const thumb = (m) => `<span class="science-thumbnail">${svg(m.art)}</span>`;
+  const Live = window.HypothesisLive || {
+    definitions: {},
+    link: () => null,
+    label: () => null,
+  };
   const link = (m) =>
     m.live
-      ? HypothesisExperiments.link(m.id) || `${m.id}.html`
+      ? HypothesisExperiments.link(m.id) || Live.link(m.id) || `${m.id}.html`
       : `?market=${m.id}`;
   const tradeLink = (m, side, index) =>
     HypothesisExperiments.definitions[m.id]
@@ -47,13 +52,16 @@
           index === undefined ? m.id : `${m.id}:${index}`,
           side,
         )
-      : `${link(m)}?${m.id === "galton" ? "slot=" + index + "&" : ""}side=${side}`;
+      : Live.definitions[m.id]
+        ? Live.link(m.id, side)
+        : `${link(m)}?${m.id === "galton" ? "slot=" + index + "&" : ""}side=${side}`;
   const sideLabel = (m, side) =>
     m.id === "convection"
       ? side === "up"
         ? "CW"
         : "CCW"
       : HypothesisExperiments.label(m.id, side) ||
+        Live.label(m.id, side) ||
         (m.id === "bitcoin"
           ? side === "up"
             ? "Up"
@@ -126,7 +134,7 @@
         )
         .join(
           "",
-        )}<p class="feature-odds-caption">${m.live ? (HypothesisExperiments.definitions[m.id] ? "Live science · Two-minute rounds" : m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (HypothesisExperiments.definitions[m.id] ? "LIVE NUMERICAL EXPERIMENT" : m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Hypothesis</span></div>`;
+        )}<p class="feature-odds-caption">${m.live ? (HypothesisExperiments.definitions[m.id] ? "Live science · Two-minute rounds" : Live.definitions[m.id] ? "Live stream · Weeks-long windows" : m.id === "aerofoil" ? "Live gold market · CFD tracer experiment" : m.id === "galton" ? "7 slot markets · Live gold trading" : "Live gold market · Collision music") : "Illustrative odds · Market preview"}</p><p class="feature-description">${safe(m.description)}</p><a class="feature-preview-link" href="${link(m)}" ${preview(m)}>Explore this experiment ${icon("arrow")}</a></div><a class="feature-art" href="${link(m)}" ${preview(m)} aria-label="Preview ${safe(m.short)}">${svg(m.art, true)}<span class="feature-art-label">${m.live ? (HypothesisExperiments.definitions[m.id] ? "LIVE NUMERICAL EXPERIMENT" : Live.definitions[m.id] ? "LIVE USGS STREAM · OFFICIAL RECORD" : m.id === "aerofoil" ? "WIND TUNNEL · 20° ANGLE OF ATTACK" : m.id === "galton" ? "ONE BALL · SEVEN LANDING SLOTS" : "THREE RINGS · SIXTY SECONDS") : "CONCEPT PREVIEW"}</span></a></div><div class="featured-footer"><span>${icon("clock")}${m.live ? "Live" : "Planned"} ${m.duration} rounds <span>·</span> Play gold</span><span class="small-brand">Hypothesis</span></div>`;
     $("carousel-dots").innerHTML = featured
       .map(
         (m, i) =>
@@ -269,6 +277,22 @@
       const live =
         snapshot.markets?.[id] || (id === "bitcoin" ? snapshot : null);
       if (!live || !$(id + "-countdown")) continue;
+      if (Live.definitions[id]) {
+        const now = Date.now() + (client.offset || 0),
+          span = (ms) => {
+            const d = Math.floor(ms / 86400000),
+              h = Math.floor((ms % 86400000) / 3600000),
+              m = Math.floor((ms % 3600000) / 60000);
+            return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m} min`;
+          };
+        $(id + "-countdown").textContent =
+          live.round.phase === "awaiting"
+            ? "Deadline passed · awaiting official record"
+            : live.round.phase === "result"
+              ? `Next window in ${span(Math.max(0, live.round.nextAt - now))}`
+              : `${span(Math.max(0, live.round.deadline - now))} to deadline`;
+        continue;
+      }
       if (live.round.closed) {
         const left = Math.max(
           0,
@@ -344,7 +368,7 @@
     } else {
       title = "A little curiosity goes a long way.";
       content =
-        '<ol class="home-steps"><li><strong>Make yourself at home.</strong>Your guest account starts with 1,000 gold. Visit your profile to choose a username.</li><li><strong>Find your next prediction.</strong>Browse live experiments by science subject and save your favorites.</li><li><strong>Play a live experiment.</strong>Predict a dust particle’s exit height, trade a Galton landing slot, watch a ring-escape challenge, or play Bitcoin in Maths &amp; Statistics. Review and confirm each trade before spending gold.</li><li><strong>See how your ideas stack up.</strong>Follow your positions, activity, and profit/loss in your profile. Each winning share pays 1 gold.</li></ol><div class="dialog-note">The aerofoil experiment uses real OpenFOAM data. Other live experiments use the numerical model shown on their game page. Bitcoin prices and trading bots are simulated; gold has no cash value.</div><a class="dialog-button" href="galton.html">Make your first prediction</a>';
+        '<ol class="home-steps"><li><strong>Make yourself at home.</strong>Your guest account starts with 1,000 gold. Visit your profile to choose a username.</li><li><strong>Find your next prediction.</strong>Browse live experiments by science subject and save your favorites.</li><li><strong>Play a live experiment.</strong>Predict a dust particle’s exit height, trade a Galton landing slot, watch a ring-escape challenge, follow Kīlauea’s live camera for weeks, or play Bitcoin in Maths &amp; Statistics. Review and confirm each trade before spending gold.</li><li><strong>See how your ideas stack up.</strong>Follow your positions, activity, and profit/loss in your profile. Each winning share pays 1 gold.</li></ol><div class="dialog-note">The aerofoil experiment uses real OpenFOAM data, and the Kīlauea market settles on official USGS notices. Other live experiments use the numerical model shown on their game page. Bitcoin prices and trading bots are simulated; gold has no cash value.</div><a class="dialog-button" href="galton.html">Make your first prediction</a>';
     }
     $("home-dialog-title").textContent = title;
     $("home-dialog-content").innerHTML = content;

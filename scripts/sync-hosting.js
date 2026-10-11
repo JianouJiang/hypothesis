@@ -15,6 +15,10 @@ for (const name of [
   "flow-renderer.js",
   "galton.html",
   "escape.html",
+  "live.html",
+  "live.js",
+  "live.css",
+  "livestreams.js",
   "experiment.html",
   "experiment.js",
   "experiments.js",
@@ -72,6 +76,14 @@ const exchange = fs
     'import Labs from "./experiments.js";',
   )
   .replace(
+    'const { LiveMarket } = require("./live-market");',
+    'import { LiveMarket } from "./live-market.js";',
+  )
+  .replace(
+    'const Live = require("./livestreams");',
+    'import Live from "./livestreams.js";',
+  )
+  .replace(
     "module.exports = { Exchange, AeroMarket };",
     "export { Exchange, AeroMarket };",
   );
@@ -84,9 +96,15 @@ for (const name of [
   "lab-physics.js",
   "wave-physics.js",
   "wake-physics.js",
+  "live-market.js",
+  "live-feeds.js",
 ]) {
   let source = fs.readFileSync(path.join(root, name), "utf8");
   source = source
+    .replace(
+      'const Live = require("./livestreams");',
+      'import Live from "./livestreams.js";',
+    )
     .replace(
       /const (\{[^;]+\}) = require\("\.\/wave-physics"\);/,
       'import $1 from "./wave-physics.js";',
@@ -167,4 +185,16 @@ fs.writeFileSync(
   path.join(hosting, "lib", "experiments.js"),
   labSource.slice(labStart, labEnd).trimEnd() +
     "\nconst Labs={definitions,ids,parse,contractIds,label,link};\nexport {definitions,ids,parse,contractIds,label,link};\nexport default Labs;\n",
+);
+
+// Public live-stream definitions share one ESM instance with the Worker engine.
+const liveSource = fs.readFileSync(path.join(root, "livestreams.js"), "utf8");
+const liveStart = liveSource.indexOf("const HST"),
+  liveEnd = liveSource.lastIndexOf("return {");
+if (liveStart < 0 || liveEnd < liveStart)
+  throw new Error("Cannot locate live-stream definitions factory.");
+fs.writeFileSync(
+  path.join(hosting, "lib", "livestreams.js"),
+  liveSource.slice(liveStart, liveEnd).trimEnd() +
+    "\nconst Live={definitions,ids,parse,label,link,deadline,question,embedUrl};\nexport {definitions,ids,parse,label,link,deadline,question,embedUrl};\nexport default Live;\n",
 );

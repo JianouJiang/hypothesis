@@ -1,13 +1,13 @@
 # Hypothesis
 
-**Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Trade 21 live experiments covering fluids, mechanics, heat, light, fields, quantum physics, gravity, and probability. Explore seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
+**Hypothesis** is a science prediction playground: build a model, take a position, and test it against the experiment. Trade 22 live experiments covering fluids, mechanics, heat, light, fields, quantum physics, gravity, probability, and a live-streamed volcano. Explore seasonal in-person competitions. Every guest starts with **1,000 gold coins**, shared across all live markets. No signup or real money.
 
 **Play:** [GitHub Pages](https://jianoujiang.github.io/hypothesis/) · [Shared live market](https://hypothesis.jianou-works.chatgpt.site)
 
 ## What works
 
 - A science market home page with featured experiments, subject navigation, search, topic/status filters, and a saved watchlist.
-- Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. All **21 catalogue experiments are playable**, including the original aerofoil, Bitcoin, Galton board and ring escape, plus 17 numerical experiments listed below.
+- Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. All **22 catalogue experiments are playable**, including the original aerofoil, Bitcoin, Galton board and ring escape, the live-streamed Kīlauea market, plus 17 numerical experiments listed below.
 - An aerofoil game with rounds around two minutes using genuine, precomputed OpenFOAM velocity fields and passive-tracer trajectories. Thousands of advected dust tracers and adjustable photographic trails reveal the flow. A dashed horizontal line marks the previous exit; a solid gold line and height chart show the current particle. Download the NACA 0012 geometry and public physical parameters.
 - A personal profile with an editable username, bio, and avatar; live positions, closed positions, activity, and a gold-denominated profit/loss chart.
 - An animated BTC/USD chart, opening price to beat, and five-minute countdown.
@@ -18,7 +18,7 @@
 - Automatic settlement follows each game’s published rule. Winning shares pay **1 gold each**; losing shares pay zero. Unfilled orders expire and release reserved funds/shares.
 - Guest wallets, open positions, transaction activity, settled results, and a practice-wallet reset.
 - Responsive desktop/mobile layout, keyboard support, chart hover, and search.
-- Public discussions on all 21 live games: guest avatars, current-position badges, threaded replies, likes, Newest/Most liked sorting, a Holders filter, comment links, reports, and deletion of your own posts. Comments stay with the game across rounds; holdings reflect the current round.
+- Public discussions on all 22 live games: guest avatars, current-position badges, threaded replies, likes, Newest/Most liked sorting, a Holders filter, comment links, reports, and deletion of your own posts. Comments stay with the game across rounds; holdings reflect the current round.
 - Private feedback with optional reply email and a separate, unchecked email-updates opt-in; contact **jianou.works@gmail.com** from every page.
 - Aggregate game-link clicks and visits, with a browser opt-out and Do Not Track support. A protected owner inbox shows feedback, update requests, engagement totals, and reported comments.
 
@@ -45,7 +45,7 @@ npm start
 
 Open **http://127.0.0.1:3000**. Different browser profiles receive separate guest wallets and trade in the same market. Tabs in the same profile share a wallet. The server saves progress to `data/market.json`, which is excluded from Git. Keep this directory to retain wallets after a restart.
 
-The public repository includes the games, matching engine, geometry, and physical conditions. The private CFD replay library is intentionally excluded. The owner's local server reads `../polymarket_physics_private/flow-bank.json`, or a file selected with `PHYSICS_CFD_DATA=/absolute/path/flow-bank.json`. Without it, all 20 other games and browsing still work; aerofoil trading reports unavailable rather than inventing flow. Existing aerofoil positions require their original dataset to resume safely. Use the hosted game to play without running CFD yourself.
+The public repository includes the games, matching engine, geometry, and physical conditions. The private CFD replay library is intentionally excluded. The owner's local server reads `../polymarket_physics_private/flow-bank.json`, or a file selected with `PHYSICS_CFD_DATA=/absolute/path/flow-bank.json`. Without it, all 21 other games and browsing still work; aerofoil trading reports unavailable rather than inventing flow. Existing aerofoil positions require their original dataset to resume safely. Use the hosted game to play without running CFD yourself.
 
 To play across your local network:
 
@@ -80,6 +80,18 @@ Bitcoin, CFD and Galton rounds last **1–5 minutes**. Escape attempts run for u
 **The collisions make the music.** There is no background recording or looping track. Measured contact impulses trigger original synthesized pentatonic notes: struck ring/peg row affects pitch, impulse affects loudness, and horizontal position affects stereo pan. Harmonics decay after each hit. Click **Play collision music** to satisfy browser audio activation, and use **Mute collision music** at any time. Hidden tabs suspend audio; rejoining never plays a backlog of missed impacts.
 
 Both games compute authoritative trajectories on the server and send only elapsed positions and impacts. A short rendering buffer smooths the 1-second network updates. Guests share the same ball, clock, book, and wallet. Their trades do not alter physics. The Galton probability vector is normalized from visible ball position; escape quotes use current radius and remaining time. These are liquidity heuristics, not calibrated scientific forecasts. Seeds and unobserved outcomes stay on the server. Contracts in one request share a clock sample so all seven slots cross a round boundary together.
+
+## Kīlauea live-stream market
+
+**[Play the Kīlauea market](https://hypothesis.jianou-works.chatgpt.site/live.html?game=kilauea)** · `live.html?game=kilauea`
+
+The first game built on a **real experiment watched through a live stream** rather than a simulation. Since 23 December 2024 Kīlauea has erupted in numbered lava fountaining episodes separated by pauses of two weeks or more; the USGS Hawaiian Volcano Observatory (HVO) streams Halemaʻumaʻu around the clock on three public-domain cameras (V1cam, V2cam, V3cam). The page embeds the stream and asks **“Will Kīlauea’s next lava fountaining episode begin before the deadline?”**
+
+Because a live stream lags real time by seconds to minutes and the camera cannot settle anything, the market is deliberately slow: windows last one to four weeks, with deadlines at **00:00 UTC on the 1st and 16th of each month**, always at least seven days after a window opens. Trading stays open until the deadline. **Yes** resolves as soon as an HVO notice states that a numbered episode began at a time (HST) inside the window; **No** resolves after the deadline once the site has successfully checked the record at or after the deadline. Episodes that began before the window, intrusions, overflows, spattering or new vents without a numbered fountaining episode do not count. The result stays on screen for ten minutes, then the next window opens.
+
+Settlement reads the public USGS Hazard Notification System API: `live-feeds.js` polls the recent-notice list, fetches each new HVO notice for volcano `hi3` once, strips the HTML, and parses “Episode N … began/started at HH:MM HST on Month D”. Real notices for episodes 48, 53 and 54 are kept in `tests/fixtures/hvo/` and drive the parser tests, including overnight episodes whose only date belongs to the end time and daily updates that merely restate earlier episodes. Episode start times for episodes 48–54 are seeded from the HVO status reports so the liquidity model has a recent event rate from day one. The USGS `url.usgs.gov/v1cam|v2cam|v3cam` short links are re-resolved a few times a day so the embed survives stream restarts; viewers can switch cameras on the page.
+
+`livestreams.js` holds the public specification (question, rule, schedule, stream, source, seeded events) and is shared by the browser, the Node server and the hosted Worker. `live-market.js` is the engine: a window is a `Market` round whose outcome is unknown until an observation arrives, so `path` never contains a future value, bots quote a memoryless hazard from the mean gap between recent official episodes (a liquidity heuristic, not a forecast), and a window that passes its deadline closes trading and waits for a fresh successful check rather than guessing. The local server polls every 30 seconds when a check is due (every five minutes while open); the hosted Worker checks during requests when the stored observation is older than five minutes, bounded to four notice fetches per request. If the feed is discontinued or changes format, the owner can resolve or void a window from the **owner inbox** with a note citing the published record; the note is shown on the page and in past windows. Nothing about this market is simulated: the volcano, the camera and the record are real, and gold has no cash value.
 
 ## Numerical experiment catalogue
 
@@ -121,7 +133,7 @@ Dates, venue, entry arrangements, prizes, final scoring and compute budgets are 
 
 ## Guest profiles
 
-The profile uses the same guest account as the home page and all 21 live experiments. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
+The profile uses the same guest account as the home page and all 22 live experiments. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
 
 Positions Value marks held shares at the current sell quotes. Total PnL is cash plus reserved gold plus marked positions, minus the initial 1,000 gold. The chart shows recorded portfolio observations and the current value, with time filters; it never invents historical results. Biggest Win is the largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct market rounds with fills. Volume counts the guest's actual fills, including fills of their resting orders.
 
@@ -184,5 +196,7 @@ Planck’s [body/continuous collision documentation](https://piqnt.com/planck.js
 ## Credits
 
 Hypothesis is an independent science playground with original identity, scientific illustrations, and avatar artwork. Each experiment publishes its own physical conditions and settlement rules.
+
+`tests/live.test.js` covers the Kīlauea market: deadline scheduling, the HVO notice parser on real fixtures, feed walking with cached notices and camera re-resolution, Yes settlement from an in-window episode, No settlement only after a post-deadline check, pre-window events, owner override and void refunds, hazard quotes, restart persistence, the community listing, the HTTP owner endpoint and the feed poller. `NODE_PATH=/path/to/playwright/node_modules node tests/live-browser.cjs` opens the page in a real browser against an isolated server with a stubbed feed.
 
 `tests/lab.test.js` checks all new models, conservation and symmetry properties, heat bounds, Brownian reflection, Lorentz motion, restitution, Faraday flux, wave normalization/free propagation/grid refinement, SCHOTT indices/Snell refraction, cylinder density and mirror symmetry, private future state, shared-wallet settlement, restart persistence and the exact three-second rollover. `NODE_PATH=/path/to/playwright/node_modules node tests/labs-browser.cjs` runs each of the 17 games through a real browser and local HTTP server: visual rendering, parameter downloads, review/cancel/confirm, positions, comments, mobile overflow, catalogue/profile links and expired confirmations. Browser tests use isolated wallets and never submit comments or feedback to production.

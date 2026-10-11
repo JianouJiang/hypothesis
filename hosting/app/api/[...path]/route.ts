@@ -1,6 +1,30 @@
 import { env } from "cloudflare:workers";
 import { Exchange } from "../../../lib/exchange.js";
 import { communityApi } from "../../../lib/community-api";
+import { adminAuthorized } from "../../../lib/community.js";
+import Live from "../../../lib/livestreams.js";
+import { fetchObservation } from "../../../lib/live-feeds.js";
+
+// Official-record observations are shared across requests for a minute so a
+// burst of traffic cannot hammer the USGS feed; the engine stores the result.
+const feedCache = new Map<string, { at: number; observation: any }>();
+async function observeDue(market: any) {
+  let changed = false;
+  for (const game of market.liveFeedsDue()) {
+    const cached = feedCache.get(game);
+    let observation = cached && Date.now() - cached.at < 60000 ? cached.observation : null;
+    if (!observation) {
+      observation = await fetchObservation((Live.definitions as Record<string, any>)[game], {
+        previousMeta: market.liveFeedMeta(game),
+        maxNotices: 4,
+      });
+      feedCache.set(game, { at: Date.now(), observation });
+    }
+    market.observeLive(game, observation);
+    changed = true;
+  }
+  return changed;
+}
 
 let flowCache: any = null;
 async function loadFlow() {
@@ -133,10 +157,22 @@ async function handle(request: Request) {
       return json(400, { error: "Could not store the CFD dataset." });
     }
   }
-  if (request.method === "GET" && route !== "session")
+  const owner = route === "live-admin";
+  if (owner && !["GET", "POST"].includes(request.method))
+    return json(405, { error: "Method not allowed." });
+  if (
+    owner &&
+    !adminAuthorized(
+      request.headers.get("Authorization"),
+      env.COMMUNITY_ADMIN_TOKEN,
+    )
+  )
+    return json(403, { error: "Invalid owner key." });
+  if (request.method === "GET" && route !== "session" && !owner)
     return json(404, { error: "Not found." });
   if (
     request.method === "POST" &&
+    !owner &&
     !["order", "cancel", "reset", "profile", "competition"].includes(
       route || "",
     )
@@ -147,8 +183,9 @@ async function handle(request: Request) {
       error: "The shared market is initializing. Please try again.",
     });
   const database = env.DB;
-  let token =
-    request.headers.get("Authorization")?.replace(/^Bearer /, "") || "";
+  let token = owner
+    ? ""
+    : request.headers.get("Authorization")?.replace(/^Bearer /, "") || "";
   if (token && !/^[a-f0-9]{48}$/.test(token)) token = "";
   let input: any = {};
   try {
@@ -161,7 +198,7 @@ async function handle(request: Request) {
       const body = await request.text();
       if (body.length > 4096) return json(413, { error: "Request too large." });
       input = JSON.parse(body);
-      if (!token)
+      if (!token && !owner)
         return json(401, { error: "Reconnect to restore your guest wallet." });
     }
     // The seed never leaves the server. Rebuilding a state snapshot advances the
@@ -195,6 +232,25 @@ async function handle(request: Request) {
         );
       const previousTick = signature(previousState);
       const market = new Exchange({ state: previousState, flowData });
+      const observed = await observeDue(market);
+      if (owner) {
+        // The owner reads live-market status or resolves a window by hand
+        // from the published record. No guest wallet is involved.
+        let result;
+        if (request.method === "POST")
+          result = market.resolveLive(input.game, input);
+        const live = market.liveStatus();
+        if (request.method === "POST" || observed) {
+          const update = await database
+            .prepare(
+              "UPDATE markets SET state = ?, revision = revision + 1, updated = ? WHERE id = ? AND revision = ?",
+            )
+            .bind(JSON.stringify(market.state), Date.now(), "bitcoin", row.revision)
+            .run();
+          if (update.meta.changes !== 1) continue;
+        }
+        return json(200, { result, live });
+      }
       market.select(marketId);
       let created = false;
       if (!token || !Object.hasOwn(market.players, token)) {
@@ -220,6 +276,7 @@ async function handle(request: Request) {
       const snapshot = market.snapshot(token, marketId);
       const changed =
         created ||
+        observed ||
         request.method === "POST" ||
         previousTick !== signature(market.state) ||
         previousState.version !== 2;

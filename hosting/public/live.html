@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Watch a real experiment on its live stream and predict whether the next official event arrives before the deadline."
+    />
+    <title>Live-stream experiment · Hypothesis</title>
+    <link rel="icon" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="aerofoil.css" />
+    <link rel="stylesheet" href="collision.css" />
+    <link rel="stylesheet" href="experiment.css" />
+    <link rel="stylesheet" href="live.css" />
+    <link rel="stylesheet" href="community.css" />
+    <script src="guest.js" defer></script>
+    <script src="livestreams.js" defer></script>
+    <script src="live.js" defer></script>
+    <script src="community-ui.js" defer></script>
+  </head>
+  <body
+    class="home-page aero-page collision-page lab-page live-page"
+    data-game="live"
+  >
+    <a class="skip-link" href="#experiment">Skip to experiment</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Hypothesis home"
+          ><svg viewBox="0 0 38 38" aria-hidden="true">
+            <path
+              d="M10 7v24M28 7v24M10 21c6 0 12-5 18-5"
+              stroke-linecap="round"
+            />
+            <circle cx="10" cy="21" r="3" fill="currentColor" stroke="none" />
+            <circle
+              cx="28"
+              cy="16"
+              r="3"
+              fill="currentColor"
+              stroke="none"
+            /></svg
+          ><span>Hypothesis</span></a
+        >
+        <a class="aero-search" href="index.html"
+          >⌕ <span>Explore science markets</span></a
+        >
+        <div class="header-actions">
+          <a class="portfolio-link" href="profile.html">Portfolio</a
+          ><a class="wallet-button" href="profile.html"
+            ><span class="coin">G</span><span id="aero-balance">—</span
+            ><span class="wallet-word">Gold</span></a
+          ><a
+            class="guest-avatar header-profile"
+            href="profile.html"
+            data-guest-avatar
+            aria-label="Your profile"
+          ></a>
+        </div>
+      </div>
+      <div class="subject-nav-wrap">
+        <nav class="subject-nav" aria-label="Science subjects">
+          <a href="index.html">↗ Trending</a
+          ><a class="subject-tab" href="index.html?subject=fluid"
+            >Fluid Dynamics</a
+          ><a href="index.html?subject=solid">Solid Mechanics</a
+          ><a href="index.html?subject=thermo">Thermodynamics</a
+          ><a href="index.html?subject=electro">Electromagnetism</a
+          ><a href="index.html?subject=optics">Optics</a
+          ><a href="index.html?subject=maths">Maths &amp; Statistics</a
+          ><a href="index.html?subject=quantum">Quantum Physics</a
+          ><a href="index.html?subject=astro">Astrophysics</a
+          ><a href="competitions.html"
+            >Competitions <span class="nav-new">NEW</span></a
+          >
+        </nav>
+      </div>
+    </header>
+    <main class="aero-main" id="experiment">
+      <div class="aero-breadcrumb">
+        <a id="live-subject" href="index.html">Science markets</a><span>›</span
+        ><span id="live-short">Live-stream experiment</span>
+      </div>
+      <div class="aero-layout">
+        <section class="aero-experiment" aria-label="Live-stream experiment">
+          <div class="aero-title">
+            <span class="aero-title-art live-title-art" aria-hidden="true"
+              >◉</span
+            >
+            <div>
+              <div class="aero-eyebrow" id="live-eyebrow">
+                LIVE STREAM · WEEKS-LONG QUESTION
+              </div>
+              <h1 id="live-title">Connecting to the live experiment…</h1>
+              <p id="live-subtitle">
+                A real camera. An official record. Predict what happens before
+                the deadline.
+              </p>
+            </div>
+          </div>
+          <div class="experiment-stats">
+            <div>
+              <span id="live-last-label">LAST OFFICIAL EVENT</span
+              ><strong id="live-last-event">—</strong>
+            </div>
+            <div>
+              <span>OFFICIAL RECORD CHECKED</span
+              ><strong id="live-feed-status">—</strong>
+            </div>
+            <div class="round-clock">
+              <span id="live-clock-label">TIME TO DEADLINE</span
+              ><strong id="live-countdown">—</strong>
+            </div>
+          </div>
+          <div class="live-stage">
+            <div class="live-bar">
+              <span
+                ><i class="live-dot"></i>
+                <span id="live-phase">CONNECTING</span></span
+              ><span><b id="live-deadline-short">—</b></span>
+            </div>
+            <div class="live-video-wrap">
+              <iframe
+                id="live-video"
+                title="Live stream of the experiment"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"
+                loading="lazy"
+              ></iframe>
+              <div
+                class="stage-result"
+                id="stage-result"
+                hidden
+                role="status"
+              ></div>
+              <div class="live-video-note" id="live-video-note" hidden></div>
+            </div>
+            <div class="live-bar live-bar-foot">
+              <span id="live-credit">Live stream</span
+              ><span class="live-cameras" id="live-cameras"></span
+              ><a id="live-stream-link" target="_blank" rel="noopener"
+                >Open the stream ↗</a
+              >
+            </div>
+          </div>
+          <p class="live-phase-note" id="live-phase-note" hidden></p>
+          <div class="live-readout">
+            <div>
+              <span>WINDOW OPENED</span><strong id="live-window-start">—</strong>
+            </div>
+            <div>
+              <span>DEADLINE</span><strong id="live-window-end">—</strong>
+            </div>
+            <div>
+              <span>LIQUIDITY MODEL</span><strong id="live-model">—</strong>
+            </div>
+            <button id="download-conditions" class="geometry-download" disabled>
+              ↓ Round data
+            </button>
+          </div>
+          <div class="lab-chart">
+            <canvas
+              id="live-timeline"
+              aria-label="Timeline of official events, the current window, and the deadline"
+            ></canvas>
+            <div id="live-timeline-caption">
+              Official events · Shaded band is the current window · Dashed line
+              is the deadline
+            </div>
+          </div>
+          <div
+            class="market-tabs"
+            role="tablist"
+            aria-label="Market information"
+          >
+            <button
+              role="tab"
+              aria-selected="true"
+              id="book-tab"
+              data-panel="book"
+            >
+              Order book</button
+            ><button
+              role="tab"
+              aria-selected="false"
+              id="activity-tab"
+              data-panel="activity"
+            >
+              Activity</button
+            ><button
+              role="tab"
+              aria-selected="false"
+              id="results-tab"
+              data-panel="results"
+            >
+              Past windows
+            </button>
+          </div>
+          <div
+            id="aero-market-panel"
+            class="aero-market-panel"
+            role="tabpanel"
+            aria-labelledby="book-tab"
+          ></div>
+          <section class="experiment-details" id="experiment-details">
+            <h2>The experiment</h2>
+            <p id="live-about"></p>
+            <details open>
+              <summary>How this market resolves</summary>
+              <p id="live-rule"></p>
+              <p id="live-rule-generic">
+                Each winning share pays 1 gold. Trading closes at the deadline;
+                unfilled orders expire at settlement. The result stays on screen
+                for ten minutes, then the next window opens with a new deadline.
+              </p>
+            </details>
+            <details>
+              <summary>Official record &amp; live stream</summary>
+              <p id="live-source-notes"></p>
+              <p>
+                <a id="live-source-link" target="_blank" rel="noopener"
+                  >Read the official record ↗</a
+                >
+                · <a id="live-feed-link" target="_blank" rel="noopener">Data feed ↗</a>
+                · <a id="live-stream-link-2" target="_blank" rel="noopener"
+                  >Watch on the source channel ↗</a
+                >
+              </p>
+              <p id="live-lag-note"></p>
+              <h3 class="modal-section-label">Recent official events</h3>
+              <ul class="live-events" id="live-events"></ul>
+            </details>
+            <details>
+              <summary>Build your own model</summary>
+              <p id="live-model-notes"></p>
+              <p>
+                Liquidity bots quote a memoryless hazard from the recent
+                official event rate. Their quotes are estimates, not validated
+                scientific probabilities. All players see the same official
+                record; trades do not change the experiment.
+              </p>
+            </details>
+            <details>
+              <summary>Current window &amp; feed snapshot</summary>
+              <pre id="live-parameters">Connecting…</pre>
+            </details>
+          </section>
+          <section
+            data-community-game=""
+            aria-label="Game discussion"
+          ></section>
+        </section>
+        <aside class="aero-sidebar">
+          <section class="aero-ticket" aria-label="Trade this market">
+            <div class="ticket-actions">
+              <button id="trade-buy" aria-pressed="true">Buy</button
+              ><button id="trade-sell" aria-pressed="false">Sell</button
+              ><select id="trade-type" aria-label="Order type">
+                <option value="market">Market</option>
+                <option value="limit">Limit</option>
+              </select>
+            </div>
+            <div class="selected-contract" id="selected-contract">
+              Choose a prediction
+            </div>
+            <div class="ticket-outcomes">
+              <button id="choose-up" class="up" aria-pressed="true">
+                <span id="label-up">Yes</span>
+                <span id="quote-up">—</span></button
+              ><button id="choose-down" class="down" aria-pressed="false">
+                <span id="label-down">No</span> <span id="quote-down">—</span>
+              </button>
+            </div>
+            <label class="amount-label" for="trade-amount"
+              ><span id="amount-label">Amount</span
+              ><span id="trade-available">— available</span></label
+            >
+            <div class="ticket-amount">
+              <input
+                id="trade-amount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                value="10"
+                inputmode="decimal"
+              /><span id="amount-unit">gold</span>
+            </div>
+            <div class="amount-shortcuts">
+              <button data-add="10">+10</button
+              ><button data-add="50">+50</button
+              ><button data-add="100">+100</button
+              ><button id="amount-max">Max</button>
+            </div>
+            <label id="limit-label" class="limit-label" hidden
+              >Limit price (gold per share)<input
+                id="limit-price"
+                type="number"
+                min="0.01"
+                max="0.99"
+                step="0.01"
+                value="0.50"
+            /></label>
+            <div class="ticket-estimate">
+              <span id="estimate-label">Potential payout</span
+              ><strong id="trade-estimate">—</strong>
+            </div>
+            <button class="review-trade" id="review-trade" disabled>
+              Connecting…
+            </button>
+            <p class="ticket-footnote">
+              Free gold only. Review before confirming.
+            </p>
+            <p id="trade-error" class="aero-error" role="alert"></p>
+          </section>
+          <section class="aero-positions">
+            <h2>Your positions</h2>
+            <div id="aero-positions">No positions yet.</div>
+            <div id="aero-orders"></div>
+            <a href="profile.html">View your portfolio ↗</a>
+          </section>
+          <div class="aero-tip">
+            <span>◉</span>
+            <div>
+              <strong>Patience is part of the model.</strong>
+              <p id="live-tip">
+                Windows last weeks, so the stream delay does not matter. Watch
+                the official record, not just the camera.
+              </p>
+            </div>
+          </div>
+          <p class="aero-connection" id="aero-connection" role="status">
+            Connecting…
+          </p>
+        </aside>
+      </div>
+      <section class="community-contact" aria-label="Contact and feedback">
+        <div>
+          <strong>Help shape the next experiment.</strong>
+          <p>
+            Ideas, bugs, or a model to share?
+            <a href="mailto:jianou.works@gmail.com">jianou.works@gmail.com</a>
+          </p>
+        </div>
+        <div>
+          <button data-privacy>Privacy choices</button
+          ><button class="community-primary" data-feedback>
+            Send feedback ↗
+          </button>
+        </div>
+      </section>
+      <footer class="aero-footer">
+        Hypothesis · Independent science playground · Gold has no cash value.<a
+          href="https://github.com/JianouJiang/hypothesis"
+          >GitHub ↗</a
+        >
+      </footer>
+    </main>
+    <dialog
+      id="trade-confirm"
+      class="aero-confirm"
+      aria-labelledby="confirm-title"
+    >
+      <button
+        id="confirm-close"
+        class="confirm-close"
+        aria-label="Close confirmation"
+      >
+        ×</button
+      ><span class="confirm-icon">G</span>
+      <h2 id="confirm-title">Confirm your prediction</h2>
+      <p><span id="confirm-market-name">Live-stream market</span></p>
+      <div id="confirm-summary"></div>
+      <p class="confirm-note">
+        The quote may move before execution. No real money is used.
+      </p>
+      <p id="confirm-error" class="aero-error" role="alert"></p>
+      <button id="confirm-submit" class="review-trade">Confirm trade</button
+      ><button id="confirm-cancel" class="confirm-cancel">Go back</button>
+    </dialog>
+  </body>
+</html>

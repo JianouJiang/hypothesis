@@ -83,6 +83,24 @@
       outcomes: ["Above previous exit", "Below previous exit"],
     },
     {
+      id: "kilauea",
+      title:
+        "Will Kīlauea’s next lava fountaining episode begin before the deadline?",
+      short: "Kīlauea lava fountains",
+      subject: "fluid",
+      topic: "Volcanoes",
+      art: "volcano",
+      chance: 70,
+      live: true,
+      isNew: true,
+      featured: true,
+      duration: "Weeks-long",
+      description:
+        "A real volcano on a live USGS camera. Trade whether the next official lava fountaining episode starts before the deadline.",
+      rule: "Yes resolves when a USGS HVO notice reports a numbered fountaining episode that began inside the window. No resolves after the deadline once the official record has been checked.",
+      outcomes: ["Yes", "No"],
+    },
+    {
       id: "galton",
       title: "Where will the ball land on the Galton board?",
       short: "The Galton board",
@@ -378,6 +396,20 @@
       }));
     else delete m.choices;
   }
+  for (const m of markets) {
+    const def = window.HypothesisLive?.definitions[m.id];
+    if (!def) continue;
+    Object.assign(m, {
+      title: def.title,
+      short: def.short,
+      subject: def.subject,
+      topic: def.topic,
+      rule: def.rule,
+      outcomes: def.outcomes,
+      live: true,
+      description: def.subtitle + " " + def.about.split(". ")[0] + ".",
+    });
+  }
   let artCounter = 0;
   const svg = (kind, large = false) => {
     const id = `science-art-${++artCounter}`;
@@ -667,6 +699,33 @@
       content +=
         path("M190 115Q238 100 253 151T212 202", "#ad9dd7", 1.5) +
         circle(212, 202, 6, "#eee4ff");
+    } else if (kind === "volcano") {
+      bg = "#1b1210";
+      content += `<radialGradient id="${id}-glow" cx="220" cy="190" r="150" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff8a3d" stop-opacity=".55"/><stop offset=".6" stop-color="#b8341f" stop-opacity=".12"/><stop offset="1" stop-color="#1b1210" stop-opacity="0"/></radialGradient>`;
+      content += `<rect width="440" height="280" fill="url(#${id}-glow)"/>`;
+      for (let i = 0; i < 26; i++)
+        content += circle(
+          14 + ((i * 97) % 412),
+          8 + ((i * 53) % 110),
+          i % 5 === 0 ? 1.4 : 0.8,
+          "#e8dccb",
+          `opacity=".${3 + (i % 5)}"`,
+        );
+      content += `<path d="M-10 282 L90 196 L150 206 L205 178 L236 182 L290 160 L352 194 L450 282Z" fill="#2c1d19"/>`;
+      content += `<path d="M150 206 L205 178 L236 182 L290 160 L300 208 L170 214Z" fill="#17100e"/>`;
+      content += `<path d="M196 212 C204 150 214 120 220 70 C226 120 236 150 244 212Z" fill="#ff9a3c" opacity=".9"/>`;
+      content += `<path d="M208 212 C212 160 216 130 220 92 C224 130 228 160 232 212Z" fill="#ffe08a"/>`;
+      content += path("M214 150c-14-24-16-56-6-82", "#ffb15c", 2.4, 'opacity=".8"') + path("M226 150c14-24 16-56 6-82", "#ffb15c", 2.4, 'opacity=".8"');
+      for (let i = 0; i < 18; i++)
+        content += circle(
+          220 + Math.sin(i * 1.7) * (18 + i * 2.3),
+          110 + ((i * 37) % 86) - i * 1.5,
+          1.6 + (i % 3) * 0.5,
+          i % 2 ? "#ffcf7a" : "#ff8a3d",
+        );
+      content += `<path d="M150 214 Q220 198 300 208 L300 222 Q220 236 150 226Z" fill="#ff7a2c" opacity=".75"/>`;
+      if (large)
+        content += `<text x="24" y="263" fill="#c9a98f" font-family="Inter, sans-serif" font-size="10">USGS HVO LIVE STREAM</text><text x="326" y="263" fill="#8d7566" font-family="Inter, sans-serif" font-size="9">Official record ↗</text>`;
     } else if (kind === "bitcoin") {
       bg = "#f7931a";
       content += `<text x="220" y="198" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-weight="bold" font-size="180">₿</text>`;

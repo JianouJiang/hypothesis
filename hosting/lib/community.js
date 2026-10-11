@@ -1,7 +1,15 @@
 "use strict";
 // Server-only community data. Never serialize this state into a market snapshot.
 import Labs from "./experiments.js";
-const GAMES = ["bitcoin", "aerofoil", "galton", "escape", ...Labs.ids];
+import Live from "./livestreams.js";
+const GAMES = [
+  "bitcoin",
+  "aerofoil",
+  "galton",
+  "escape",
+  ...Labs.ids,
+  ...Live.ids,
+];
 const MAX_BYTES = 1500000;
 const requireValue = (ok, message) => {
   if (!ok) throw new Error(message);
@@ -89,6 +97,7 @@ class Community {
         const shares = market.players?.[token]?.positions?.[side]?.shares || 0;
         const label =
           Labs.label(key, side) ||
+          Live.label(key, side) ||
           (game === "galton"
             ? `Slot ${key.split("-")[1]} ${side === "up" ? "Yes" : "No"}`
             : game === "bitcoin"
@@ -177,6 +186,7 @@ class Community {
           price: t.price,
           label:
             Labs.label(key, t.side) ||
+            Live.label(key, t.side) ||
             (game === "galton"
               ? `Slot ${key.split("-")[1]} ${t.side === "up" ? "Yes" : "No"}`
               : game === "bitcoin"

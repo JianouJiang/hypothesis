@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 "use strict";
-// Reads the official record for every live-stream market from this machine
-// and hands the observation to the hosted market, which cannot reach usgs.gov
-// from its own network. Run every few minutes from cron:
-//   */5 * * * * cd ~/Desktop/hypothesis && node scripts/push-live-feed.js >> data/live-feed-push.log 2>&1
+// Reads the official record for every live-stream market and hands the
+// observation to the hosted market, which cannot reach usgs.gov from its own
+// network. Production runs this on a schedule in GitHub Actions
+// (.github/workflows/live-feed.yml); it can also be run by hand.
 // Owner key: COMMUNITY_ADMIN_TOKEN or ../polymarket_physics_private/community-admin-token.
 // Target: HYPOTHESIS_API_BASE (default https://hypothesis.jianou-works.chatgpt.site).
 const fs = require("node:fs");

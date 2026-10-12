@@ -81,6 +81,15 @@ const { createApp } = require("../server");
     await page.locator("#leaderboard-rows tr").first().waitFor();
     console.log("PASS failed requests clear stale rows and retry recovers");
 
+    const slowWallet = await browser.newPage();
+    await slowWallet.route("**/api/session?**", () => {});
+    await slowWallet.goto(`${base}/leaderboard.html`);
+    await slowWallet.locator("#leaderboard-rows tr").first().waitFor({ timeout: 4000 });
+    assert.equal(await slowWallet.locator("#leaderboard-rows tr").count(), 20);
+    assert.match(await slowWallet.locator("#leaderboard-connection").innerText(), /Connecting/);
+    await slowWallet.close();
+    console.log("PASS rankings load while the wallet request is still pending");
+
     const session = await page.evaluate(() => fetch("/api/session").then((r) => r.json()));
     assert.match(session.player.name, /^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{12}$/);
     const newName = session.player.name;

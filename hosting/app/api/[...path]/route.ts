@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { Exchange } from "../../../lib/exchange.js";
+import Rankings from "../../../lib/rankings.js";
 import { communityApi } from "../../../lib/community-api";
 import { adminAuthorized } from "../../../lib/community.js";
 import Live from "../../../lib/livestreams.js";
@@ -193,6 +194,17 @@ async function handle(request: Request) {
   if (token && !/^[a-f0-9]{48}$/.test(token)) token = "";
   let input: any = {};
   try {
+    if (request.method === "GET" && route === "leaderboard") {
+      // Rankings contain completed fills/settlements only. Read the committed
+      // ledger without booting every physics simulation, fetching the CFD bank,
+      // polling external feeds, or contending with trades for a D1 write.
+      const row = await database.prepare("SELECT state FROM markets WHERE id = ?")
+        .bind("bitcoin").first<{ state: string }>();
+      const saved = row ? JSON.parse(row.state) : {};
+      const players = saved.version === 2 ? saved.accounts : saved.players;
+      return json(200, Rankings.board(players || {},
+        Object.fromEntries(new URL(request.url).searchParams), Date.now(), token));
+    }
     const marketId =
       new URL(request.url).searchParams.get("market") || "bitcoin";
     const flowData = await loadFlow();
@@ -258,14 +270,6 @@ async function handle(request: Request) {
           if (update.meta.changes !== 1) continue;
         }
         return json(200, { result, live });
-      }
-      if (route === "leaderboard") {
-        const board = market.leaderboard(Object.fromEntries(new URL(request.url).searchParams), token);
-        const update = await database.prepare(
-          "UPDATE markets SET state = ?, revision = revision + 1, updated = ? WHERE id = ? AND revision = ?",
-        ).bind(JSON.stringify(market.state), Date.now(), "bitcoin", row.revision).run();
-        if (update.meta.changes !== 1) continue;
-        return json(200, board);
       }
       market.select(marketId);
       let created = false;

@@ -10,7 +10,7 @@
     sort: params.get("sort") === "volume" ? "volume" : "profit",
     q: (params.get("q") || "").slice(0, 80), page: Math.max(1, Number(params.get("page")) || 1),
   };
-  let request = 0, controller, debounce, board, refreshTimer;
+  let request = 0, controller, debounce, refreshTimer;
   const client = new Client((snapshot) => {
     $("home-balance").textContent = money(snapshot.player.balance);
   }, (message) => { $("leaderboard-connection").textContent = message; });
@@ -27,7 +27,6 @@
     return `<div class="leaderboard-trader"><span class="leaderboard-rank">${row.rank}</span><span class="leaderboard-avatar">${avatar(row.avatar)}${medal(row.rank)}</span>${name}${row.isYou ? '<span class="leaderboard-you-tag">You</span>' : ""}</div>`;
   }
   function render(data) {
-    board = data;
     state.page = data.page;
     $("leaderboard-table").dataset.sort = state.sort;
     document.querySelectorAll("[data-period]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.period === state.period));
@@ -78,7 +77,9 @@
         data = engine.leaderboard(state, client.localId);
       } else {
         const headers = client.token ? { Authorization: `Bearer ${client.token}` } : {};
-        const response = await fetch(`/api/leaderboard?${new URLSearchParams(state)}`, { headers, signal: controller.signal });
+        const response = await fetch(`/api/leaderboard?${new URLSearchParams(state)}`, {
+          headers, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(12000)]),
+        });
         data = await response.json();
         if (!response.ok) throw new Error(data.error || "Could not load the leaderboard.");
       }
@@ -136,7 +137,12 @@
   $("home-menu-toggle").onclick = () => { $("home-menu").hidden = !$("home-menu").hidden; $("home-menu-toggle").setAttribute("aria-expanded", !$("home-menu").hidden); };
   $("subject-nav").innerHTML = `<a href="index.html" class="subject-tab">${icon("chart")}Trending</a><a href="index.html?new=1" class="subject-tab">New</a><a href="leaderboard.html" class="subject-tab" aria-current="page">Leaderboard</a><a href="competitions.html" class="subject-tab">Competitions</a><span class="nav-separator"></span>${PhysicsCatalog.subjects.map((s) => `<a class="subject-tab" href="index.html?subject=${s.id}">${safe(s.name)}</a>`).join("")}`;
   function startRefresh() { clearInterval(refreshTimer); refreshTimer = setInterval(() => { if (!document.hidden) refresh(); }, 30000); }
-  client.start().then(() => { refresh(); startRefresh(); });
+  if (location.protocol === "file:") {
+    client.start().then(() => { refresh(); startRefresh(); });
+  } else {
+    refresh(); startRefresh();
+    client.start().then(() => { if (client.snapshot) refresh(); });
+  }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
   window.addEventListener("pagehide", () => { clearInterval(refreshTimer); clearTimeout(debounce); controller?.abort(); });
   window.addEventListener("pageshow", (event) => { if (event.persisted) { refresh(); startRefresh(); } });

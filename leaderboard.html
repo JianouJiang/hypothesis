@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="See the top science prediction traders by profit and volume. Explore the biggest wins on Hypothesis."
+    />
+    <title>Leaderboard | Hypothesis</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="leaderboard.css" />
+    <script src="rankings.js" defer></script>
+    <script src="market.js" defer></script>
+    <script src="experiments.js" defer></script>
+    <script src="livestreams.js" defer></script>
+    <script src="catalog.js" defer></script>
+    <script src="guest.js" defer></script>
+    <script src="leaderboard.js" defer></script>
+    <link rel="stylesheet" href="community.css" />
+    <script src="community-ui.js" defer></script>
+  </head>
+  <body class="home-page leaderboard-page">
+    <svg class="svg-defs" aria-hidden="true">
+      <defs>
+        <symbol id="i-search" viewBox="0 0 24 24">
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 4.5 4.5" />
+        </symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24">
+          <path d="m9 5 7 7-7 7" />
+        </symbol>
+        <symbol id="i-info" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v6m0-10h.01" />
+        </symbol>
+        <symbol id="i-bookmark" viewBox="0 0 24 24">
+          <path d="M6 4h12v17l-6-4-6 4z" />
+        </symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 6v6l4 2" />
+        </symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24">
+          <path d="m13 2-9 12h7l-1 8 10-13h-7z" />
+        </symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24">
+          <path d="m3 17 6-6 4 4 8-10m-6 0h6v6" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24">
+          <path d="m6 6 12 12M6 18 18 6" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24">
+          <path d="m5 12 4 4L19 6" />
+        </symbol>
+        <symbol id="i-filter" viewBox="0 0 24 24">
+          <path d="M3 7h9m4 0h5M3 17h3m4 0h11" />
+          <circle cx="14" cy="7" r="2" />
+          <circle cx="8" cy="17" r="2" />
+        </symbol>
+        <symbol id="i-menu" viewBox="0 0 24 24">
+          <path d="M4 8h16M4 16h16" />
+        </symbol>
+        <symbol id="i-flask" viewBox="0 0 24 24">
+          <path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M5 12h14m-5-5 5 5-5 5" />
+        </symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24">
+          <rect x="4" y="4" width="6" height="6" rx="1" />
+          <rect x="14" y="4" width="6" height="6" rx="1" />
+          <rect x="4" y="14" width="6" height="6" rx="1" />
+          <rect x="14" y="14" width="6" height="6" rx="1" />
+        </symbol>
+      </defs>
+    </svg>
+    <a class="skip-link" href="#leaderboard-main">Skip to leaderboard</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Hypothesis home"
+          ><svg viewBox="0 0 38 38" aria-hidden="true">
+            <path
+              d="M10 7v24M28 7v24M10 21c6 0 12-5 18-5"
+              stroke-linecap="round"
+            />
+            <circle cx="10" cy="21" r="3" fill="currentColor" stroke="none" />
+            <circle
+              cx="28"
+              cy="16"
+              r="3"
+              fill="currentColor"
+              stroke="none"
+            /></svg
+          ><span>Hypothesis</span></a
+        >
+        <form class="home-search" role="search" id="home-search-form">
+          <svg class="icon"><use href="#i-search" /></svg
+          ><input
+            id="home-search"
+            type="search"
+            placeholder="Search science markets…"
+            aria-label="Search science markets"
+            autocomplete="off"
+          /><kbd>/</kbd>
+        </form>
+        <div class="header-actions">
+          <button class="home-help" data-dialog="how">
+            <svg class="icon"><use href="#i-info" /></svg>How it works</button
+          ><a class="portfolio-link" href="profile.html">Portfolio</a
+          ><button class="wallet-button" data-dialog="wallet">
+            <span class="coin">G</span><span id="home-balance">1,000.00</span
+            ><span class="wallet-word">Gold</span></button
+          ><a
+            class="guest-avatar header-profile"
+            href="profile.html"
+            data-guest-avatar
+            aria-label="Your profile"
+          ></a
+          ><button
+            class="icon-button home-menu-toggle"
+            id="home-menu-toggle"
+            aria-label="Open account menu"
+            aria-expanded="false"
+            aria-controls="home-menu"
+          >
+            <svg class="icon"><use href="#i-menu" /></svg>
+          </button>
+        </div>
+        <div class="account-menu" id="home-menu" hidden>
+          <a href="leaderboard.html">Leaderboard</a><button data-dialog="wallet">Your gold wallet</button
+          ><a href="profile.html">Your profile &amp; portfolio</a
+          ><button data-dialog="how">How it works</button
+          ><a
+            href="https://github.com/JianouJiang/hypothesis"
+            target="_blank"
+            rel="noopener"
+            >View on GitHub ↗</a
+          >
+        </div>
+      </div>
+      <div class="subject-nav-wrap">
+        <nav
+          class="subject-nav"
+          aria-label="Science subjects"
+          id="subject-nav"
+        ></nav>
+        <span class="nav-fade" aria-hidden="true">›</span>
+      </div>
+    </header>
+
+    <main class="leaderboard-layout" id="leaderboard-main">
+      <section aria-labelledby="leaderboard-title">
+        <div class="leaderboard-heading"><h1 id="leaderboard-title">Leaderboard</h1><button class="leaderboard-info" id="leaderboard-info-open" aria-label="How leaderboard rankings work"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></button></div>
+        <div class="leaderboard-tabs"><span>Predictions</span></div>
+        <div class="leaderboard-filters">
+          <div class="leaderboard-periods" role="group" aria-label="Time period">
+            <button data-period="day" aria-pressed="false">Today</button><button data-period="week" aria-pressed="false">Weekly</button><button data-period="month" aria-pressed="true">Monthly</button><button data-period="all" aria-pressed="false">All</button>
+          </div>
+          <select class="leaderboard-category" id="leaderboard-category" aria-label="Science category"><option value="all">All Categories</option></select>
+        </div>
+        <table class="leaderboard-table" id="leaderboard-table" data-sort="profit" aria-label="Trader rankings in gold" aria-busy="true">
+          <thead><tr><th scope="col"><label class="leaderboard-search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="leaderboard-search" aria-label="Search traders by name" placeholder="Search by name" maxlength="80" autocomplete="off"/></label></th>
+          <th scope="col" class="profit-column"><button class="leaderboard-sort" data-sort="profit" aria-pressed="true">Profit/Loss</button><select class="leaderboard-sort-mobile" aria-label="Rank traders by"><option value="profit">Profit/Loss</option><option value="volume">Volume</option></select></th>
+          <th scope="col" class="volume-column"><button class="leaderboard-sort" data-sort="volume" aria-pressed="false">Volume</button><select class="leaderboard-sort-mobile" aria-label="Rank traders by"><option value="profit">Profit/Loss</option><option value="volume">Volume</option></select></th></tr></thead>
+          <tbody id="leaderboard-rows"></tbody>
+        </table>
+        <div class="leaderboard-empty" id="leaderboard-empty" role="status"><strong>Loading leaderboard…</strong><p>Finding the top science predictions.</p></div>
+        <nav class="leaderboard-pagination" id="leaderboard-pagination" aria-label="Leaderboard pages"></nav>
+        <div class="leaderboard-your-rank" id="leaderboard-your-rank" aria-label="Your ranking" hidden></div>
+        <p class="leaderboard-status" id="leaderboard-status" role="status"></p>
+        <p class="leaderboard-status" id="leaderboard-connection">Connecting to the shared market…</p>
+      </section>
+      <aside class="leaderboard-wins" aria-labelledby="leaderboard-wins-title"><h2 id="leaderboard-wins-title">Biggest wins this month</h2><ol id="leaderboard-wins-list"></ol><div class="leaderboard-empty" id="leaderboard-wins-empty"><strong>No wins yet</strong><p>Profitable sales and settled predictions will appear here.</p></div></aside>
+    </main>
+    <dialog class="leaderboard-info-dialog" id="leaderboard-info-dialog" aria-labelledby="leaderboard-info-title"><h2 id="leaderboard-info-title">How the leaderboard works</h2><p>Profit/Loss ranks gold earned from completed sales and settled predictions, after their cost. Open positions count when you sell or they settle. Your portfolio also includes the current value of open positions, so its profit can differ.</p><p>Volume is the gold value of filled buys and sells. Starting gold and canceled orders are not earnings. Bots are excluded. Resetting your practice wallet resets your rankings.</p><p>Today starts at midnight UTC, Weekly on Monday, and Monthly on the first day of the month. All shows lifetime results since your last reset. Search keeps each trader’s original rank. Biggest wins shows the cost and proceeds of individual profitable sales or settlements.</p><p>In file preview mode, only this browser’s Bitcoin practice results are available. Gold has no cash value.</p><button id="leaderboard-info-close">Got it</button></dialog>
+  </body>
+</html>

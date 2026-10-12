@@ -157,6 +157,15 @@ test("profile, positions and balance survive serialized exchange restart", () =>
     new Set(["bitcoin", "aerofoil"]),
   );
   assert.ok(Math.abs(after.player.equity - before.player.equity) < 1e-6);
+  const board = restored.leaderboard({ period: "all" }, id);
+  assert.equal(board.entries[0].name, "Wake Explorer");
+  assert.equal(board.entries[0].volume, after.player.totalVolume);
+  assert.equal(board.entries[0].profit, after.player.realized);
+  assert.equal(board.entries[0].isYou, true);
+  assert.ok(restored.leaderboard({ period: "all", category: "fluid" }).entries[0].volume > 19);
+  assert.ok(restored.leaderboard({ period: "all", category: "maths" }).entries[0].volume > 19);
+  restored.reset(id);
+  assert.equal(restored.leaderboard({ period: "all" }).entries.length, 0);
 });
 test("legacy Bitcoin wallets migrate without a top-up or lost positions", () => {
   const data = fixture(),

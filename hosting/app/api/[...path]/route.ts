@@ -172,7 +172,7 @@ async function handle(request: Request) {
     )
   )
     return json(403, { error: "Invalid owner key." });
-  if (request.method === "GET" && route !== "session" && !owner)
+  if (request.method === "GET" && !["session", "leaderboard"].includes(route || "") && !owner)
     return json(404, { error: "Not found." });
   if (
     request.method === "POST" &&
@@ -258,6 +258,14 @@ async function handle(request: Request) {
           if (update.meta.changes !== 1) continue;
         }
         return json(200, { result, live });
+      }
+      if (route === "leaderboard") {
+        const board = market.leaderboard(Object.fromEntries(new URL(request.url).searchParams), token);
+        const update = await database.prepare(
+          "UPDATE markets SET state = ?, revision = revision + 1, updated = ? WHERE id = ? AND revision = ?",
+        ).bind(JSON.stringify(market.state), Date.now(), "bitcoin", row.revision).run();
+        if (update.meta.changes !== 1) continue;
+        return json(200, board);
       }
       market.select(marketId);
       let created = false;

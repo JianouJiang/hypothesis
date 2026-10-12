@@ -115,6 +115,6 @@ test("only public assets are served; bot identity and saved market state stay pr
     assert.equal((await fetch(base + pathname)).status, 404);
   const forged = await session("physics_guest=bot-momentum");
   assert.equal(forged.state.player.balance, 1000);
-  assert.match(forged.state.player.name, /^Guest /);
+  assert.match(forged.state.player.name, /^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{12}$/);
   assert.equal((await fetch(base + "/")).status, 200);
 });

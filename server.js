@@ -65,6 +65,10 @@ function createApp(options = {}) {
     "/competitions.js": ["competitions.js", "text/javascript"],
     "/competitions.css": ["competitions.css", "text/css"],
     "/profile.html": ["profile.html", "text/html"],
+    "/leaderboard.html": ["leaderboard.html", "text/html"],
+    "/leaderboard.css": ["leaderboard.css", "text/css"],
+    "/leaderboard.js": ["leaderboard.js", "text/javascript"],
+    "/rankings.js": ["rankings.js", "text/javascript"],
     "/home.css": ["home.css", "text/css"],
     "/home.js": ["home.js", "text/javascript"],
     "/profile.css": ["profile.css", "text/css"],
@@ -222,6 +226,11 @@ function createApp(options = {}) {
           }
           communityState = community.state;
           return json(200, result);
+        }
+        if (req.method === "GET" && url.pathname === "/api/leaderboard") {
+          const board = market.leaderboard(Object.fromEntries(url.searchParams), id);
+          save();
+          return json(200, board);
         }
         if (market.select) market.select(marketId);
         if (req.method === "GET" && url.pathname === "/api/session") {

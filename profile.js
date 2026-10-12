@@ -419,7 +419,7 @@
     $("home-dialog").showModal();
   }
   $("profile-subject-nav").innerHTML =
-    `<a class="subject-tab" href="index.html">${icon("chart")}Trending</a><a class="subject-tab" href="index.html?new=1">New</a><span class="nav-separator"></span>${PhysicsCatalog.subjects.map((s) => `<a class="subject-tab" href="index.html?subject=${s.id}">${safe(s.name)}</a>`).join("")}`;
+    `<a class="subject-tab" href="index.html">${icon("chart")}Trending</a><a class="subject-tab" href="index.html?new=1">New</a><a href="leaderboard.html" class="subject-tab">Leaderboard</a><span class="nav-separator"></span>${PhysicsCatalog.subjects.map((s) => `<a class="subject-tab" href="index.html?subject=${s.id}">${safe(s.name)}</a>`).join("")}`;
   $("home-search-form").onsubmit = (event) => {
     event.preventDefault();
     location.href = `index.html?q=${encodeURIComponent($("home-search").value.trim())}`;

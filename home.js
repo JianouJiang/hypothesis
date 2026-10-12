@@ -158,7 +158,7 @@
   }
   function render() {
     $("subject-nav").innerHTML =
-      `<a href="index.html" class="subject-tab" data-subject="" aria-current="${!state.subject && !state.new}">${icon("chart")}Trending</a><a href="?new=1" class="subject-tab" data-new aria-current="${state.new}">New</a><a href="competitions.html" class="subject-tab season-nav">Competitions <span class="nav-new">NEW</span></a><span class="nav-separator"></span>${subjects.map((s) => `<a class="subject-tab" href="?subject=${s.id}" data-subject="${s.id}" aria-current="${state.subject === s.id}">${safe(s.name)}</a>`).join("")}`;
+      `<a href="index.html" class="subject-tab" data-subject="" aria-current="${!state.subject && !state.new}">${icon("chart")}Trending</a><a href="?new=1" class="subject-tab" data-new aria-current="${state.new}">New</a><a href="competitions.html" class="subject-tab season-nav">Competitions <span class="nav-new">NEW</span></a><a href="leaderboard.html" class="subject-tab">Leaderboard</a><span class="nav-separator"></span>${subjects.map((s) => `<a class="subject-tab" href="?subject=${s.id}" data-subject="${s.id}" aria-current="${state.subject === s.id}">${safe(s.name)}</a>`).join("")}`;
     const available = markets.filter(
       (m) => !state.subject || m.subject === state.subject,
     );

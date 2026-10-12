@@ -7,6 +7,7 @@ import { LiveMarket } from "./live-market.js";
 import { randomBytes } from "node:crypto";
 import Labs from "./experiments.js";
 import Live from "./livestreams.js";
+import Rankings from "./rankings.js";
 const round = (n) => Math.round(n * 1e8) / 1e8;
 
 class AeroMarket extends Market {
@@ -334,6 +335,10 @@ class Exchange {
   }
   updateProfile(id, input) {
     this.markets.bitcoin.updateProfile(id, input);
+  }
+  leaderboard(input, viewerId) {
+    this.advance();
+    return Rankings.board(this.state.accounts, input, this.clock(), viewerId);
   }
   updateCompetition(id, input) {
     if (typeof input.interested !== "boolean")

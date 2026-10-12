@@ -10,6 +10,7 @@
 - Eight science categories: Fluid Dynamics, Solid Mechanics, Thermodynamics, Electromagnetism, Optics, Quantum Physics, Astrophysics, and Maths & Statistics. All **22 catalogue experiments are playable**, including the original aerofoil, Bitcoin, Galton board and ring escape, the live-streamed Kīlauea market, plus 17 numerical experiments listed below.
 - An aerofoil game with rounds around two minutes using genuine, precomputed OpenFOAM velocity fields and passive-tracer trajectories. Thousands of advected dust tracers and adjustable photographic trails reveal the flow. A dashed horizontal line marks the previous exit; a solid gold line and height chart show the current particle. Download the NACA 0012 geometry and public physical parameters.
 - A personal profile with an editable username, bio, and avatar; live positions, closed positions, activity, and a gold-denominated profit/loss chart.
+- A Polymarket-style leaderboard with profit/volume sorting, UTC time periods, science-category filters, trader search, pagination, your rank, and the biggest profitable sales and settlements.
 - An animated BTC/USD chart, opening price to beat, and five-minute countdown.
 - Buy **Above / Below** for the dust particle or **Up / Down** for Bitcoin, and sell shares before the round closes.
 - A review window before every market or limit order. Nothing is spent until **Confirm**; canceling or dismissing leaves the wallet unchanged. Confirmations expire when their round ends. Market execution uses prices available when confirmed.
@@ -135,7 +136,7 @@ Dates, venue, entry arrangements, prizes, final scoring and compute budgets are 
 
 ## Guest profiles
 
-The profile uses the same guest account as the home page and all 22 live experiments. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
+The profile uses the same guest account as the home page and all 22 live experiments. New accounts receive a unique random 12-character username containing letters and numbers, independent of their private session token. Existing and chosen usernames stay intact. Usernames are unique within the market, 3–24 characters, with a 200-character bio and eight avatar choices. Edits are saved on the shared server (or in browser storage in standalone mode). No email, password, cryptocurrency wallet, or payment is requested.
 
 Positions Value marks held shares at the current sell quotes. Total PnL is cash plus reserved gold plus marked positions, minus the initial 1,000 gold. The chart shows recorded portfolio observations and the current value, with time filters; it never invents historical results. Biggest Win is the largest recorded positive sell-fill or settlement profit. Markets Traded counts distinct market rounds with fills. Volume counts the guest's actual fills, including fills of their resting orders.
 
@@ -143,6 +144,15 @@ The latest 500 activity events and 100 settled rounds per market are retained; c
 
 Guest access is remembered in this browser. Clearing browser storage or changing browser profiles creates a separate guest identity. There is no account recovery or login yet.
 
+## Leaderboard
+
+**[Leaderboard](https://hypothesis.jianou-works.chatgpt.site/leaderboard.html)** follows [Polymarket's leaderboard layout](https://polymarket.com/leaderboard): a ranked trader list with avatars and top-three medals, Today/Weekly/Monthly/All filters, categories, name search, profit and volume columns, pagination, and a biggest-wins panel. It uses Hypothesis players and free gold. Empty boards show an invitation to trade; no sample traders or invented earnings are published.
+
+Profit/Loss means **realized** profit after cost from completed sales and settlements, including losses. Open positions count when sold or settled; the profile's marked-to-market profit can therefore differ. Volume counts filled buys and sells, excluding settlement payouts and unfilled/canceled orders. Today starts at midnight UTC, Weekly on Monday, and Monthly on the first of the month; All covers the account's lifetime since its last wallet reset. Search retains a trader's overall rank within the selected period/category. Bots and accounts without trading results are excluded. Biggest wins displays the cost and proceeds of individual profitable sell fills or settlements.
+
+`rankings.js` maintains per-category lifetime totals, 62 days of daily aggregates, and bounded top-win lists separately from the 500-entry activity feed. It is shared by Node, the hosted Worker, and standalone Bitcoin practice. Existing accounts migrate their retained activity without changing wallets or names; complete lifetime profit and volume always use the existing account counters. If an old account's activity was already truncated, the board explicitly flags incomplete historical category/period results and wins. New activity remains complete beyond that cap. Resetting a wallet clears its rankings too.
+
+`GET /api/leaderboard` accepts `period=day|week|month|all`, `category=all|<science subject>`, `sort=profit|volume`, `q`, and a one-based `page` (20 traders per page). It is public and returns only names, avatars, ranking statistics, public market IDs, and an optional `isYou` marker; session tokens, private profiles, balances, and account IDs never appear. Hosted requests use the same D1 revision check as trading and do not create a guest account. The browser refreshes every 30 seconds while visible. Run `node tests/leaderboard-browser.cjs` for isolated desktop/mobile, search, filter, sort, pagination, error/retry, and standalone checks.
 ## Online architecture
 
 The hosted app in `hosting/` serves the plain HTML, CSS, and JavaScript and runs the market engine on a Cloudflare Worker with D1 wallet storage and a private R2 CFD replay library through Sites. Pages and API share one origin, so there is exactly one public address. GitHub holds the source and runs the tests on every push; the former GitHub Pages address keeps a redirect so old links and deep links still work.
